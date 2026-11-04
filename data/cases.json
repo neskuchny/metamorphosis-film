@@ -1,0 +1,393 @@
+{
+ "_readme": "Verified cases for the 'case' scene. Every entry has a source that was checked on the 'as_of' date. Translate headline/labels into the film language; keep numbers exactly. 'stage' maps to the challenger sequence in SKILL.md (1 margin-around-the-core, 2 buyer agents, 3 talent, 4 roll-up/contract capacity, 5 AI-native capacity from scratch, 0 market signal). Add new cases only with a fetched source. 'leads' are names worth checking — never use them in a film before verifying. 'geo' (lat, lon, precision) is for the 'map' scene: precision 'city' is a verified place, 'country' is a point inside the country (label it with the country, never with a city). Hadrian and Xometry share one point in the USA: show them as one dot. Attacker types and the reasoning that uses these cases: data/threat-playbook.md.",
+ "cases": [
+  {
+   "id": "hadrian",
+   "name": "Hadrian",
+   "industries": [
+    "manufacturing",
+    "precision machining",
+    "aerospace",
+    "defense"
+   ],
+   "stage": 5,
+   "where": "USA",
+   "year": "2026",
+   "headline": "Builds highly automated factories for precision parts from scratch — AI, robotics and process engineering. From one automated shop to a multi-factory platform in about six years.",
+   "stats": [
+    {
+     "value": "$1.37B",
+     "label": "raised, Series D, August 2026"
+    },
+    {
+     "value": "$7.87B",
+     "label": "valuation"
+    },
+    {
+     "value": "~6 years",
+     "label": "from first automated shop to a network of factories"
+    }
+   ],
+   "sources": [
+    {
+     "title": "PR Newswire — Hadrian raises $1.37B Series D (Aug 2026)",
+     "url": "https://digital-release.wowktv.com/business/press-releases/cision/20260806LA20310/hadrian-raises-1-37b-series-d-to-build-highly-automated-factories-to-accelerate-americas-industrial-renewal"
+    },
+    {
+     "title": "BNN Bloomberg — Hadrian valued at US$7.87B (Aug 2026)",
+     "url": "https://www.bnnbloomberg.ca/business/company-news/2026/08/06/manufacturing-company-hadrian-valued-at-us787-billion-in-latest-funding-round/"
+    },
+    {
+     "title": "Komo — Hadrian profile (history)",
+     "url": "https://komo.ai/directory/hadrian"
+    }
+   ],
+   "as_of": "2026-10-31",
+   "geo": {
+    "lat": 39.8,
+    "lon": -98.6,
+    "precision": "country"
+   }
+  },
+  {
+   "id": "xiaomi-changping",
+   "name": "Xiaomi",
+   "industries": [
+    "manufacturing",
+    "electronics",
+    "consumer goods",
+    "appliances"
+   ],
+   "stage": 5,
+   "where": "Beijing (Changping), China",
+   "year": "2024",
+   "headline": "A smartphone factory where all key processes are automated across 11 lines; a small team monitors from a control room. Runs 24/7.",
+   "stats": [
+    {
+     "value": "10M+",
+     "label": "phones a year, planned capacity"
+    },
+    {
+     "value": "100%",
+     "label": "of key processes automated (company claim)"
+    },
+    {
+     "value": "11",
+     "label": "production lines"
+    }
+   ],
+   "sources": [
+    {
+     "title": "New Atlas — Xiaomi dark robotic factory (10 Jul 2024)",
+     "url": "https://newatlas.com/robotics/xiaomi-dark-robotic-factory/"
+    }
+   ],
+   "as_of": "2026-10-31",
+   "geo": {
+    "lat": 40.22,
+    "lon": 116.23,
+    "precision": "city"
+   }
+  },
+  {
+   "id": "xometry",
+   "name": "Xometry",
+   "industries": [
+    "manufacturing",
+    "machining",
+    "injection molding",
+    "sheet metal",
+    "3D printing",
+    "B2B marketplace"
+   ],
+   "stage": 1,
+   "where": "USA and Europe",
+   "year": "2025",
+   "headline": "Prices a custom part from a CAD file instantly with AI and routes orders to thousands of independent shops. The customer belongs to the platform, the shops become contract capacity.",
+   "stats": [
+    {
+     "value": "$630M",
+     "label": "marketplace revenue 2025, +30% year on year"
+    },
+    {
+     "value": "81,821",
+     "label": "active buyers (end of 2025)"
+    },
+    {
+     "value": "4,996",
+     "label": "active suppliers (end of 2025)"
+    }
+   ],
+   "sources": [
+    {
+     "title": "CIMdata — Xometry full-year 2025 results",
+     "url": "https://www.cimdata.com/en/industry-summary-articles/item/29521-xometry-reports-record-fourth-quarter-and-strong-full-year-2025-results"
+    }
+   ],
+   "as_of": "2026-10-31",
+   "geo": {
+    "lat": 39.8,
+    "lon": -98.6,
+    "precision": "country"
+   }
+  },
+  {
+   "id": "dwelly",
+   "name": "Dwelly",
+   "industries": [
+    "real estate",
+    "lettings",
+    "property management",
+    "services",
+    "roll-up"
+   ],
+   "stage": 4,
+   "where": "United Kingdom",
+   "year": "2026",
+   "headline": "Buys traditional letting agencies and runs them on an AI-native platform: agents do the admin, people supervise and advise. 16 acquisitions since 2024.",
+   "stats": [
+    {
+     "value": "$170M",
+     "label": "Series B, July 2026 ($260M raised in total)"
+    },
+    {
+     "value": "300+",
+     "label": "properties per staff member vs ~100 in a traditional agency"
+    },
+    {
+     "value": "~15,000",
+     "label": "properties under management"
+    }
+   ],
+   "sources": [
+    {
+     "title": "Pulse 2.0 — Dwelly announces $170M Series B (31 Jul 2026)",
+     "url": "https://pulse2.com/dwelly-announces-170-million-series-b/"
+    }
+   ],
+   "as_of": "2026-10-31",
+   "geo": {
+    "lat": 54.0,
+    "lon": -2.0,
+    "precision": "country"
+   }
+  },
+  {
+   "id": "saaspocalypse-2026",
+   "name": "February 2026",
+   "industries": [
+    "software",
+    "legal",
+    "information services",
+    "advertising",
+    "professional services",
+    "any"
+   ],
+   "stage": 0,
+   "where": "Global stock markets",
+   "year": "2026",
+   "headline": "After Anthropic extended Claude Cowork with plug-ins for legal, marketing and finance work, investors sold off companies whose business is specialised software and expert labour.",
+   "stats": [
+    {
+     "value": "−18%",
+     "label": "Thomson Reuters (Westlaw), early February 2026"
+    },
+    {
+     "value": "−14.4%",
+     "label": "RELX (LexisNexis) in one day"
+    },
+    {
+     "value": "−11.8%",
+     "label": "WPP in one day"
+    }
+   ],
+   "sources": [
+    {
+     "title": "Trending Topics — The Anthropic effect: SaaS sell-off (5 Feb 2026)",
+     "url": "https://www.trendingtopics.eu/the-anthropic-effect-fear-of-ai-agents-trigger-major-saas-stock-sell-off/"
+    }
+   ],
+   "as_of": "2026-10-31"
+  },
+  {
+   "id": "klarna",
+   "name": "Klarna",
+   "industries": [
+    "financial services",
+    "customer service",
+    "any"
+   ],
+   "stage": 1,
+   "where": "Sweden",
+   "year": "2024–2025",
+   "headline": "Its AI assistant took over most customer chats — then the company brought humans back for quality. Use as the honest counterpoint: AI replaces processes, not care; the winners redesign work, not just cut staff.",
+   "stats": [
+    {
+     "value": "2.3M",
+     "label": "conversations handled by the AI assistant (company, Feb 2024)"
+    },
+    {
+     "value": "700",
+     "label": "full-time agents' worth of work (company claim)"
+    },
+    {
+     "value": "2025",
+     "label": "humans brought back into support for quality"
+    }
+   ],
+   "sources": [
+    {
+     "title": "Tech.co — Klarna reverses AI customer service overhaul (20 May 2025)",
+     "url": "https://tech.co/news/klarna-reverses-ai-overhaul"
+    }
+   ],
+   "as_of": "2026-10-31",
+   "geo": {
+    "lat": 62.0,
+    "lon": 15.0,
+    "precision": "country"
+   }
+  },
+  {
+   "id": "ai-rollup-capital",
+   "name": "AI roll-ups (General Catalyst, Thrive)",
+   "industries": [
+    "services",
+    "accounting",
+    "consulting",
+    "IT services",
+    "legal",
+    "roll-up",
+    "any fragmented industry"
+   ],
+   "stage": 4,
+   "where": "USA",
+   "year": "2025",
+   "headline": "Venture funds buy traditional service firms and run them on AI to turn them into high-margin businesses: buy-and-build at scale.",
+   "stats": [
+    {
+     "value": "$1.5B",
+     "label": "General Catalyst for AI-driven services transformation (Nov 2025)"
+    },
+    {
+     "value": "$1B+",
+     "label": "available to Thrive Holdings for roll-ups (Dec 2025)"
+    },
+    {
+     "value": "40–60%",
+     "label": "target margin after the AI rebuild (GC thesis)"
+    }
+   ],
+   "sources": [
+    {
+     "title": "Techleap — General Catalyst's $1.5B AI services transformation (11.2025)",
+     "url": "https://finder.techleap.nl/news/feed/general-catalyst-s-1-5b-ai-services-transformation"
+    },
+    {
+     "title": "Newcomer — Inside the VC roll-up craze (18.12.2025)",
+     "url": "https://www.newcomer.co/p/inside-the-vc-roll-up-craze-that"
+    }
+   ],
+   "as_of": "2026-11-01",
+   "geo": {
+    "lat": 39.8,
+    "lon": -98.6,
+    "precision": "country"
+   }
+  },
+  {
+   "id": "ai-native-revenue-per-employee",
+   "name": "AI-native software companies",
+   "industries": [
+    "software",
+    "any"
+   ],
+   "stage": 0,
+   "where": "USA",
+   "year": "2026",
+   "headline": "AI-native companies make several times more revenue per employee than traditional leaders: the cost base of a company built around agents.",
+   "stats": [
+    {
+     "value": "~$3.3M",
+     "label": "ARR per employee at Cursor (~$1B ARR, ~300 people)"
+    },
+    {
+     "value": "~$0.48M",
+     "label": "revenue per employee at Salesforce"
+    },
+    {
+     "value": "7–10×",
+     "label": "efficiency gap estimated by the author"
+    }
+   ],
+   "sources": [
+    {
+     "title": "SaaStr — $500K ARR per employee is the new $200K (26.01.2026; author's estimates)",
+     "url": "https://www.saastr.com/the-new-rule-500k-arr-per-employee-is-the-new-200k"
+    }
+   ],
+   "as_of": "2026-11-01",
+   "note": "Author's estimates, ARR vs revenue are not strictly comparable: say 'about' and 'estimate'."
+  },
+  {
+   "id": "anthropic-claude-code",
+   "name": "Anthropic",
+   "industries": [
+    "software",
+    "any knowledge work"
+   ],
+   "stage": 4,
+   "where": "USA",
+   "year": "2026",
+   "headline": "Inside an AI company the change is already measured: agents write so much code that merges into the main branch grew about twelvefold in five months, and the company replaced Git to cope.",
+   "stats": [
+    {
+     "value": "×12",
+     "label": "merges into the main branch a day: ~2 500 (May) → 30 000+ (Sept 2026)"
+    },
+    {
+     "value": "+67%",
+     "label": "pull requests merged per engineer per day (Jan 2026)"
+    },
+    {
+     "value": "70–90%",
+     "label": "of code written with Claude Code assistance (Jan 2026)"
+    }
+   ],
+   "sources": [
+    {
+     "title": "Anthropic — Understand Claude Code's impact with contribution metrics (29.01.2026)",
+     "url": "https://claude.com/blog/contribution-metrics"
+    },
+    {
+     "title": "Habr / Selectel — Anthropic replaces Git with Scion (14.10.2026), from Anthropic's engineering blog (13.10.2026)",
+     "url": "https://habr.com/ru/companies/selectel/news/1094398/"
+    }
+   ],
+   "as_of": "2026-11-01",
+   "note": "×12 is computed from ~2 500 → 30 000+ merges a day (May → Sept 2026); the blog elsewhere says tenfold. Say 'about ten times'. Do not mix with the +67% per-engineer figure."
+  }
+ ],
+ "leads": [
+  {
+   "name": "Manifest",
+   "note": "AI-native legal tech for immigration lawyers (from metAImorphosis deck) — verify"
+  },
+  {
+   "name": "Alpha School",
+   "note": "private schools with AI tutor, ~2 hours of academics a day — verify numbers"
+  },
+  {
+   "name": "Hexion (?)",
+   "note": "named in metAImorphosis deck as 'manufacturing, factory as a service' — identity unclear, verify"
+  },
+  {
+   "name": "Public company vacancy for an AI agent (March 2026)",
+   "note": "metAImorphosis deck s.70, company not named — verify"
+  },
+  {
+   "name": "YC looking for a $100B company with under 10 employees",
+   "note": "metAImorphosis deck s.23 — verify the YC request for startups"
+  }
+ ]
+}
