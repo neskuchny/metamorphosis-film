@@ -1,0 +1,86 @@
+/* Browser player shell: paste film.json, watch it. The film itself is drawn by film.js on the 1920x1080 stage. */
+html, body.web { width: auto; height: 100%; overflow: auto; }
+body.web { background: #09090B; color: #EDE9E2; font-family: var(--sans); }
+body.playing { overflow: hidden; }
+
+#intro { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 28px 18px; }
+.card { width: 100%; max-width: 760px; }
+.eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.card h1 { font-size: 34px; font-weight: 800; letter-spacing: -.02em; margin: 10px 0 12px; }
+.card p { color: #b9bcc2; line-height: 1.5; font-size: 16px; }
+#paste { width: 100%; height: 220px; margin: 18px 0 14px; padding: 14px; resize: vertical; background: #111216; color: var(--ink); border: 1px solid rgba(237,233,226,.16); border-radius: 10px; font: 13px/1.45 var(--mono); }
+#paste:focus { outline: none; border-color: var(--amber); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+button, label.ghost { font: 600 15px var(--sans); border-radius: 10px; padding: 11px 18px; cursor: pointer; border: 1px solid rgba(237,233,226,.22); background: transparent; color: var(--ink); }
+button.primary { background: var(--amber); color: #15120a; border-color: var(--amber); }
+button:hover, label.ghost:hover { border-color: var(--ink); }
+.err { color: #ff8a73; min-height: 1.4em; margin-top: 10px; font-size: 14px; }
+.note { font-size: 13px !important; color: var(--muted) !important; margin-top: 18px; }
+
+#viewer { position: fixed; inset: 0; background: #000; }
+#stagebox { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+#stagewrap { width: 1920px; height: 1080px; flex: none; transform-origin: center center; }
+#bigplay { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 22px; padding: 16px 34px; background: var(--amber); color: #15120a; border-color: var(--amber); box-shadow: 0 10px 60px rgba(0,0,0,.6); }
+#toast { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); max-width: 90%; padding: 10px 16px; border-radius: 10px; background: rgba(20,20,24,.92); border: 1px solid rgba(237,233,226,.2); font-size: 14px; color: #d8dade; }
+#ui { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px; padding: 36px 18px 14px; background: linear-gradient(transparent, rgba(0,0,0,.8)); transition: opacity .35s; }
+#ui.idle { opacity: 0; pointer-events: none; }
+#ui button { padding: 8px 14px; font-size: 14px; background: rgba(20,20,24,.7); }
+#scrub { flex: 1; min-width: 80px; accent-color: var(--amber); }
+#clock { font: 13px var(--mono); color: #c7c9ce; white-space: nowrap; }
+.chk { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #c7c9ce; white-space: nowrap; }
+[hidden] { display: none !important; }
+@media (max-width: 640px) {
+  #ui { flex-wrap: wrap; gap: 8px 10px; padding: 28px 12px 10px; }
+  #scrub { order: -1; flex: 1 1 100%; }
+  #ui button { padding: 7px 11px; font-size: 13px; }
+  #bigplay { font-size: 18px; padding: 13px 26px; }
+}
+
+/* finale: your numbers -> your step (after the film) */
+#finale{position:absolute;inset:0;overflow:auto;background:#08080A;z-index:20;padding:28px 18px 40px;-webkit-overflow-scrolling:touch}
+.fn-card{position:relative;max-width:980px;margin:0 auto;color:#EDE9E2}
+.fn-card h2{font-size:34px;font-weight:800;letter-spacing:-.02em;margin:8px 0 8px}
+.fn-card h3{font-size:20px;font-weight:700;margin:30px 0 12px}
+.fn-lead{color:#b9bcc2;font-size:16px;line-height:1.5;max-width:720px}
+.fn-x{position:absolute;right:0;top:0;font-size:26px;line-height:1;padding:6px 12px}
+.fn-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:22px;align-items:start}
+.fn-in{margin-bottom:18px}
+.fn-in label{display:flex;justify-content:space-between;gap:12px;font-size:15px;color:#d6d8dc;margin-bottom:8px;line-height:1.35}
+.fn-in label b{font-family:var(--mono);color:#EDE9E2;white-space:nowrap}
+.fn-in input{width:100%;accent-color:var(--amber)}
+.fn-in .fn-def{font-size:12px;color:var(--muted);margin-top:2px}
+.fn-out{background:rgba(237,233,226,.05);border:1px solid rgba(237,233,226,.12);border-radius:12px;padding:18px}
+.fn-big{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.fn-big span{font-size:56px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.fn-big small{font-size:14px;color:var(--muted)}
+.fn-sub{font-size:15px;color:#d6d8dc;margin:8px 0 12px}
+#fn-chart{width:100%;height:200px;display:block}
+.fn-legend{display:flex;gap:16px;align-items:center;font-size:13px;font-family:var(--mono);flex-wrap:wrap;margin-top:8px}
+.fn-legend .you{color:var(--you)} .fn-legend .them{color:var(--them)}
+.fn-link{border:none;background:none;color:var(--muted);text-decoration:underline;padding:0;font-size:13px;margin-left:auto}
+.fn-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.fn-step{text-align:left;border:1px solid rgba(237,233,226,.18);border-radius:12px;padding:14px 16px;background:transparent;color:#EDE9E2;cursor:pointer;font:inherit}
+.fn-step b{display:block;font-size:16px;margin-bottom:6px}
+.fn-step span{display:block;font-size:14px;color:#b9bcc2;line-height:1.4;font-weight:400}
+.fn-step.on{border-color:var(--amber);background:rgba(233,180,76,.10)}
+.fn-q{padding-left:22px;color:#d6d8dc;font-size:15px;line-height:1.5}
+.fn-q li{margin-bottom:6px}
+.fn-actions{margin-top:26px}
+a.btnlink{display:inline-block;text-decoration:none;font:600 15px var(--sans);border-radius:10px;padding:11px 18px;border:1px solid rgba(237,233,226,.22);color:var(--ink)}
+#b-finale{border-color:var(--amber);color:var(--amber)}
+@media (max-width:760px){.fn-grid{grid-template-columns:1fr}.fn-steps{grid-template-columns:1fr}.fn-big span{font-size:44px}.fn-card h2{font-size:26px}}
+body.fin #bigplay,body.fin #ui,body.fin #toast{display:none!important}
+.fn-plan{margin-top:30px;border:1px solid rgba(237,233,226,.14);border-radius:12px;padding:14px 18px}
+.fn-plan summary{cursor:pointer;font-size:20px;font-weight:700;color:#EDE9E2}
+.fn-plan h4{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+.fn-move{padding:10px 0;border-top:1px solid rgba(237,233,226,.08)}
+.fn-move b{display:block;font-size:16px;color:#EDE9E2}
+.fn-move span{display:block;font-size:14px;color:#b9bcc2;line-height:1.45;margin-top:4px}
+.fn-move em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--them);margin-left:8px}
+.fn-risk{margin-top:22px}
+.fn-rq{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 0;border-top:1px solid rgba(237,233,226,.08);font-size:15px;color:#d6d8dc}
+.fn-rq .yn{display:flex;gap:6px;flex:none}
+.fn-rq button{padding:6px 14px;font-size:14px}
+.fn-rq button.on{border-color:var(--amber);background:rgba(233,180,76,.15)}
+.fn-verdict{font-size:16px;font-weight:600;color:#EDE9E2;min-height:1.4em;margin-top:8px}
+.fn-refl{width:100%;padding:12px;background:#111216;color:var(--ink);border:1px solid rgba(237,233,226,.16);border-radius:10px;font:15px/1.45 var(--sans);resize:vertical}

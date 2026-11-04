@@ -1,0 +1,2 @@
+Caveat (c) 2014 The Caveat Project Authors (Pablo Impallari) and Neucha (c) 2010 Jovanny Lemonad: SIL Open Font License 1.1, https://openfontlicense.org
+Woff2 subsets from the fontsource project.

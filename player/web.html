@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Film player</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="web.css">
+</head>
+<body class="web">
+<section id="intro">
+  <div class="card">
+    <div class="eyebrow">metamorphosis-film</div>
+    <h1 id="t-title"></h1>
+    <p id="t-lead"></p>
+    <textarea id="paste" spellcheck="false" placeholder='{ "company": { "name": "…" }, "language": "en", "scenes": [ … ] }'></textarea>
+    <div class="row">
+      <button id="open" class="primary"></button>
+      <label class="ghost"><input id="file" type="file" accept=".json,application/json" hidden><span id="t-file"></span></label>
+      <button id="example" class="ghost"></button>
+    </div>
+    <p id="err" class="err"></p>
+    <p id="t-note" class="note"></p>
+  </div>
+</section>
+
+<section id="viewer" hidden>
+  <div id="stagebox"><div id="stagewrap">
+    <div id="stage">
+      <div id="bg"><div id="grid"></div><div id="grain"></div><div id="vignette"></div></div>
+      <div id="scenes"></div>
+      <div id="hud">
+        <div id="hud-brand"></div>
+        <div id="hud-year"><span class="lbl"></span><span class="val"></span></div>
+        <div id="hud-act"></div>
+        <div id="hud-progress"><i></i></div>
+      </div>
+      <div id="captions"><span></span></div>
+      <div id="fade"></div>
+    </div>
+  </div></div>
+  <button id="bigplay"></button>
+  <div id="toast" hidden></div>
+  <div id="ui">
+    <button id="b-play"></button>
+    <button id="b-restart"></button>
+    <input id="scrub" type="range" min="0" max="1000" value="0" step="1">
+    <span id="clock">0:00 / 0:00</span>
+    <label class="chk"><input id="c-voice" type="checkbox" checked><span id="t-voice"></span></label>
+    <button id="b-finale" hidden></button>
+    <button id="b-fs"></button>
+  </div>
+  <section id="finale" hidden>
+    <div class="fn-card">
+      <button id="fn-close" class="fn-x" aria-label="close">×</button>
+      <div class="eyebrow" id="fn-company"></div>
+      <h2 id="fn-title"></h2>
+      <p id="fn-intro" class="fn-lead"></p>
+      <div id="fn-risk" class="fn-risk" hidden><h3 id="fn-risk-title"></h3><div id="fn-risk-q"></div><p id="fn-risk-v" class="fn-verdict"></p></div>
+      <div class="fn-grid">
+        <div id="fn-inputs"></div>
+        <div class="fn-out">
+          <div class="fn-big"><span id="fn-change"></span><small id="fn-change-l"></small></div>
+          <div class="fn-sub" id="fn-cross"></div>
+          <svg id="fn-chart" viewBox="0 0 560 260" preserveAspectRatio="none"></svg>
+          <div class="fn-legend"><span class="you" id="fn-l-you"></span><span class="them" id="fn-l-them"></span><button id="fn-reset" class="fn-link"></button></div>
+        </div>
+      </div>
+      <details id="fn-plan" class="fn-plan" hidden><summary id="fn-plan-title"></summary><p id="fn-plan-memo" class="fn-lead"></p><div id="fn-plan-list"></div></details>
+      <div id="fn-paths-wrap" hidden><h3 id="fn-paths-title"></h3><div id="fn-paths" class="fn-steps"></div></div>
+      <h3 id="fn-steps-title"></h3>
+      <div id="fn-steps" class="fn-steps"></div>
+      <h3 id="fn-q-title"></h3>
+      <ol id="fn-q" class="fn-q"></ol>
+      <div id="fn-refl-wrap" hidden><h3 id="fn-refl-title"></h3><textarea id="fn-refl" class="fn-refl" rows="3"></textarea></div>
+      <div class="row fn-actions">
+        <button id="fn-copy" class="primary"></button>
+        <button id="fn-dl" class="ghost"></button>
+        <a id="fn-contact" class="ghost btnlink" hidden></a>
+        <button id="fn-back" class="ghost"></button>
+      </div>
+      <p class="note" id="fn-privacy"></p>
+    </div>
+  </section>
+</section>
+
+<script src="timeline.js"></script>
+<script src="validate.js"></script>
+<script src="model.js"></script>
+<script src="map-data.js"></script>
+<script src="web.js"></script>
+</body>
+</html>
