@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Комикс</title>
+<link rel="stylesheet" href="fonts.css">
+<style>html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#FFF6DC}svg{display:block}text{font-family:'Pangolin','Neucha',sans-serif}</style></head><body>
+<svg id="s" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+<script>
+// Text of the comic. Override from the command line: node scripts/clip.mjs ... --text '{"p1":["YOU.","3,000 PEOPLE."],"bubble":"US|300.","p2":"ARQON. 2031.","burst":"÷10","p3":"SAME OUTPUT."}'
+// Keep it short, UPPERCASE reads best: p1 two lines <= 20 chars, bubble <= 14 chars per line (split lines with |), p2 <= 14, burst <= 5, p3 <= 20.
+const TEXT=Object.assign({p1:['ВЫ.','ТРИ ТЫСЯЧИ ЧЕЛОВЕК.'],bubble:'НАС — ТРИСТА.',p2:'АРКОН. 2031.',burst:'÷10',p3:'ВЫПУСК — ТОТ ЖЕ.'},window.TEXT||{});
+
+const NS='http://www.w3.org/2000/svg';const INK='#111018',NAVY='#1B2A5C',MAG='#E6397C',CY='#19B5D8',YEL='#FFD21F',ORG='#FF7A1A',PAPER='#FFF6DC';
+let seed=9;const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646};
+const S=document.getElementById('s');
+const ease={out:x=>1-Math.pow(1-x,3),back:x=>{const c1=2.2,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)}};
+const P=(t,a,d,f=x=>x)=>f(Math.min(1,Math.max(0,(t-a)/d)));
+const mk=(tag,at,par)=>{const e=document.createElementNS(NS,tag);for(const k in at)e.setAttribute(k,at[k]);if(par)par.appendChild(e);return e};
+const defs=mk('defs',{},S);
+defs.innerHTML=`
+<pattern id="htS" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(28)"><circle cx="6" cy="6" r="2.1" fill="#111018"/></pattern>
+<pattern id="htL" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(28)"><circle cx="6" cy="6" r="3.9" fill="#111018"/></pattern>
+<pattern id="htM" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(28)"><circle cx="6" cy="6" r="3.4" fill="#E6397C"/></pattern>
+<linearGradient id="fadeV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+<linearGradient id="fadeV2" x1="0" y1="0" x2="0" y2="1"><stop offset=".35" stop-color="#000"/><stop offset="1" stop-color="#fff"/></linearGradient>
+<mask id="mTop"><rect width="2000" height="1100" fill="url(#fadeV)"/></mask>
+<mask id="mBot"><rect width="2000" height="1100" fill="url(#fadeV2)"/></mask>
+<linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6397C"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#FFD21F"/></linearGradient>
+<filter id="wob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".022" numOctaves="2" seed="6"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter>`;
+mk('rect',{width:1920,height:1080,fill:PAPER},S);
+const anim=[];
+// ---- helpers
+const ink=(w=7)=>({stroke:INK,'stroke-width':w,'stroke-linejoin':'round','stroke-linecap':'round'});
+function panel(x,y,w,h,t0,build){
+  const g=mk('g',{},S);const cp='cp'+x+y;const c=mk('clipPath',{id:cp},defs);mk('rect',{x:0,y:0,width:w,height:h},c);
+  const inner=mk('g',{'clip-path':`url(#${cp})`},g);const art=mk('g',{filter:'url(#wob)'},inner);const top=mk('g',{},inner);
+  build(art,top,w,h);mk('rect',{x:0,y:0,width:w,height:h,fill:'none',...ink(9)},g);
+  anim.push(T=>{const q=P(T,t0,.45,ease.back),a=P(T,t0,.12);g.setAttribute('opacity',a);const s=.82+.18*q;g.setAttribute('transform',`translate(${x+w/2} ${y+h/2}) scale(${s}) translate(${-w/2} ${-h/2})`)});
+  return g;
+}
+function caption(par,x,y,w,lines,t0,size=40){
+  const h=lines.length*size*1.18+26;const g=mk('g',{},par);
+  mk('rect',{x:x+6,y:y+6,width:w,height:h,fill:INK},g);mk('rect',{x,y,width:w,height:h,fill:YEL,...ink(5)},g);
+  lines.forEach((l,i)=>{const t=mk('text',{x:x+20,y:y+size+10+i*size*1.18,'font-size':size,fill:INK,'letter-spacing':1},g);t.textContent=l});
+  anim.push(T=>{const q=P(T,t0,.35,ease.out);g.setAttribute('opacity',P(T,t0,.1));g.setAttribute('transform',`translate(${(1-q)*-40} 0)`)});
+}
+function bubble(par,cx,cy,rx,ry,tail,text,t0,size=40){
+  const g=mk('g',{},par);
+  mk('polygon',{points:tail,fill:'#fff',...ink(5)},g);
+  mk('ellipse',{cx,cy,rx,ry,fill:'#fff',...ink(5)},g);
+  mk('polygon',{points:tail,fill:'#fff'},g);   // hide the seam
+  text.forEach((l,i)=>{const t=mk('text',{x:cx,y:cy+size*.35+(i-(text.length-1)/2)*size*1.15,'font-size':size,'text-anchor':'middle',fill:INK},g);t.textContent=l});
+  anim.push(T=>{const q=P(T,t0,.35,ease.back);g.setAttribute('opacity',P(T,t0,.08));g.setAttribute('transform',`translate(${cx} ${cy}) scale(${.4+.6*q}) translate(${-cx} ${-cy})`)});
+}
+function person(par,cx,cy,s,body,skin='#F5C29A',hat=null){
+  const g=mk('g',{},par);
+  mk('path',{d:`M${cx-s*1.1} ${cy+s*1.5}Q${cx-s*1.1} ${cy+s*.45} ${cx} ${cy+s*.45}Q${cx+s*1.1} ${cy+s*.45} ${cx+s*1.1} ${cy+s*1.5}z`,fill:body,...ink(Math.max(2.5,s*.12))},g);
+  mk('circle',{cx,cy,r:s*.62,fill:skin,...ink(Math.max(2.5,s*.12))},g);
+  if(hat)mk('path',{d:`M${cx-s*.66} ${cy-s*.08}Q${cx-s*.6} ${cy-s*.78} ${cx} ${cy-s*.78}Q${cx+s*.6} ${cy-s*.78} ${cx+s*.66} ${cy-s*.08}z`,fill:hat,...ink(Math.max(2.5,s*.12))},g);
+  mk('circle',{cx:cx-s*.21,cy:cy+s*.07,r:s*.06,fill:INK},g);mk('circle',{cx:cx+s*.21,cy:cy+s*.07,r:s*.06,fill:INK},g);
+  mk('path',{d:`M${cx-s*.18} ${cy+s*.26}Q${cx} ${cy+s*.4} ${cx+s*.18} ${cy+s*.26}`,fill:'none',stroke:INK,'stroke-width':Math.max(2,s*.07),'stroke-linecap':'round'},g);
+  return g;
+}
+function crateBig(par,x,y,s){
+  mk('rect',{x:x+5,y:y+5,width:s,height:s,fill:INK},par);
+  mk('rect',{x,y,width:s,height:s,fill:ORG,...ink(6)},par);
+  mk('rect',{x:x+s*.18,y:y+s*.18,width:s*.64,height:s*.64,fill:'none',...ink(4)},par);
+  mk('line',{x1:x+s*.18,y1:y+s*.18,x2:x+s*.82,y2:y+s*.82,...ink(4)},par);mk('line',{x1:x+s*.82,y1:y+s*.18,x2:x+s*.18,y2:y+s*.82,...ink(4)},par);
+}
+
+// ================= PANEL 1: you =================
+panel(40,40,1100,1000,.3,(art,top,w,h)=>{
+  mk('rect',{width:w,height:830,fill:'url(#dusk)'},art);
+  mk('rect',{width:w,height:620,fill:'url(#htL)',mask:'url(#mTop)',opacity:.5},art);
+  mk('circle',{cx:790,cy:480,r:150,fill:'#FFF3B0',...ink(6)},art);
+  // factory
+  mk('path',{d:'M40 560H1060V820H40Z',fill:NAVY,...ink(8)},art);
+  let saw='M40 560V470';for(let i=0;i<8;i++){const x=40+i*127.5;saw+=`L${x+127.5} 560V470`}saw+='L1060 560Z';
+  mk('path',{d:`M40 560V470 ${[...Array(8).keys()].map(i=>`L${40+i*127.5+127.5} 560V470`).join(' ')}L1060 560Z`,fill:'#2B3F7E',...ink(7)},art);
+  [[190,300,74,260],[420,350,64,210],[700,320,70,240]].forEach(([x,y,w2,h2])=>{mk('rect',{x,y,width:w2,height:h2,fill:'#2B3F7E',...ink(7)},art);mk('rect',{x:x,y:y,width:w2,height:26,fill:MAG,...ink(5)},art)});
+  [[227,300],[452,350],[735,320]].forEach(([x,y])=>{[[0,-30,46],[-26,-76,38],[18,-110,50],[-16,-160,42]].forEach(([dx,dy,r])=>mk('circle',{cx:x+dx,cy:y+dy,r,fill:'#fff',...ink(5)},art))});
+  for(let r=0;r<4;r++)for(let c=0;c<17;c++){mk('rect',{x:80+c*57,y:590+r*52,width:34,height:30,fill:rnd()<.12?'#3a4f8f':YEL,...ink(3)},art)}
+  mk('rect',{width:w,y:820,height:180,fill:'#F2A93B'},art);mk('line',{x1:0,y1:820,x2:w,y2:820,...ink(8)},art);
+  mk('rect',{y:820,width:w,height:180,fill:'url(#htS)',mask:'url(#mBot)',opacity:.35},art);
+  // crowd: 142 figures
+  const rows=[[800,40,22],[838,34,26],[884,28,32],[940,22,40],[1000,18,50]];
+  rows.forEach(([y,n,s])=>{for(let i=0;i<n;i++){const x=24+(i+(rnd()*.4-.2))*((w-48)/(n-1));person(art,x,y-s*1.0+rnd()*6,s*.5,NAVY,'#F5C29A',i%5===0?YEL:null)}});
+  caption(top,34,34,560,TEXT.p1,1.0,44);
+});
+
+// ================= PANEL 2: them =================
+panel(1164,40,716,480,1.3,(art,top,w,h)=>{
+  mk('rect',{width:w,height:h,fill:YEL},art);
+  mk('circle',{cx:360,cy:200,r:300,fill:'#FFE680'},art);
+  mk('rect',{width:w,height:h,fill:'url(#htM)',mask:'url(#mBot)',opacity:.55},art);
+  mk('rect',{x:0,y:360,width:w,height:120,fill:'#B5651D',...ink(8)},art);   // table
+  mk('rect',{x:0,y:360,width:w,height:18,fill:'#D98B3A',...ink(5)},art);
+  person(art,150,290,92,MAG,'#F5C29A',null);
+  person(art,360,270,100,CY,'#E9A97E','#FF7A1A');
+  person(art,570,290,92,NAVY,'#F7D1AE',null);
+  mk('rect',{x:300,y:392,width:120,height:46,fill:'#2b2b36',...ink(5)},art);  // laptop
+  bubble(top,505,115,190,68,'420,160 390,214 480,172',TEXT.bubble.split('|'),1.9,44);
+  caption(top,18,18,268,[TEXT.p2],1.6,36);
+});
+
+// ================= PANEL 3: same output =================
+panel(1164,544,716,496,2.3,(art,top,w,h)=>{
+  mk('rect',{width:w,height:h,fill:CY},art);
+  mk('rect',{width:w,height:h,fill:'url(#htS)',mask:'url(#mTop)',opacity:.45},art);
+  mk('rect',{y:380,width:w,height:120,fill:'#0f8aa6',...ink(8)},art);
+  const s=70;[[40,310],[110,310],[180,310],[75,240],[145,240]].forEach(([x,y])=>crateBig(art,x,y+0,s));
+  [[466,310],[536,310],[606,310],[501,240],[571,240]].forEach(([x,y])=>crateBig(art,x,y,s));
+  mk('rect',{x:300,y:230,width:116,height:20,fill:MAG,...ink(6)},art);mk('rect',{x:300,y:280,width:116,height:20,fill:MAG,...ink(6)},art);
+  // burst
+  const pts=[];for(let i=0;i<24;i++){const a=i/24*Math.PI*2,r=i%2?78:116;pts.push((358+Math.cos(a)*r).toFixed(1)+','+(122+Math.sin(a)*r).toFixed(1))}
+  mk('polygon',{points:pts.join(' '),fill:YEL,...ink(7)},art);
+  const t=mk('text',{x:358,y:146,'font-size':84,'text-anchor':'middle',fill:INK,transform:'rotate(-8 358 122)'},top);t.textContent=TEXT.burst;
+  caption(top,22,402,452,[TEXT.p3],2.9,40);
+});
+// hand-drawn ink for caption+bubble sits above; fix panel-2 text split
+window.__seek=function(T){for(const a of anim)a(T);return true};
+document.fonts.ready.then(()=>{window.__seek(0);window.__ready=true});
+const qT=new URLSearchParams(location.search).get('t');if(qT!==null)document.fonts.ready.then(()=>window.__seek(+qT));
+</script></body></html>

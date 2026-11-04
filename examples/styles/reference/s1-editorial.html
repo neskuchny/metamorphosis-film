@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Редакционный дата-док</title>
+<link rel="stylesheet" href="../fonts.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--paper:#F1EBDD;--ink:#16130E;--red:#C2301A;--mute:#85796A}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--paper)}
+body{position:relative;font-family:'Source Serif 4',serif;color:var(--ink)}
+.grain{position:absolute;inset:0;opacity:.28;mix-blend-mode:multiply}
+.mono{font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;font-size:19px;color:var(--mute)}
+.top{position:absolute;left:96px;right:96px;top:52px;display:flex;justify-content:space-between;padding-bottom:16px;border-bottom:4px double var(--ink)}
+h1{position:absolute;left:96px;top:128px;font-weight:600;font-size:84px;line-height:1.03;letter-spacing:-.022em;width:1600px}
+h1 em{font-style:italic;font-weight:400;color:var(--red)}
+.lab{position:absolute;left:96px}
+.num{position:absolute;left:90px;font-size:196px;font-weight:600;line-height:.8;letter-spacing:-.045em}
+.cap{position:absolute;left:820px;font-style:italic;font-size:34px;line-height:1.25;color:#4a4236;width:760px}
+.bar{position:absolute;left:96px;display:flex;gap:6px}
+.seg{width:146px;height:32px;background:var(--ink)}
+.seg.hole{background:none;border:2px dashed rgba(22,19,14,.38)}
+.seg.r{background:var(--red)}
+.note{position:absolute;left:96px;font-style:italic;font-size:36px;color:var(--red);display:flex;align-items:center;gap:16px}
+.foot{position:absolute;left:96px;right:96px;bottom:44px;display:flex;justify-content:space-between;border-top:1px solid rgba(22,19,14,.4);padding-top:14px}
+</style></head><body>
+<svg class="grain" width="1920" height="1080"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="3" seed="4"/><feColorMatrix values="0 0 0 0 .35  0 0 0 0 .3  0 0 0 0 .2  0 0 0 .55 0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+
+<div class="top"><span class="mono">Аркон · сценарий 2031</span><span class="mono">Что вас ждёт · с. 7</span></div>
+<h1>Один и тот же выпуск.<br><em>Десятая часть людей.</em></h1>
+
+<div class="lab mono" style="top:336px">Вы · сегодня</div>
+<div class="num" style="top:372px">3 000</div>
+<div class="cap" style="top:430px">человек в сборке, снабжении и планировании.<br>Выпуск за год: 100 условных единиц.</div>
+<div class="bar" style="top:548px"><i class="seg"></i><i class="seg"></i><i class="seg"></i><i class="seg"></i><i class="seg"></i><i class="seg"></i><i class="seg"></i><i class="seg"></i><i class="seg"></i><i class="seg"></i></div>
+
+<div class="lab mono" style="top:628px;color:var(--red)">Аркон · 2031</div>
+<div class="num" style="top:664px;color:var(--red)">300</div>
+<div class="cap" style="top:722px">человек. Выпуск за год — те же<br>100 условных единиц.</div>
+<div class="bar" style="top:838px"><i class="seg r"></i><i class="seg hole"></i><i class="seg hole"></i><i class="seg hole"></i><i class="seg hole"></i><i class="seg hole"></i><i class="seg hole"></i><i class="seg hole"></i><i class="seg hole"></i><i class="seg hole"></i></div>
+
+<div class="note" style="top:888px;left:96px">
+  <svg width="86" height="56" viewBox="0 0 86 56"><path d="M70 50 C 40 52, 14 40, 14 8" fill="none" stroke="#C2301A" stroke-width="3" stroke-linecap="round"/><path d="M4 18 L14 6 L26 16" fill="none" stroke="#C2301A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span>один сегмент из десяти</span>
+</div>
+
+<div class="foot"><span class="mono">Модель: S-образная кривая внедрения. Допущения — в конце фильма</span><span class="mono">Сценарий, не прогноз</span></div>
+</body></html>

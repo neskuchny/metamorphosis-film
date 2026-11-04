@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Артефакт из будущего</title>
+<link rel="stylesheet" href="../fonts.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden}
+body{position:relative;background:radial-gradient(1200px 800px at 50% 40%,#232831 0%,#12151a 70%,#0b0d10 100%);font-family:'Source Serif 4',serif;color:#16140f}
+.win{position:absolute;left:150px;top:70px;width:1620px;height:940px;border-radius:16px;background:#FBFAF5;overflow:hidden;box-shadow:0 60px 140px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.08)}
+.chrome{height:62px;background:#E9E6DD;display:flex;align-items:center;padding:0 22px;gap:10px;border-bottom:1px solid #d3cfc3}
+.chrome i{width:15px;height:15px;border-radius:50%;background:#c9c4b6}
+.addr{margin-left:24px;flex:1;max-width:820px;height:36px;border-radius:18px;background:#F6F4EC;font-family:'JetBrains Mono',monospace;font-size:16px;color:#7b7566;display:flex;align-items:center;padding:0 20px;letter-spacing:.02em}
+.mast{display:flex;justify-content:space-between;align-items:baseline;padding:30px 80px 14px;border-bottom:3px solid #16140f}
+.logo{font-weight:600;font-size:34px;letter-spacing:.14em;text-transform:uppercase}
+.mono{font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:.1em;text-transform:uppercase;color:#7b7566}
+.body{display:grid;grid-template-columns:1fr 520px;gap:64px;padding:44px 80px}
+.kick{font-family:'JetBrains Mono',monospace;color:#B3261E;font-size:18px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-bottom:20px}
+h1{font-weight:600;font-size:66px;line-height:1.04;letter-spacing:-.02em}
+mark{background:linear-gradient(transparent 58%,#FFE34D 58%,#FFE34D 92%,transparent 92%);color:inherit;padding:0 4px;margin:0 -4px}
+.dek{margin-top:26px;font-style:italic;font-size:29px;line-height:1.35;color:#43403a}
+.by{margin-top:22px}
+.txt{margin-top:28px;column-count:2;column-gap:40px;font-size:22px;line-height:1.5;color:#2a2823;text-align:justify;hyphens:auto}
+.txt p::first-letter{float:left;font-size:84px;line-height:.8;font-weight:600;padding:6px 10px 0 0}
+.card{border:1px solid #cfcabb;border-radius:6px;padding:26px 28px;background:#F7F5EC}
+.card h3{font-size:24px;font-weight:600;margin-bottom:18px}
+.bars div{display:flex;align-items:center;gap:14px;margin:14px 0;font-family:'JetBrains Mono',monospace;font-size:17px}
+.bars b{display:block;height:26px}
+.fade{position:absolute;left:0;right:0;bottom:0;height:150px;background:linear-gradient(rgba(251,250,245,0),#FBFAF5 85%)}
+.rel{margin-top:34px}.rel h4{font-family:'JetBrains Mono',monospace;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:#7b7566;margin-bottom:6px;font-weight:400}
+.rel p{font-size:25px;line-height:1.25;font-weight:600;padding:16px 0;border-top:1px solid #cfcabb}
+.stamp{position:absolute;right:62px;top:790px;border:5px solid #B3261E;color:#B3261E;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;padding:12px 20px;transform:rotate(-7deg);line-height:1.25;text-align:center;background:rgba(251,250,245,.8)}
+</style></head><body>
+<div class="win">
+  <div class="chrome"><i></i><i></i><i></i><div class="addr">vestnik-otrasli.example / 2031 / 03 / 14 / arqon</div></div>
+  <div class="mast"><span class="logo">Вестник отрасли</span><span class="mono">14 марта 2031 · Промышленность · Регионы</span></div>
+  <div class="body">
+    <div>
+      <div class="kick">Производство · разбор</div>
+      <h1>Аркон: <mark>триста человек</mark> выпускают то, на что у&nbsp;соседей уходит три тысячи</h1>
+      <div class="dek">Региональные заводы бытовой техники впервые теряют заказы не из-за цены, а из-за скорости: новый игрок перестраивает линию за ночь.</div>
+      <div class="mono by">Редакция · чтение 6 мин</div>
+      <div class="txt"><p>Ещё пять лет назад разговор о том, сколько людей нужно, чтобы собрать партию техники, сводился к смене и фонду оплаты. Сегодня главный вопрос другой: сколько дней проходит между идеей модификации и первой коробкой на складе у клиента.</p><p>Крупнейшие региональные производители по-прежнему держат в штате тысячи сотрудников. Новые игроки — сотни, но с другой организацией работы: заказ, закупка и планирование идут через агентов, а человек решает, куда двигаться.</p></div>
+    </div>
+    <div>
+      <div class="card">
+        <h3>Выпуск на одного сотрудника, условные единицы</h3>
+        <div class="bars">
+          <div><span style="width:70px">Вы</span><b style="width:44px;background:#16140f"></b><span>1×</span></div>
+          <div><span style="width:70px">Аркон</span><b style="width:440px;background:#B3261E;max-width:290px"></b><span>10×</span></div>
+        </div>
+        <div class="mono" style="margin-top:14px;font-size:14px">Сценарная модель, не статистика</div>
+      </div>
+      <div class="rel"><h4>Читают сейчас</h4>
+        <p>Как перестроить линию за ночь: разбор</p>
+        <p>Закупки без менеджеров. Что осталось людям</p>
+        <p>Регион, где заказов стало больше, а штат меньше</p>
+      </div>
+    </div>
+  </div>
+  <div class="fade"></div>
+  <div class="stamp">Сценарий<br>вымышленный артефакт</div>
+</div>
+</body></html>

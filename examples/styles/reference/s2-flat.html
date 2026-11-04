@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Плоская иллюстрация</title>
+<link rel="stylesheet" href="../fonts.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#17123F}
+svg{display:block}
+text{font-family:'Unbounded',sans-serif}
+</style></head><body>
+<svg id="s" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+<script>
+let seed=7;const r=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646};
+const S=document.getElementById('s');let o='';
+o+=`<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#150F3A"/><stop offset=".62" stop-color="#3A1D69"/><stop offset="1" stop-color="#6A2A7A"/></linearGradient>
+<radialGradient id="sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FF7A45" stop-opacity=".55"/><stop offset="1" stop-color="#FF7A45" stop-opacity="0"/></radialGradient>
+<linearGradient id="gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B1244"/><stop offset="1" stop-color="#0F0A2B"/></linearGradient>
+</defs>
+<rect width="1920" height="1080" fill="url(#bg)"/>
+<circle cx="1480" cy="330" r="560" fill="url(#sun)"/>`;
+for(let i=0;i<110;i++){const x=r()*1920,y=r()*620,s=r()*2.2+.6;o+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${s.toFixed(1)}" fill="#fff" opacity="${(r()*.6+.2).toFixed(2)}"/>`}
+// hills
+o+=`<path d="M0 930 C 260 860 520 900 760 880 S 1260 840 1500 880 S 1800 900 1920 870 V1080 H0Z" fill="#26165A" opacity=".8"/>`;
+o+=`<rect x="0" y="940" width="1920" height="140" fill="url(#gr)"/>`;
+// title
+o+=`<text x="96" y="176" font-size="64" font-weight="900" fill="#fff">Тот же выпуск.</text>`;
+o+=`<text x="96" y="258" font-size="64" font-weight="900" fill="#FF9158">Десятая часть людей.</text>`;
+// panel geometry
+const CW=30.4,CH=41.2,PAD=24;
+function fig(x,y,c,h){x=+x;y=+y;return `<g><circle cx="${x}" cy="${y-9}" r="6.2" fill="${h}"/><path d="M${x-11.5} ${y+12} Q${x-11.5} ${y-1.5} ${x} ${y-1.5} Q${x+11.5} ${y-1.5} ${x+11.5} ${y+12} Z" fill="${c}"/></g>`}
+function crates(x,y){let s='';for(let i=0;i<10;i++){const cx=x+i*42;s+=`<g><rect x="${cx}" y="${y}" width="36" height="36" rx="7" fill="#FFC857"/><rect x="${cx}" y="${y+13}" width="36" height="7" fill="#F29E3D"/><rect x="${cx+14}" y="${y}" width="8" height="36" fill="#F29E3D" opacity=".55"/></g>`}return s}
+// LEFT panel (300 figures = 3000 people)
+const LX=96,LY=470,LW=960,LH=460;
+o+=`<rect x="${LX}" y="${LY}" width="${LW}" height="${LH}" rx="30" fill="#fff" opacity=".07"/><rect x="${LX}" y="${LY}" width="${LW}" height="${LH}" rx="30" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="2"/>`;
+const cool=['#8EA2D6','#7F95CC','#9BAEE0','#8699D0'];
+for(let j=0;j<10;j++)for(let i=0;i<30;i++){const x=LX+PAD+CW*(i+.5),y=LY+PAD+CH*(j+.5)+10;o+=fig(x.toFixed(1),y.toFixed(1),cool[(r()*4)|0],'#C9D3F2')}
+o+=crates(LX,LY-52);
+o+=`<text x="${LX}" y="${LY-80}" font-size="30" font-weight="700" fill="#C9D3F2">Вы · 3 000 человек</text>`;
+// RIGHT panel (30 figures = 300 people)
+const RX=1184,RW=10*CW+2*PAD,RH=3*CH+2*PAD,RY=LY+LH-RH;
+o+=`<rect x="${RX}" y="${RY}" width="${RW}" height="${RH}" rx="26" fill="#FF8F4F" opacity=".14"/><rect x="${RX}" y="${RY}" width="${RW}" height="${RH}" rx="26" fill="none" stroke="#FF9158" stroke-opacity=".6" stroke-width="2.5"/>`;
+const warm=['#FF8F4F','#FF7F3F','#FFA060'];
+for(let j=0;j<3;j++)for(let i=0;i<10;i++){const x=RX+PAD+CW*(i+.5),y=RY+PAD+CH*(j+.5)+10;o+=fig(x.toFixed(1),y.toFixed(1),warm[(r()*3)|0],'#FFD3B0')}
+o+=crates(RX,RY-52);
+o+=`<text x="${RX}" y="${RY-80}" font-size="30" font-weight="700" fill="#FFB27F">Аркон · 300 человек</text>`;
+// big number
+o+=`<text x="1176" y="470" font-size="236" font-weight="900" fill="#FF9158" letter-spacing="-6">300</text>`;
+o+=`<text x="1184" y="548" font-size="40" font-weight="700" fill="#E8DDF8">вместо 3 000</text>`;
+// equal sign between crates
+o+=`<text x="1090" y="${RY-22}" font-size="54" font-weight="900" fill="#FFC857" text-anchor="middle">=</text>`;
+// legend
+o+=`<g transform="translate(110,1006)">${fig(0,6,'#8EA2D6','#C9D3F2')}<text x="30" y="8" font-size="22" font-weight="700" fill="#C9D3F2" opacity=".85">1 фигурка = 10 человек · ящик = одинаковый выпуск</text></g>`;
+S.innerHTML=o;
+</script>
+</body></html>

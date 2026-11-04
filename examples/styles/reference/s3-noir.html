@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Нуар: свет как мораль</title>
+<link rel="stylesheet" href="../fonts.css">
+<style>*{margin:0;padding:0}html,body{width:1920px;height:1080px;overflow:hidden;background:#000}svg{display:block}</style></head><body>
+<svg id="s" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+<script>
+let seed=11;const r=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646};
+let o=`<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#03050A"/><stop offset=".7" stop-color="#0B1522"/><stop offset="1" stop-color="#16222F"/></linearGradient>
+<linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A0F16"/><stop offset="1" stop-color="#020305"/></linearGradient>
+<linearGradient id="cone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFB566" stop-opacity=".75"/><stop offset="1" stop-color="#FFB566" stop-opacity="0"/></linearGradient>
+<radialGradient id="vig" cx=".5" cy=".5" r=".75"><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".85"/></radialGradient>
+<radialGradient id="moon" cx=".22" cy=".18" r=".5"><stop offset="0" stop-color="#5A7898" stop-opacity=".28"/><stop offset="1" stop-color="#5A7898" stop-opacity="0"/></radialGradient>
+<filter id="b8" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8"/></filter>
+<filter id="b24" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="24"/></filter>
+<filter id="fog"><feTurbulence type="fractalNoise" baseFrequency=".004 .012" numOctaves="3" seed="3"/><feColorMatrix values="0 0 0 0 .55  0 0 0 0 .62  0 0 0 0 .7  0 0 0 1.4 -.45"/></filter>
+<filter id="gr"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="9"/><feColorMatrix type="saturate" values="0"/></filter>
+<linearGradient id="fmg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000"/><stop offset=".45" stop-color="#fff"/><stop offset=".8" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+<mask id="fm" maskUnits="userSpaceOnUse" x="0" y="400" width="1920" height="600"><rect x="0" y="400" width="1920" height="600" fill="url(#fmg)"/></mask>
+<clipPath id="scene"><rect x="0" y="138" width="1920" height="804"/></clipPath>
+</defs>`;
+o+=`<g clip-path="url(#scene)">`;
+o+=`<rect width="1920" height="1080" fill="url(#sky)"/><rect width="1920" height="1080" fill="url(#moon)"/>`;
+o+=`<g transform="translate(960 800) scale(1.14) translate(-960 -800)">`;
+for(let i=0;i<60;i++){o+=`<circle cx="${(r()*1920).toFixed(0)}" cy="${(150+r()*330).toFixed(0)}" r="${(r()*1.1+.4).toFixed(1)}" fill="#cfe0f0" opacity="${(r()*.45+.1).toFixed(2)}"/>`}
+// far skyline
+let sk='M0 640 ';let x=0;while(x<1920){const w=40+r()*90,h=520+r()*90;sk+=`L${x} ${h.toFixed(0)} L${(x+w).toFixed(0)} ${h.toFixed(0)} `;x+=w}sk+='L1920 640 V800 H0Z';
+o+=`<path d="${sk}" fill="#09111b"/>`;
+// ground
+o+=`<rect x="0" y="780" width="1920" height="170" fill="url(#gnd)"/>`;
+// LEFT: big hall (sawtooth)
+let hall='M70 780 V560 ';for(let i=0;i<9;i++){const x0=70+i*110;hall+=`L${x0} 560 L${x0+110} 500 V560 `}hall+='L1060 560 V780Z';
+o+=`<path d="${hall}" fill="#05080D"/>`;
+// windows grid (3000: many, dim, cold)
+for(let j=0;j<5;j++)for(let i=0;i<40;i++){const wx=92+i*23.4,wy=600+j*32;const on=r();const op=on<.22?0:(on<.9?.10+r()*.14:.38);o+=`<rect x="${wx.toFixed(1)}" y="${wy}" width="15" height="9" fill="#7FA2C4" opacity="${op.toFixed(2)}"/>`}
+// chimneys
+o+=`<rect x="320" y="420" width="26" height="90" fill="#05080D"/><rect x="560" y="440" width="22" height="70" fill="#05080D"/><rect x="800" y="410" width="28" height="100" fill="#05080D"/>`;
+// cold wash on hall
+o+=`<rect x="70" y="560" width="990" height="220" fill="#6F8FB0" opacity=".05"/>`;
+// RIGHT: small bright building
+o+=`<rect x="1290" y="470" width="310" height="310" fill="#06090E"/><rect x="1270" y="458" width="350" height="18" fill="#0a0e15"/>`;
+// light cone and spill (blurred)
+o+=`<g filter="url(#b24)"><polygon points="1340,700 1550,700 1760,900 1130,900" fill="url(#cone)" opacity=".85"/></g>`;
+o+=`<g filter="url(#b8)"><polygon points="1350,700 1540,700 1690,880 1200,880" fill="url(#cone)" opacity=".55"/></g>`;
+o+=`<ellipse cx="1445" cy="845" rx="360" ry="40" fill="#FFB566" opacity=".16" filter="url(#b24)"/>`;
+// window
+o+=`<rect x="1330" y="540" width="230" height="160" fill="#FFB566"/><rect x="1330" y="540" width="230" height="160" fill="#FFE2B0" opacity=".35"/>`;
+// silhouettes at the window: table + people
+o+=`<rect x="1330" y="640" width="230" height="12" fill="#2a1a0d"/><rect x="1330" y="652" width="230" height="48" fill="#241508" opacity=".85"/>`;
+const ppl=[1375,1445,1515];ppl.forEach((px,i)=>{o+=`<circle cx="${px}" cy="${598+(i%2)*4}" r="14" fill="#2a1a0d"/><path d="M${px-24} 652 Q${px-22} 616 ${px} 616 Q${px+22} 616 ${px+24} 652Z" fill="#2a1a0d"/>`});
+o+=`<line x1="1445" y1="540" x2="1445" y2="700" stroke="#2a1a0d" stroke-width="5"/><line x1="1330" y1="620" x2="1560" y2="620" stroke="#2a1a0d" stroke-width="4"/>`;
+// small warm door light
+o+=`<rect x="1572" y="716" width="18" height="64" fill="#FFB566" opacity=".7"/>`;
+// reflections on ground
+o+=`<g filter="url(#b8)" opacity=".5"><rect x="1380" y="790" width="130" height="150" fill="#FFB566" opacity=".4"/></g>`;
+o+=`</g>`;
+// fog
+o+=`<g mask="url(#fm)"><rect x="-100" y="400" width="2120" height="600" filter="url(#fog)" opacity=".34" style="mix-blend-mode:screen"/></g>`;
+// foreground silhouettes: fence + pipe
+let fence='M0 942 V868 ';for(let i=0;i<24;i++){const fx=i*86;fence+=`L${fx} 868 L${fx+6} 842 L${fx+12} 868 L${fx+86} 868 `}fence+='V942Z';
+o+=`<path d="${fence}" fill="#000"/><rect x="0" y="905" width="1920" height="40" fill="#000"/>`;
+o+=`</g>`;
+// vignette + grain over scene
+o+=`<rect y="138" width="1920" height="804" fill="url(#vig)"/>`;
+o+=`<rect y="138" width="1920" height="804" filter="url(#gr)" opacity=".2" style="mix-blend-mode:overlay"/>`;
+// letterbox
+o+=`<rect width="1920" height="138" fill="#000"/><rect y="942" width="1920" height="138" fill="#000"/>`;
+// labels
+o+=`<text x="96" y="92" font-family="JetBrains Mono" font-size="20" letter-spacing="3" fill="#7a8794">АРКОН · 2031 · НОЧНАЯ СМЕНА</text>`;
+o+=`<text x="1824" y="92" text-anchor="end" font-family="JetBrains Mono" font-size="20" letter-spacing="3" fill="#7a8794">СЦЕНА 07</text>`;
+o+=`<text x="96" y="906" font-family="JetBrains Mono" font-size="20" letter-spacing="3" fill="#7FA2C4" opacity=".75">ВЫ — 3 000</text>`;
+o+=`<text x="1513" y="906" text-anchor="middle" font-family="JetBrains Mono" font-size="20" letter-spacing="3" fill="#FFB566">АРКОН — 300</text>`;
+// subtitle
+o+=`<text x="960" y="1022" text-anchor="middle" font-family="Source Serif 4" font-style="italic" font-size="46" fill="#EDE2CE">Триста человек. Там, где у вас три тысячи.</text>`;
+document.getElementById('s').innerHTML=o;
+</script></body></html>
