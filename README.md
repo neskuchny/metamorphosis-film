@@ -65,12 +65,14 @@ node scripts/render.mjs examples/artel/film.json --preview   # contact sheet in 
 node scripts/render.mjs examples/artel/film.json             # → out/artel.mp4
 ```
 
-Voice priority: `ELEVENLABS_API_KEY` → `OPENAI_API_KEY` → edge-tts (free) → Piper (`pip install piper-tts`, offline, for networks that block WebSockets) → silent film with captions. Force one with `TTS_PROVIDER=piper` etc. Fast draft: `--res 720`. A 5-minute film is about 9 000 frames: roughly 12 minutes on the small cloud machine this was developed on (about 13 frames per second), less with more cores (`--workers N`).
+Voice priority: `ELEVENLABS_API_KEY` → `OPENAI_API_KEY` → `GEMINI_API_KEY` (Gemini TTS) → edge-tts (free) → Piper (`pip install piper-tts`, offline, for networks that block WebSockets) → silent film with captions. Force one with `TTS_PROVIDER=piper` etc. Fast draft: `--res 720`. A 5-minute film is about 9 000 frames: roughly 12 minutes on the small cloud machine this was developed on (about 13 frames per second), less with more cores (`--workers N`).
 
 Browser player: open `dist/film-player.html`, paste or choose a `film.json`, press Watch. To put a film inside the file (one HTML you can send to the client): `node scripts/bundle.mjs work/acme/film.json --autoload --out acme-player.html`. After changing anything in `player/`, run `node scripts/bundle.mjs` to refresh `dist/film-player.html`.
+
+Before rendering: `node scripts/words.mjs film.json` (clichés, AI-sounding phrases, канцелярит). To choose the voice by ear: `node scripts/voices.mjs film.json --scene 18` (the same line in several free voices, `out/voices/all-voices.mp3`). After rendering: `node scripts/qc.mjs out/artel.mp4` (hook, black, freeze, dead air, loudness, contact sheet). Sound is designed in code on every render and mastered to −14 LUFS; to change only the sound, `--sound-only` re-mixes without re-rendering the picture.
 
 Hand-drawn scenes: see `examples/styles/README.md`.
 
 ## Licences
 
-Code: MIT. Rendering uses only open-source pieces (Chromium via Playwright, FFmpeg, Inter and JetBrains Mono fonts under OFL); there is no per-company render licence to buy. Risk rubric adapted from the metAImorphosis toolbox (A. Tarasov, M. Belukhin), CC BY. World outlines in the `map` scene: Natural Earth (public domain; packaged by world-atlas, ISC). Edge-tts uses Microsoft's online voice service (unofficial client) — for commercial distribution at scale, prefer ElevenLabs/OpenAI keys.
+Code: MIT. Rendering uses only open-source pieces (Chromium via Playwright, FFmpeg, Inter and JetBrains Mono fonts under OFL); there is no per-company render licence to buy. Risk rubric adapted from the metAImorphosis toolbox (A. Tarasov, M. Belukhin), CC BY. World outlines in the `map` scene: Natural Earth (public domain; packaged by world-atlas, ISC). Sound design, camera vocabulary, the words check, QC measures and the cold-review questions follow ideas from [sarpstar/cinecode](https://github.com/sarpstar/cinecode) (MIT, © Sarp Yıldız), rewritten for this project; the narration clean-up filter chain is taken from its `voice_treat.py`. Edge-tts uses Microsoft's online voice service (unofficial client) — for commercial distribution at scale, prefer ElevenLabs/OpenAI keys.

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /* film.json -> MP4.
    node scripts/render.mjs [film.json] [--out out/film.mp4] [--res 1080|720] [--fps 30]
-                           [--preview] [--no-voice] [--no-music] [--workers N]
-   Voice: ELEVENLABS_API_KEY or OPENAI_API_KEY if set, otherwise free edge-tts (pip install edge-tts),
+                           [--preview] [--no-voice] [--no-sound] [--sound-only] [--workers N]
+   Sound: a bed, hits and picture-locked events designed in code (scripts/sound.mjs), mastered to -14 LUFS.
+   Voice: ELEVENLABS_API_KEY, OPENAI_API_KEY or GEMINI_API_KEY (free tier) if set, otherwise free edge-tts (pip install edge-tts),
    otherwise a silent film with captions. */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -13,6 +14,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 import vm from 'node:vm';
 import { validate } from './validate.mjs';
+import { designSound, motionOnsets } from './sound.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(import.meta.url);
@@ -26,8 +28,9 @@ const filmPath = path.resolve(argv.find((a, i) => !a.startsWith('--') && !VALUE_
 const FPS = +opt('fps', 30);
 const RES = +opt('res', 1080);
 const PREVIEW = flag('preview');
+const SOUND_ONLY = flag('sound-only');
 const NO_VOICE = flag('no-voice');
-const NO_MUSIC = flag('no-music');
+const NO_SOUND = flag('no-sound') || flag('no-music');
 const WORKERS = Math.max(1, +opt('workers', Math.min(4, os.cpus().length)));
 const BUILD = path.join(ROOT, 'build');
 const log = (...a) => console.log('[film]', ...a);
@@ -107,6 +110,7 @@ async function providerChain(film) {
   const add = (name, fn) => { if (!want || want === name) { const p = fn(); if (p) chain.push(p); } };
   add('elevenlabs', () => process.env.ELEVENLABS_API_KEY && { name: 'elevenlabs', voice: film.voice?.elevenlabs_voice_id || process.env.ELEVENLABS_VOICE_ID || 'pNInz6obpgDQGcFmaJgB' });
   add('openai', () => process.env.OPENAI_API_KEY && { name: 'openai', voice: film.voice?.openai_voice || 'onyx' });
+  add('gemini', () => process.env.GEMINI_API_KEY && { name: 'gemini', voice: film.voice?.gemini_voice || 'Charon', model: film.voice?.gemini_model || process.env.GEMINI_TTS_MODEL || 'gemini-3.8-flash-tts', style: film.voice?.style || 'calm, low documentary narrator, measured pace, serious, no hype' });
   add('edge', () => { const cmd = edgeCmd(); return cmd && { name: 'edge', cmd, voice: film.voice?.edge_voice || EDGE_VOICES[film.language] || EDGE_VOICES.en, rate: film.voice?.rate || '+0%' }; });
   if (!want || want === 'piper') {
     const cmd = piperCmd();
@@ -152,6 +156,31 @@ async function tts(pr, text, out) {
     }
     throw new Error('edge-tts failed: ' + text.slice(0, 60));
   }
+  if (pr.name === 'gemini') {
+    // Gemini TTS (free tier with a key from aistudio.google.com): 24 kHz mono 16-bit, WAV or raw PCM
+    for (let k = 0; k < 4; k++) {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${pr.model}:generateContent`, {
+        method: 'POST', headers: { 'x-goog-api-key': process.env.GEMINI_API_KEY, 'content-type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text, speech_metadata: { style: pr.style } }] }],
+          generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { voice: pr.voice } } } }),
+      });
+      if (r.status === 429 || r.status >= 500) { await new Promise((res) => setTimeout(res, 4000 * (k + 1))); continue; }
+      if (!r.ok) throw new Error(`gemini TTS ${r.status}: ${(await r.text()).slice(0, 200)}`);
+      const j = await r.json();
+      const part = j.candidates?.[0]?.content?.parts?.find((p) => p.inlineData || p.inline_data);
+      const d = part && (part.inlineData || part.inline_data);
+      if (!d?.data) throw new Error('gemini TTS: no audio in the response');
+      const buf = Buffer.from(d.data, 'base64');
+      if (buf.slice(0, 4).toString() === 'RIFF') { fs.writeFileSync(out, buf); return; }
+      const raw = out + '.pcm'; fs.writeFileSync(raw, buf);
+      const rate = (String(d.mimeType || d.mime_type).match(/rate=(\d+)/) || [])[1] || '24000';
+      const c = spawnSync(FFMPEG, ['-hide_banner', '-loglevel', 'error', '-y', '-f', 's16le', '-ar', rate, '-ac', '1', '-i', raw, out]);
+      fs.rmSync(raw, { force: true });
+      if (c.status === 0) return;
+      throw new Error('gemini TTS: could not convert the audio');
+    }
+    throw new Error('gemini TTS: rate limited');
+  }
   let res;
   if (pr.name === 'elevenlabs') {
     res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${pr.voice}?output_format=mp3_44100_128`, {
@@ -188,8 +217,8 @@ async function main() {
       for (let i = 0; i < film.scenes.length; i++) {
         const text = film.scenes[i].narration;
         if (!text || pr.name === 'none') { audio.push(null); continue; }
-        const key = crypto.createHash('sha1').update([pr.name, pr.voice, pr.rate, text].join('|')).digest('hex').slice(0, 16);
-        const f = path.join(BUILD, 'audio', `${key}.${pr.name === 'piper' ? 'wav' : 'mp3'}`);
+        const key = crypto.createHash('sha1').update([pr.name, pr.voice, pr.rate, ...(pr.style ? [pr.style, pr.model] : []), text].join('|')).digest('hex').slice(0, 16);
+        const f = path.join(BUILD, 'audio', `${key}.${['piper', 'gemini'].includes(pr.name) ? 'wav' : 'mp3'}`);
         if (!fs.existsSync(f)) { process.stdout.write(`[film] tts ${i + 1}/${film.scenes.length}\r`); await tts(pr, text, f); }
         audio.push({ file: f, dur: mediaDuration(f) });
       }
@@ -236,88 +265,136 @@ async function main() {
     return;
   }
 
-  // 4) audio track
-  const voiceTrack = path.join(BUILD, 'track.m4a');
-  await buildAudio(audio, timeline, total, voiceTrack);
-
-  // 5) frames -> segments in parallel
-  const frames = Math.ceil(total * FPS);
-  const per = Math.ceil(frames / WORKERS);
-  let done = 0, lastPct = -1;
-  const t0 = Date.now();
-  const segs = [];
-  await Promise.all(Array.from({ length: WORKERS }, async (_, w) => {
-    const a = w * per, b = Math.min(frames, a + per);
-    if (a >= b) return;
-    const seg = path.join(BUILD, `seg-${w}.mp4`); segs[w] = seg;
+  // 4) picture events for the sound: every year change the counter shows (frame-exact, in the page itself)
+  const SOUND = !NO_SOUND && film.sound !== false;
+  let years = [];
+  if (SOUND) {
     const page = await newPage();
-    const cdp = await page.context().newCDPSession(page);
-    const ff = spawn(FFMPEG, ['-hide_banner', '-loglevel', 'error', '-y', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
-      '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '22', '-pix_fmt', 'yuv420p', '-r', String(FPS), seg], { stdio: ['pipe', 'inherit', 'inherit'] });
-    const closed = new Promise((res, rej) => ff.on('close', (c) => (c === 0 ? res() : rej(new Error('ffmpeg segment failed')))));
-    for (let f = a; f < b; f++) {
-      await page.evaluate((tt) => window.__seek(tt), f / FPS);
-      const { data } = await cdp.send('Page.captureScreenshot', { format: 'jpeg', quality: 92, optimizeForSpeed: true, ...(RES !== 1080 ? { clip: { x: 0, y: 0, width: 1920, height: 1080, scale: RES / 1080 } } : {}) });   // raw CDP ignores deviceScaleFactor, so --res needs the clip scale
-      if (!ff.stdin.write(Buffer.from(data, 'base64'))) await new Promise((r) => ff.stdin.once('drain', r));
-      done++;
-      const pct = Math.floor((done / frames) * 100);
-      if (pct !== lastPct && pct % 5 === 0) { lastPct = pct; const el = (Date.now() - t0) / 1000; log(`frames ${pct}%  (${Math.round(el)}s elapsed, ~${Math.round(el / done * (frames - done))}s left)`); }
-    }
-    ff.stdin.end();
-    await closed;
+    years = await page.evaluate(({ total, fps }) => {
+      const el = document.querySelector('#hud-year .val'), out = []; let prev = null;
+      for (let f = 0; f < Math.ceil(total * fps); f++) { window.__seek(f / fps); const y = el ? el.textContent : null; if (prev !== null && y !== prev) out.push(f / fps); prev = y; }
+      return out;
+    }, { total, fps: FPS });
     await page.close();
-  }));
-  await browser.close();
+  }
 
-  // 6) mux
-  const list = path.join(BUILD, 'segments.txt');
-  fs.writeFileSync(list, segs.filter(Boolean).map((s) => `file '${s.replace(/'/g, "'\\''")}'`).join('\n'));
   const slug = (film.company.short_name || film.company.name).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '');
   const out = path.resolve(opt('out', path.join(ROOT, 'out', `${slug || 'film'}.mp4`)));
-  fs.mkdirSync(path.dirname(out), { recursive: true });
-  // "clip" scenes (video made elsewhere: generated footage, HyperFrames, anything) replace the whole frame for their time slot
-  const clips = film.scenes.map((sc, i) => (sc.type === 'clip' ? { file: clipFiles[i], start: timeline[i].start, dur: timeline[i].dur } : null)).filter(Boolean);
-  let videoIn = ['-f', 'concat', '-safe', '0', '-i', list];
-  if (clips.length) {
-    const base = path.join(BUILD, 'video-base.mp4'), withClips = path.join(BUILD, 'video-clips.mp4');
+  const pictureNote = path.join(BUILD, 'picture.json');
+  let videoFile;
+  const t0 = Date.now();
+  if (SOUND_ONLY) {
+    // a sound revision never re-renders the picture: reuse the last picture of this same timeline
+    const pic = fs.existsSync(pictureNote) ? JSON.parse(fs.readFileSync(pictureNote, 'utf8')) : null;
+    if (!pic || !fs.existsSync(pic.file) || Math.abs(pic.total - total) > 0.05) { console.error(`--sound-only: no picture of this timeline in build/ (render once without it)${pic ? ` [picture ${pic.total.toFixed(2)} s, timeline ${total.toFixed(2)} s]` : ''}`); process.exit(1); }
+    videoFile = pic.file; await browser.close();
+    log('sound only: picture reused from ' + path.relative(ROOT, videoFile));
+  } else {
+    // 5) frames -> segments in parallel
+    const frames = Math.ceil(total * FPS);
+    const per = Math.ceil(frames / WORKERS);
+    let done = 0, lastPct = -1;
+    const segs = [];
+    await Promise.all(Array.from({ length: WORKERS }, async (_, w) => {
+      const a = w * per, b = Math.min(frames, a + per);
+      if (a >= b) return;
+      const seg = path.join(BUILD, `seg-${w}.mp4`); segs[w] = seg;
+      const page = await newPage();
+      const cdp = await page.context().newCDPSession(page);
+      const ff = spawn(FFMPEG, ['-hide_banner', '-loglevel', 'error', '-y', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
+        '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '22', '-pix_fmt', 'yuv420p', '-r', String(FPS), seg], { stdio: ['pipe', 'inherit', 'inherit'] });
+      const closed = new Promise((res, rej) => ff.on('close', (c) => (c === 0 ? res() : rej(new Error('ffmpeg segment failed')))));
+      for (let f = a; f < b; f++) {
+        await page.evaluate((tt) => window.__seek(tt), f / FPS);
+        const { data } = await cdp.send('Page.captureScreenshot', { format: 'jpeg', quality: 92, optimizeForSpeed: true, ...(RES !== 1080 ? { clip: { x: 0, y: 0, width: 1920, height: 1080, scale: RES / 1080 } } : {}) });   // raw CDP ignores deviceScaleFactor, so --res needs the clip scale
+        if (!ff.stdin.write(Buffer.from(data, 'base64'))) await new Promise((r) => ff.stdin.once('drain', r));
+        done++;
+        const pct = Math.floor((done / frames) * 100);
+        if (pct !== lastPct && pct % 5 === 0) { lastPct = pct; const el = (Date.now() - t0) / 1000; log(`frames ${pct}%  (${Math.round(el)}s elapsed, ~${Math.round(el / done * (frames - done))}s left)`); }
+      }
+      ff.stdin.end();
+      await closed;
+      await page.close();
+    }));
+    await browser.close();
+
+    // 6) mux
+    const list = path.join(BUILD, 'segments.txt');
+    fs.writeFileSync(list, segs.filter(Boolean).map((s) => `file '${s.replace(/'/g, "'\\''")}'`).join('\n'));
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    // "clip" scenes (video made elsewhere: generated footage, HyperFrames, anything) replace the whole frame for their time slot
+    const clips = film.scenes.map((sc, i) => (sc.type === 'clip' ? { file: clipFiles[i], start: timeline[i].start, dur: timeline[i].dur } : null)).filter(Boolean);
+    const base = path.join(BUILD, 'video-base.mp4');
     await run(['-f', 'concat', '-safe', '0', '-i', list, '-c', 'copy', base]);
-    const OW = Math.round(1920 * RES / 1080), OH = RES;
-    const inputs = ['-i', base], parts = []; let prev = '[0:v]';
-    clips.forEach((c, k) => {
-      inputs.push('-i', c.file);
-      parts.push(`[${k + 1}:v]fps=${FPS},scale=${OW}:${OH}:force_original_aspect_ratio=decrease,pad=${OW}:${OH}:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,tpad=stop_mode=clone:stop_duration=${c.dur.toFixed(2)},trim=duration=${c.dur.toFixed(3)},setpts=PTS-STARTPTS+${c.start.toFixed(3)}/TB[c${k}]`);
-      parts.push(`${prev}[c${k}]overlay=eof_action=pass:enable='between(t,${c.start.toFixed(3)},${(c.start + c.dur).toFixed(3)})'[v${k}]`);
-      prev = `[v${k}]`;
-    });
-    await run([...inputs, '-filter_complex', parts.join(';'), '-map', prev, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '22', '-pix_fmt', 'yuv420p', '-r', String(FPS), withClips]);
-    videoIn = ['-i', withClips];
-    log(`clips: ${clips.length} inserted`);
+    videoFile = base;
+    if (clips.length) {
+      const withClips = path.join(BUILD, 'video-clips.mp4');
+      const OW = Math.round(1920 * RES / 1080), OH = RES;
+      const inputs = ['-i', base], parts = []; let prev = '[0:v]';
+      clips.forEach((c, k) => {
+        inputs.push('-i', c.file);
+        parts.push(`[${k + 1}:v]fps=${FPS},scale=${OW}:${OH}:force_original_aspect_ratio=decrease,pad=${OW}:${OH}:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,tpad=stop_mode=clone:stop_duration=${c.dur.toFixed(2)},trim=duration=${c.dur.toFixed(3)},setpts=PTS-STARTPTS+${c.start.toFixed(3)}/TB[c${k}]`);
+        parts.push(`${prev}[c${k}]overlay=eof_action=pass:enable='between(t,${c.start.toFixed(3)},${(c.start + c.dur).toFixed(3)})'[v${k}]`);
+        prev = `[v${k}]`;
+      });
+      await run([...inputs, '-filter_complex', parts.join(';'), '-map', prev, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '22', '-pix_fmt', 'yuv420p', '-r', String(FPS), withClips]);
+      videoFile = withClips;
+      log(`clips: ${clips.length} inserted`);
+    }
+    fs.writeFileSync(pictureNote, JSON.stringify({ file: videoFile, total }));
   }
-  await run([...videoIn, '-i', voiceTrack, '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out]);
+
+  // 7) sound: designed bed and events locked to the picture, the narration on top, one master
+  let design = null;
+  if (SOUND) {
+    const yf = path.join(BUILD, 'motion.txt');
+    await run(['-i', videoFile, '-vf', `scale=160:-2,format=gray,tblend=all_mode=difference,signalstats,metadata=print:key=lavfi.signalstats.YAVG:file=${yf.replace(/:/g, '\\:')}`, '-an', '-f', 'null', '-']);
+    const yavg = fs.readFileSync(yf, 'utf8').split('\n').filter((l) => l.includes('YAVG=')).map((l) => +l.split('=')[1]);
+    const onsets = motionOnsets([0, ...yavg], FPS, timeline.map((x) => x.start));
+    design = path.join(BUILD, 'design.wav');
+    const st = designSound({ film, timeline, total, years, onsets, out: design });
+    log(`sound: ${st.cues} hits, ${st.ticks} year ticks, ${st.taps} taps on the picture, ${st.drops} silences`);
+  }
+  const voiceTrack = path.join(BUILD, 'track.m4a');
+  await buildAudio(audio, timeline, total, voiceTrack, design);
+  await run(['-i', videoFile, '-i', voiceTrack, '-map', '0:v:0', '-map', '1:a:0', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out]);
   log(`done: ${out}  (${Math.round(fs.statSync(out).size / 1e6)} MB, rendered in ${Math.round((Date.now() - t0) / 1000)}s)`);
 }
 
-async function buildAudio(audio, timeline, total, out) {
+async function buildAudio(audio, timeline, total, out, design) {
   const inputs = [], filters = [], labels = [];
+  // the narration is never raw TTS: high-pass, de-ess, a little presence, gentle compression (after cinecode voice_treat.py "clean")
+  const CLEAN = 'highpass=f=80,deesser=i=0.35,equalizer=f=300:t=q:w=1:g=-2,equalizer=f=3200:t=q:w=1:g=2,acompressor=threshold=-22dB:ratio=2.5:attack=8:release=150:makeup=3dB';
   audio.forEach((a, i) => {
     if (!a) return;
     inputs.push('-i', a.file);
     const ms = Math.round((timeline[i].start + timeline[i].speechStart) * 1000);
     const k = labels.length;
-    filters.push(`[${inputs.length / 2 - 1}:a]aresample=44100,aformat=channel_layouts=stereo,adelay=${ms}|${ms}[v${k}]`);
+    filters.push(`[${inputs.length / 2 - 1}:a]aresample=48000,${CLEAN},aformat=channel_layouts=stereo,adelay=${ms}|${ms}[v${k}]`);
     labels.push(`[v${k}]`);
   });
   const T = total.toFixed(2);
-  // generated ambient bed (no licensing): two detuned low drones with slow swells
-  const bed = `aevalsrc='0.5*sin(2*PI*55*t)*(0.55+0.45*sin(2*PI*t/23))+0.35*sin(2*PI*82.5*t+sin(2*PI*t/7))*(0.5+0.5*sin(2*PI*t/31+1))+0.18*sin(2*PI*110.3*t)*(0.5+0.5*sin(2*PI*t/17+2))|0.5*sin(2*PI*55.2*t)*(0.55+0.45*sin(2*PI*t/23+0.5))+0.35*sin(2*PI*82.4*t+sin(2*PI*t/7+1))*(0.5+0.5*sin(2*PI*t/29))+0.18*sin(2*PI*110*t)*(0.5+0.5*sin(2*PI*t/19))':s=44100:d=${T}`;
   const parts = [...filters];
   let voice = null;
   if (labels.length) { parts.push(`${labels.join('')}amix=inputs=${labels.length}:normalize=0:dropout_transition=0,apad=whole_dur=${T}[voice]`); voice = '[voice]'; }
-  if (!NO_MUSIC) parts.push(`${bed},lowpass=f=900,volume=0.11,afade=t=in:d=3,afade=t=out:st=${Math.max(0, total - 4).toFixed(2)}:d=4[bed]`);
-  let mixIn = [voice, NO_MUSIC ? null : '[bed]'].filter(Boolean);
-  if (!mixIn.length) { await run(['-f', 'lavfi', '-i', `anullsrc=r=44100:cl=stereo`, '-t', T, '-c:a', 'aac', out]); return; }
-  parts.push(`${mixIn.join('')}amix=inputs=${mixIn.length}:normalize=0:duration=longest,atrim=0:${T},loudnorm=I=-16:TP=-1.5:LRA=11,aresample=44100[out]`);
-  await run([...inputs, '-filter_complex', parts.join(';'), '-map', '[out]', '-c:a', 'aac', '-b:a', '192k', out]);
+  if (design) { inputs.push('-i', design); parts.push(`[${inputs.length / 2 - 1}:a]aresample=48000,aformat=channel_layouts=stereo[bed]`); }
+  const mixIn = [voice, design ? '[bed]' : null].filter(Boolean);
+  if (!mixIn.length) { await run(['-f', 'lavfi', '-i', 'anullsrc=r=48000:cl=stereo', '-t', T, '-c:a', 'aac', out]); return; }
+  // pre-master: sum, a safety limiter, a 24-bit WAV
+  const pre = path.join(BUILD, 'premaster.wav');
+  parts.push(`${mixIn.join('')}amix=inputs=${mixIn.length}:normalize=0:duration=longest,atrim=0:${T},alimiter=limit=0.7:level=false[out]`);
+  await run([...inputs, '-filter_complex', parts.join(';'), '-map', '[out]', '-c:a', 'pcm_s24le', pre]);
+  // master: bring it near -14 LUFS under a lookahead limiter, then a two-pass LINEAR normalisation (the mix keeps its dynamics)
+  const measure = (f) => { const m = spawnSync(FFMPEG, ['-hide_banner', '-nostdin', '-i', f, '-af', 'loudnorm=I=-14:TP=-2:LRA=20:print_format=json', '-f', 'null', '-'], { encoding: 'utf8' }); return JSON.parse((m.stderr.match(/\{[\s\S]*?\}/g) || ['{}']).pop()); };
+  let j = measure(pre);
+  if (j.input_i && +j.input_i < -15) {
+    const near = path.join(BUILD, 'premaster-near.wav');
+    await run(['-i', pre, '-af', `volume=${(-13.6 - +j.input_i).toFixed(2)}dB,alimiter=limit=0.56:attack=5:release=60:level=false`, '-c:a', 'pcm_s24le', near]);
+    fs.renameSync(near, pre); j = measure(pre);
+  }
+  const ln = j.input_i ? `loudnorm=I=-14:TP=-2:LRA=20:linear=true:measured_I=${j.input_i}:measured_TP=${j.input_tp}:measured_LRA=${j.input_lra}:measured_thresh=${j.input_thresh}:offset=${j.target_offset}` : 'loudnorm=I=-14:TP=-2:LRA=20';
+  await run(['-i', pre, '-af', `${ln},aresample=48000`, '-c:a', 'aac', '-b:a', '192k', out]);
+  if (j.input_i) log(`master: ${j.input_i} LUFS, ${j.input_tp} dBTP -> -14 LUFS`);
 }
 
 async function launchBrowser() {
