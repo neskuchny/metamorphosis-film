@@ -138,13 +138,16 @@ async function tts(pr, text, out) {
       }
       return false;
     };
+    // patient rounds: a throttled free service comes back within minutes; switching the whole film to another voice is worse
+    for (let round = 0; round < 4; round++) {
+    if (round) { log(`edge-tts is throttling; waiting ${2 * round} min before trying scene again`); await new Promise((res) => setTimeout(res, 120000 * round)); }
     if (await once(text, out, 5)) return;
     const parts = text.match(/[^.!?…]+[.!?…]+["»”)]*\s*|[^.!?…]+$/g)?.map((x) => x.trim()).filter(Boolean) || [];
     if (parts.length > 1) {
       const files = [];
       for (let j = 0; j < parts.length; j++) {
         const f = out.replace(/\.mp3$/, `.part${j}.mp3`);
-        if (!(await once(parts[j], f, 6))) { files.length = 0; break; }
+        if (!(fs.existsSync(f) && fs.statSync(f).size > 1000) && !(await once(parts[j], f, 6))) { files.length = 0; break; }   // keep the parts already made
         files.push(f);
       }
       if (files.length) {
@@ -154,6 +157,7 @@ async function tts(pr, text, out) {
         files.forEach((f) => fs.rmSync(f, { force: true })); fs.rmSync(list, { force: true });
         if (r.status === 0 && fs.existsSync(out) && fs.statSync(out).size > 1000) return;
       }
+    }
     }
     throw new Error('edge-tts failed: ' + text.slice(0, 60));
   }
