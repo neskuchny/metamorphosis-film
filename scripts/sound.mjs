@@ -110,6 +110,19 @@ function addTick(L, R, t, gain, seed) {
     L[k] += v * 0.9; R[k] += v;
   }
 }
+// a checkout scanner's beep (city): soft attack, two partials
+function addBeep(L, R, t, gain) {
+  const s0 = Math.round(t * SR), n = Math.round(0.12 * SR);
+  for (let i = 0; i < n; i++) { const tt = i / SR, k = s0 + i; if (k < 0 || k >= L.length) continue;
+    const e = Math.min(1, tt / 0.004) * (tt < 0.075 ? 1 : Math.exp(-(tt - 0.075) / 0.012));
+    const v = gain * 0.55 * e * (Math.sin(2 * Math.PI * 1760 * tt) + 0.25 * Math.sin(2 * Math.PI * 3520 * tt)); L[k] += v; R[k] += v; }
+}
+// a dock's clack (logistics): a low wooden knock
+function addClack(L, R, t, gain, seed) {
+  const s0 = Math.round(t * SR), n = Math.round(0.15 * SR), r = rng(seed), bp = biquad('bp', 620, 5), lp = biquad('lp', 2200);
+  for (let i = 0; i < n; i++) { const tt = i / SR, k = s0 + i; if (k < 0 || k >= L.length) continue;
+    const v = gain * 1.8 * (bp(r() * 2 - 1) * Math.exp(-tt / 0.035) + 0.3 * lp(r() * 2 - 1) * Math.exp(-tt / 0.006)); L[k] += v * 0.9; R[k] += v; }
+}
 // a soft contact (paper, a card landing): band noise, short
 function addTap(L, R, t, gain, seed, pan) {
   const s0 = Math.round(t * SR), n = Math.round(0.12 * SR), r = rng(seed), hp = biquad('hp', 350), lp = biquad('lp', 2400);
@@ -138,6 +151,8 @@ export function motionOnsets(yavg, fps, cuts) {
 export function designSound({ film, timeline, total, years = [], onsets = [], out }) {
   const N = Math.ceil((total + 0.5) * SR);
   const opts = film.sound || {};
+  // the film's sound identity follows its world (data/film-architectures.md): factory, city or logistics
+  const ID = opts.identity || film.world?.kit || 'factory';
   const sc = film.scenes;
   const starts = timeline.map((x) => x.start);
   const isChapter = (s) => s.type === 'chapter' || (s.type === 'world' && s.num);
@@ -189,8 +204,21 @@ export function designSound({ film, timeline, total, years = [], onsets = [], ou
       L[i] += v; R[i] += v;
     }
   }
-  // machine room fans (last act)
-  {
+  // the last act's layer, by the world's identity: machine-room fans, a city's traffic, a highway's rumble
+  if (ID === 'city') {
+    const p = pinkGen(rng(31)), bp = biquad('bp', 380, 0.7), r = rng(32);
+    const G = g(opts.machine_db ?? -27) * 5; let swell = 0, target = 0;
+    for (let i = 0; i < N; i++) {
+      if (i % (SR / 4) === 0) target = r() < 0.35 ? 0.6 + 0.4 * r() : 0.15;   // cars passing, now and then
+      swell += (target - swell) * 0.00004;
+      const v = G * bp(p()) * (0.35 + swell) * ma[i] * dk[i] * fo[i], pan = Math.sin(i / SR * 0.21);
+      L[i] += v * (1 - 0.3 * pan); R[i] += v * (1 + 0.3 * pan);
+    }
+  } else if (ID === 'logistics') {
+    const b = brownGen(rng(33)), lp = biquad('lp', 160, 0.8), bp = biquad('bp', 900, 1.5), p = pinkGen(rng(34));
+    const G = g(opts.machine_db ?? -27) * 4;
+    for (let i = 0; i < N; i++) { const t = i / SR, v = G * (lp(b()) * 1.6 + 0.25 * bp(p()) * (0.6 + 0.4 * Math.sin(2 * Math.PI * t * 0.07))) * ma[i] * dk[i] * fo[i]; L[i] += v; R[i] += v * 0.92; }
+  } else {
     const p = pinkGen(rng(31)), bp = biquad('bp', 520, 0.9), bp2 = biquad('bp', 1250, 2);
     const G = g(opts.machine_db ?? -27) * 5;
     for (let i = 0; i < N; i++) {
@@ -224,7 +252,8 @@ export function designSound({ film, timeline, total, years = [], onsets = [], ou
     else if (s.type === 'end') { addHit(EL, ER, x.start + 0.6, g(-12), 500 + i); cues.push([x.start + 0.6, 'hit']); }
   });
   const busy = cues.map((c) => c[0]);
-  years.forEach((t, k) => { addTick(EL, ER, t, g(-15), 600 + k); busy.push(t); });
+  const signature = ID === 'city' ? addBeep : ID === 'logistics' ? addClack : addTick;   // a checkout beep, a dock's clack, a counter's tick
+  years.forEach((t, k) => { signature(EL, ER, t, g(-15), 600 + k); busy.push(t); });
   let nt = 0;
   const inWorld = (t) => timeline.some((x, i) => sc[i].type === 'world' && t >= x.start && t < x.start + x.dur);   // a moving 3D shot is not a series of events
   for (const o of onsets) {

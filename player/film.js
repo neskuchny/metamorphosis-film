@@ -33,7 +33,8 @@ function init() {
   const DECOR = {
     editorial: (s, root, i) => {
       // the disc sits only where the right side of the frame is free of text
-      const where = { chapter: 'big', cold_open: 'edge', end: 'edge' }[s.type];
+      let where = { chapter: 'big', cold_open: 'edge', end: 'edge' }[s.type];
+      if (where === 'big' && String(s.title || '').length > 20) where = 'edge';   // a long title needs the right side
       if (!where) return null;
       const d = document.createElement('div'); d.className = 'ed-sun ' + where;
       root.insertBefore(d, root.firstChild);
@@ -190,7 +191,7 @@ function init() {
     if (WORLD || !window.FilmWorld) return WORLD;
     worldCanvas = document.createElement('canvas'); worldCanvas.className = 'world-canvas';
     const w = F.world || {};
-    try { WORLD = window.FilmWorld.create(worldCanvas, { ...w, look: w.look || 'night', width: 1920, height: 1080 }); }
+    try { WORLD = window.FilmWorld.create(worldCanvas, { name: (F.company && F.company.name) || '', ...w, look: w.look || 'night', width: 1920, height: 1080 }); }
     catch (e) { console.warn('world: WebGL is not available', e); WORLD = null; }
     return WORLD;
   };
@@ -852,6 +853,35 @@ function init() {
   };
 
   // what the owner is probably thinking, and what answers it: the belief is named first, then met with a fact
+  // the customer's path (architecture C): one purchase as a row of steps; each step says who decides it.
+  // The same scene comes back later with other owners: the steps that changed hands are the film's argument.
+  B.path = (s, root) => {
+    const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
+    fit(title, 64, 40, R - L);
+    const steps = (s.steps || []).slice(0, 6), n = Math.max(1, steps.length);
+    const gap = 26, w = (R - L - gap * (n - 1)) / n, y = 430;
+    const line = pos(h('div', 'pa-line abs', '', root), L + w / 2, y + 2, 0);
+    const dot = pos(h('div', 'pa-dot abs', '', root), L + w / 2 - 14, y - 12);
+    const cards = steps.map((st, i) => {
+      const x = L + i * (w + gap);
+      const node = pos(h('div', 'pa-node abs side-' + (st.owner || 'you'), '', root), x + w / 2 - 9, y - 6);
+      const c = pos(h('div', 'pa-card abs side-' + (st.owner || 'you'), '', root), x, y + 50, w);
+      c.innerHTML = `<div class="pa-when">${esc(st.when || '')}</div><div class="pa-label">${esc(st.label || '')}</div><div class="pa-text">${esc(st.text || '')}</div>` +
+        (st.who ? `<div class="pa-who">${esc(st.who)}</div>` : '');
+      return { node, c };
+    });
+    const note = s.note ? pos(h('div', 'pa-note abs', esc(s.note), root), L, 900, R - L) : null;
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20);
+      const span = Math.max(2, (sc.speechEnd || d) - 1.4), each = span / n;
+      const prog = clamp((t - 0.9) / span);
+      line.style.width = (R - L - w) * prog + 'px';
+      dot.style.left = (L + w / 2 - 14 + (R - L - w) * prog) + 'px'; dot.style.opacity = P(t, 0.8, 0.4);
+      cards.forEach((k, i) => { const at = 0.9 + i * each; show(k.node, P(t, at, 0.3), 0); show(k.c, P(t, at + 0.1, 0.6), 18); });
+      if (note) show(note, P(t, 0.9 + span * 0.85, 0.6), 10);
+    };
+  };
+
   B.myths = (s, root) => {
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);

@@ -395,3 +395,17 @@ html,body{background:#000;width:1920px;height:1080px;overflow:hidden}
 .world-num { font-size: 120px; -webkit-text-stroke: 2px rgba(235,238,245,0.6); }
 .world-title { color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,0.6); }
 .world-cap { font-family: var(--mono, monospace); font-size: 22px; letter-spacing: 0.06em; color: rgba(235,238,245,0.8); text-transform: uppercase; }
+
+/* path: one purchase, step by step; colour = who decides the step */
+.pa-line{height:4px;background:var(--line);border-radius:2px}
+.pa-dot{width:28px;height:28px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 6px rgba(255,255,255,.08)}
+.pa-node{width:18px;height:18px;border-radius:50%;background:var(--you)}
+.pa-node.side-them{background:var(--them)} .pa-node.side-market{background:var(--muted)}
+.pa-card{border-top:5px solid var(--you);padding:22px 4px 0}
+.pa-card.side-them{border-top-color:var(--them)} .pa-card.side-market{border-top-color:var(--muted)}
+.pa-when{font-family:var(--mono);font-size:18px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.pa-label{font-size:36px;font-weight:700;line-height:1.1;margin-bottom:14px}
+.pa-text{font-size:24px;line-height:1.35;color:var(--ink)}
+.pa-who{margin-top:16px;font-family:var(--mono);font-size:17px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pa-card.side-them .pa-who{color:var(--them)}
+.pa-note{font-size:26px;color:var(--muted)}

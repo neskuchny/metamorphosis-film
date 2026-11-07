@@ -69,6 +69,8 @@ Voice priority: `ELEVENLABS_API_KEY` → `OPENAI_API_KEY` → `GEMINI_API_KEY` (
 
 Browser player: open `dist/film-player.html`, paste or choose a `film.json`, press Watch. To put a film inside the file (one HTML you can send to the client): `node scripts/bundle.mjs work/acme/film.json --autoload --out acme-player.html`. After changing anything in `player/`, run `node scripts/bundle.mjs` to refresh `dist/film-player.html`.
 
+No two films alike: every film has a fixed logic and its own telling — its own idea, story shape, central image, cases, words, world and sound (`data/film-architectures.md`, the `concept` block). `node scripts/distinct.mjs film.json` checks it against the examples and other films. `examples/korzinka/` is the second example, built to differ from Artel.
+
 Before rendering: `node scripts/words.mjs film.json` (clichés, AI-sounding phrases, канцелярит). To choose the voice by ear: `node scripts/voices.mjs film.json --scene 18` (the same line in several free voices, `out/voices/all-voices.mp3`). After rendering: `node scripts/qc.mjs out/artel.mp4` (hook, black, freeze, dead air, loudness, contact sheet). Sound is designed in code on every render and mastered to −14 LUFS; to change only the sound, `--sound-only` re-mixes without re-rendering the picture; `--scenes 2,11` re-renders only those scenes into the last picture.
 
 3D world: `world` scenes show the company as a lit town at night, one window per person, the neighbour that rebuilds next door and a newcomer assembling across the river (`film.world`, look `night` or `paper`). It renders in software WebGL, so no GPU is needed (about 0.5 s per frame). After editing `player/world/src.js`, run `npm run build:world`.

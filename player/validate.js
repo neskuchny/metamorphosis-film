@@ -2,7 +2,7 @@
    validate(film, { exists(file) }) -> { errors, warnings, estimatedSeconds }
    exists is optional: when given, "clip" files are checked for presence. */
 (function (root) {
-  const TYPES = ['cold_open', 'statement', 'chapter', 'dossier', 'timeline', 'race', 'scissors', 'pillars', 'signals', 'map', 'waves', 'moment', 'attackers', 'anatomy', 'ladder', 'myths', 'plan', 'parallels', 'scenarios', 'beneath', 'world', 'case', 'fork', 'questions', 'clip', 'end'];
+  const TYPES = ['cold_open', 'statement', 'chapter', 'dossier', 'timeline', 'race', 'scissors', 'pillars', 'signals', 'map', 'waves', 'moment', 'attackers', 'anatomy', 'ladder', 'myths', 'plan', 'parallels', 'scenarios', 'beneath', 'world', 'path', 'case', 'fork', 'questions', 'clip', 'end'];
   const TAGS = ['known', 'estimate', 'model'];
   const SIDES = ['you', 'them', 'market'];
 
@@ -23,9 +23,19 @@
       if (typeof w !== 'object') err('world must be an object { you, them_start, them_end, sites, look }');
       else {
         if (w.look != null && !['night', 'paper'].includes(w.look)) err('world.look must be night or paper');
+        if (w.kit != null && !['factory', 'city', 'logistics'].includes(w.kit)) err('world.kit must be factory, city or logistics');
+        if (w.time != null && !['night', 'dusk', 'dawn', 'snow'].includes(w.time)) err('world.time must be night, dusk, dawn or snow');
+        if (w.light != null && !/^#[0-9a-f]{6}$/i.test(w.light)) err('world.light must be a hex colour like "#e3262f"');
+        if (w.share != null && !(w.share > 0 && w.share < 1)) err('world.share must be between 0 and 1 (the customers the newcomer takes, city kit)');
         for (const k of ['you', 'them_start', 'them_end', 'sites']) if (w[k] != null && !(typeof w[k] === 'number' && w[k] > 0)) err(`world.${k} must be a positive number`);
         if (w.you > 12000) warn('world.you above 12 000: the town shows 12 000 windows; say in a caption that one window stands for several people');
       }
+    }
+    // the film's own idea (Step 2c): without it, films for different companies drift towards the example
+    if (!film.concept || typeof film.concept !== 'object') warn('concept missing: write the film\'s own idea (data/film-architectures.md) — idea, architecture, central_image, signature, specifics[]');
+    else {
+      for (const k of ['idea', 'architecture', 'central_image', 'signature']) if (!film.concept[k]) warn(`concept.${k} missing`);
+      if (!Array.isArray(film.concept.specifics) || film.concept.specifics.length < 4) warn('concept.specifics: list at least 4 words only this company has (names, products, places, numbers)');
     }
     if (film.sound != null && film.sound !== false && typeof film.sound !== 'object') err('sound must be false or an object { music, room_db, body_db, machine_db, music_db, room_wet }');
     if (film.camera != null && film.camera !== false) err('camera at film level can only be false (turns all camera moves off)');
@@ -213,6 +223,15 @@
       case 'scenarios':
         if (!Array.isArray(s.items) || s.items.length < 2 || s.items.length > 3) err(`${at}: items[] (2–3 paths: tradition, evolution, revolution) required`);
         else s.items.forEach((it, j) => { if (!it.name || !it.outcome) err(`${at}: item ${j + 1} needs name and outcome`); if (len(it.what) > 110) warn(`${at}: item ${j + 1} what > 110 chars`); if (len(it.outcome) > 80) warn(`${at}: item ${j + 1} outcome > 80 chars`); });
+        break;
+      case 'path':
+        if (!Array.isArray(s.steps) || s.steps.length < 3 || s.steps.length > 6) err(`${at}: 3–6 steps required`);
+        (s.steps || []).forEach((st, j) => {
+          if (!st.label) err(`${at}: step ${j + 1} needs a label`);
+          if (len(st.label) > 22) warn(`${at}: step ${j + 1} label > 22 chars`);
+          if (len(st.text) > 70) warn(`${at}: step ${j + 1} text > 70 chars`);
+          if (st.owner && !SIDES.includes(st.owner)) err(`${at}: step ${j + 1} owner must be you/them/market`);
+        });
         break;
       case 'world':
         if (!['open', 'neighbor', 'newcomer', 'finale'].includes(s.beat)) err(`${at}: beat must be open, neighbor, newcomer or finale`);
