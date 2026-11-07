@@ -994,6 +994,21 @@ function init() {
 
   let current = -1;
 
+  // camera: one primary move per scene, a pure function of time (after cinecode's named vocabulary).
+  // push = dolly in, pull = pull back, breathe = a <= 1.5% push that leaves reading undisturbed, none = locked.
+  // ease: inertia (35% linear + 65% smoothstep) inside the film; ease-out on the first scene so it moves from frame 0.
+  const CAM = { cold_open: ['push', 1.045, 'out'], chapter: ['push', 1.05], statement: ['push', 1.03], moment: ['push', 1.04],
+    case: ['push', 1.025], questions: ['push', 1.02], end: ['pull', 1.04], clip: ['none'] };
+  const inertia = (x) => 0.35 * x + 0.65 * x * x * (3 - 2 * x), easeOut = (x) => 1 - (1 - x) * (1 - x);
+  function camera(s, t, d) {
+    const mode = s.camera || (CAM[s.type] || ['breathe', 1.015])[0];
+    if (mode === 'none' || F.camera === false) return '';
+    const amt = (CAM[s.type] && CAM[s.type][1]) || (mode === 'breathe' ? 1.015 : mode === 'pull' ? 1.04 : 1.03);
+    const u = clamp(t / Math.max(0.1, d)), e = (CAM[s.type] && CAM[s.type][2] === 'out') ? easeOut(u) : inertia(u);
+    const k = mode === 'pull' ? amt + (1 - amt) * e : 1 + (amt - 1) * e;
+    return `scale(${k.toFixed(5)})`;
+  }
+
   window.__seek = function (T) {
     let i = SC.findIndex((x) => T >= x.start && T < x.start + x.dur);
     if (i < 0) i = T < 0 ? 0 : SC.length - 1;
@@ -1007,6 +1022,7 @@ function init() {
     const t = T - sc.start;
     sc.year = sc.s.type === 'case' ? null : (sc.s.year ?? null);
     sc.update(t, sc.dur, sc);
+    sc.root.style.transform = camera(sc.s, t, sc.dur);
     // the year counter is a pure function of the scene index (the renderer seeks in parallel chunks, so no carried state)
     let y = F.start_year || new Date().getFullYear();
     for (let j = 0; j <= i; j++) { const yj = j === i ? sc.year : SC[j].endYear; if (yj) y = yj; }
@@ -1014,7 +1030,7 @@ function init() {
     actEl.textContent = sc.s.act || '';
     prog.style.width = (100 * clamp(T / TOTAL)) + '%';
     // fade through black between scenes
-    const fin = 1 - P(t, 0, 0.45, (x) => x);
+    const fin = 1 - P(t, 0, i === 0 ? 0.12 : 0.45, (x) => x);   // the first frame already shows the picture (hook)
     const fout = P(t, sc.dur - 0.35, 0.35, (x) => x);
     fade.style.opacity = Math.max(i === 0 ? fin : fin * 0.9, fout * (i === SC.length - 1 ? 1 : 0.9));
     if (SKETCH) STAGE.dataset.boil = Math.floor(T * 8) % 3;

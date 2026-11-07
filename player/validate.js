@@ -18,6 +18,8 @@
     if (!film.language) err('language is required (BCP-47 short code, e.g. "ru", "en", "uz", "ja")');
     if (!Array.isArray(film.scenes) || film.scenes.length < 5) err('scenes must be an array with at least 5 scenes');
     if (film.style != null && !['default', 'sketch', 'editorial', 'poster'].includes(film.style)) err('style must be "default", "sketch", "editorial" or "poster"');
+    if (film.sound != null && film.sound !== false && typeof film.sound !== 'object') err('sound must be false or an object { music, room_db, body_db, machine_db, music_db, room_wet }');
+    if (film.camera != null && film.camera !== false) err('camera at film level can only be false (turns all camera moves off)');
     if (['sketch', 'editorial', 'poster'].includes(film.style) && film.language && !['ru', 'en', 'uz', 'de', 'fr', 'es', 'it', 'pt', 'uk', 'be', 'nl', 'sv'].includes(film.language)) warn(`style "${film.style}" has fonts for Latin and basic Cyrillic only: for "${film.language}" some letters fall back to a system font, prefer the default style`);
     if (film.language && !['en', 'ru'].includes(film.language)) {
       const need = ['known', 'estimate', 'model', 'year', 'you', 'source'];
@@ -71,6 +73,8 @@
       if (!TYPES.includes(s?.type)) return err(`${at}: unknown type. Allowed: ${TYPES.join(', ')}`);
       if (s.type !== 'chapter' && !s.narration) err(`${at}: narration is required`);
       chars += len(s.narration);
+      if (s.camera != null && !['push', 'pull', 'breathe', 'none'].includes(s.camera)) err(`${at}: camera must be push, pull, breathe or none`);
+      if (s.sound != null && !['drop', 'none'].includes(s.sound)) err(`${at}: sound must be "drop" (silence before this scene) or "none" (no hit)`);
       switch (s.type) {
         case 'cold_open':
           if (!Array.isArray(s.lines) || !s.lines.length) err(`${at}: lines[] required`);

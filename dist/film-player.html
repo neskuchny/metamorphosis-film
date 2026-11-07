@@ -1604,6 +1604,21 @@ function init() {
 
   let current = -1;
 
+  // camera: one primary move per scene, a pure function of time (after cinecode's named vocabulary).
+  // push = dolly in, pull = pull back, breathe = a <= 1.5% push that leaves reading undisturbed, none = locked.
+  // ease: inertia (35% linear + 65% smoothstep) inside the film; ease-out on the first scene so it moves from frame 0.
+  const CAM = { cold_open: ['push', 1.045, 'out'], chapter: ['push', 1.05], statement: ['push', 1.03], moment: ['push', 1.04],
+    case: ['push', 1.025], questions: ['push', 1.02], end: ['pull', 1.04], clip: ['none'] };
+  const inertia = (x) => 0.35 * x + 0.65 * x * x * (3 - 2 * x), easeOut = (x) => 1 - (1 - x) * (1 - x);
+  function camera(s, t, d) {
+    const mode = s.camera || (CAM[s.type] || ['breathe', 1.015])[0];
+    if (mode === 'none' || F.camera === false) return '';
+    const amt = (CAM[s.type] && CAM[s.type][1]) || (mode === 'breathe' ? 1.015 : mode === 'pull' ? 1.04 : 1.03);
+    const u = clamp(t / Math.max(0.1, d)), e = (CAM[s.type] && CAM[s.type][2] === 'out') ? easeOut(u) : inertia(u);
+    const k = mode === 'pull' ? amt + (1 - amt) * e : 1 + (amt - 1) * e;
+    return `scale(${k.toFixed(5)})`;
+  }
+
   window.__seek = function (T) {
     let i = SC.findIndex((x) => T >= x.start && T < x.start + x.dur);
     if (i < 0) i = T < 0 ? 0 : SC.length - 1;
@@ -1617,6 +1632,7 @@ function init() {
     const t = T - sc.start;
     sc.year = sc.s.type === 'case' ? null : (sc.s.year ?? null);
     sc.update(t, sc.dur, sc);
+    sc.root.style.transform = camera(sc.s, t, sc.dur);
     // the year counter is a pure function of the scene index (the renderer seeks in parallel chunks, so no carried state)
     let y = F.start_year || new Date().getFullYear();
     for (let j = 0; j <= i; j++) { const yj = j === i ? sc.year : SC[j].endYear; if (yj) y = yj; }
@@ -1624,7 +1640,7 @@ function init() {
     actEl.textContent = sc.s.act || '';
     prog.style.width = (100 * clamp(T / TOTAL)) + '%';
     // fade through black between scenes
-    const fin = 1 - P(t, 0, 0.45, (x) => x);
+    const fin = 1 - P(t, 0, i === 0 ? 0.12 : 0.45, (x) => x);   // the first frame already shows the picture (hook)
     const fout = P(t, sc.dur - 0.35, 0.35, (x) => x);
     fade.style.opacity = Math.max(i === 0 ? fin : fin * 0.9, fout * (i === SC.length - 1 ? 1 : 0.9));
     if (SKETCH) STAGE.dataset.boil = Math.floor(T * 8) % 3;
@@ -1721,6 +1737,8 @@ function init() {
     if (!film.language) err('language is required (BCP-47 short code, e.g. "ru", "en", "uz", "ja")');
     if (!Array.isArray(film.scenes) || film.scenes.length < 5) err('scenes must be an array with at least 5 scenes');
     if (film.style != null && !['default', 'sketch', 'editorial', 'poster'].includes(film.style)) err('style must be "default", "sketch", "editorial" or "poster"');
+    if (film.sound != null && film.sound !== false && typeof film.sound !== 'object') err('sound must be false or an object { music, room_db, body_db, machine_db, music_db, room_wet }');
+    if (film.camera != null && film.camera !== false) err('camera at film level can only be false (turns all camera moves off)');
     if (['sketch', 'editorial', 'poster'].includes(film.style) && film.language && !['ru', 'en', 'uz', 'de', 'fr', 'es', 'it', 'pt', 'uk', 'be', 'nl', 'sv'].includes(film.language)) warn(`style "${film.style}" has fonts for Latin and basic Cyrillic only: for "${film.language}" some letters fall back to a system font, prefer the default style`);
     if (film.language && !['en', 'ru'].includes(film.language)) {
       const need = ['known', 'estimate', 'model', 'year', 'you', 'source'];
@@ -1774,6 +1792,8 @@ function init() {
       if (!TYPES.includes(s?.type)) return err(`${at}: unknown type. Allowed: ${TYPES.join(', ')}`);
       if (s.type !== 'chapter' && !s.narration) err(`${at}: narration is required`);
       chars += len(s.narration);
+      if (s.camera != null && !['push', 'pull', 'breathe', 'none'].includes(s.camera)) err(`${at}: camera must be push, pull, breathe or none`);
+      if (s.sound != null && !['drop', 'none'].includes(s.sound)) err(`${at}: sound must be "drop" (silence before this scene) or "none" (no hit)`);
       switch (s.type) {
         case 'cold_open':
           if (!Array.isArray(s.lines) || !s.lines.length) err(`${at}: lines[] required`);
