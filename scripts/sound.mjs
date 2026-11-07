@@ -140,7 +140,8 @@ export function designSound({ film, timeline, total, years = [], onsets = [], ou
   const opts = film.sound || {};
   const sc = film.scenes;
   const starts = timeline.map((x) => x.start);
-  const chapters = sc.map((s, i) => (s.type === 'chapter' ? i : -1)).filter((i) => i >= 0);
+  const isChapter = (s) => s.type === 'chapter' || (s.type === 'world' && s.num);
+  const chapters = sc.map((s, i) => (isChapter(s) ? i : -1)).filter((i) => i >= 0);
   const drops = sc.map((s, i) => ((s.sound === 'drop' || (s.sound !== 'none' && (s.type === 'moment' || s.type === 'end'))) ? i : -1)).filter((i) => i > 0);
   // intensity per scene: how far the film has come, counted in chapters
   const inten = sc.map((_, i) => 0.3 + 0.7 * (chapters.filter((c) => c <= i).length / Math.max(1, chapters.length)));
@@ -217,7 +218,7 @@ export function designSound({ film, timeline, total, years = [], onsets = [], ou
   timeline.forEach((x, i) => {
     const s = sc[i];
     if (s.sound === 'none') return;
-    if (s.type === 'chapter') { addWhoosh(EL, ER, x.start + 0.05, 1.0, g(-9), 100 + i); addHit(EL, ER, x.start + 0.35, g(-11), 200 + i); cues.push([x.start, 'whoosh+hit']); }
+    if (isChapter(s)) { addWhoosh(EL, ER, x.start + 0.05, 1.0, g(-9), 100 + i); addHit(EL, ER, x.start + 0.35, g(-11), 200 + i); cues.push([x.start, 'whoosh+hit']); }
     else if (s.type === 'statement') { addHit(EL, ER, x.start + 0.45, g(-15), 300 + i); cues.push([x.start + 0.45, 'hit']); }
     else if (drops.includes(i) && s.type !== 'end') { addHit(EL, ER, x.start + 0.15, g(-8), 400 + i); cues.push([x.start + 0.15, 'hit']); }
     else if (s.type === 'end') { addHit(EL, ER, x.start + 0.6, g(-12), 500 + i); cues.push([x.start + 0.6, 'hit']); }
@@ -225,7 +226,9 @@ export function designSound({ film, timeline, total, years = [], onsets = [], ou
   const busy = cues.map((c) => c[0]);
   years.forEach((t, k) => { addTick(EL, ER, t, g(-15), 600 + k); busy.push(t); });
   let nt = 0;
+  const inWorld = (t) => timeline.some((x, i) => sc[i].type === 'world' && t >= x.start && t < x.start + x.dur);   // a moving 3D shot is not a series of events
   for (const o of onsets) {
+    if (inWorld(o.t)) continue;
     if (busy.some((b) => Math.abs(b - o.t) < 0.25)) continue;
     const lvl = -30 + Math.min(8, (o.m - 0.35) * 5);
     addTap(EL, ER, o.t, g(lvl), 700 + nt, ((nt * 37) % 11) / 11 * 0.6 - 0.3); nt++;

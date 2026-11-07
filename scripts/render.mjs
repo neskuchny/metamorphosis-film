@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* film.json -> MP4.
    node scripts/render.mjs [film.json] [--out out/film.mp4] [--res 1080|720] [--fps 30]
-                           [--preview] [--no-voice] [--no-sound] [--sound-only] [--workers N]
+                           [--preview] [--no-voice] [--no-sound] [--sound-only] [--scenes 2,11] [--workers N]
    Sound: a bed, hits and picture-locked events designed in code (scripts/sound.mjs), mastered to -14 LUFS.
    Voice: ELEVENLABS_API_KEY, OPENAI_API_KEY or GEMINI_API_KEY (free tier) if set, otherwise free edge-tts (pip install edge-tts),
    otherwise a silent film with captions. */
@@ -23,12 +23,13 @@ const require = createRequire(import.meta.url);
 const argv = process.argv.slice(2);
 const flag = (n) => argv.includes('--' + n);
 const opt = (n, d) => { const i = argv.indexOf('--' + n); return i >= 0 ? argv[i + 1] : d; };
-const VALUE_OPTS = ['--out', '--res', '--fps', '--workers'];
+const VALUE_OPTS = ['--scenes', '--out', '--res', '--fps', '--workers'];
 const filmPath = path.resolve(argv.find((a, i) => !a.startsWith('--') && !VALUE_OPTS.includes(argv[i - 1])) || 'film.json');
 const FPS = +opt('fps', 30);
 const RES = +opt('res', 1080);
 const PREVIEW = flag('preview');
 const SOUND_ONLY = flag('sound-only');
+const SCENES = opt('scenes') ? opt('scenes').split(',').map(Number) : null;   // re-render only these scenes into the last picture
 const NO_VOICE = flag('no-voice');
 const NO_SOUND = flag('no-sound') || flag('no-music');
 const WORKERS = Math.max(1, +opt('workers', Math.min(4, os.cpus().length)));
@@ -133,7 +134,7 @@ async function tts(pr, text, out) {
       for (let k = 0; k < tries; k++) {
         const r = spawnSync(pr.cmd[0], [...pr.cmd.slice(1), '--voice', pr.voice, `--rate=${pr.rate}`, '--text', txt, '--write-media', file], { encoding: 'utf8', timeout: 60000 });
         if (r.status === 0 && fs.existsSync(file) && fs.statSync(file).size > 1000) return true;
-        await new Promise((res) => setTimeout(res, 2000 * (k + 1)));
+        await new Promise((res) => setTimeout(res, [3000, 8000, 15000, 25000, 40000, 60000][Math.min(k, 5)]));   // the free service throttles in bursts
       }
       return false;
     };
@@ -219,7 +220,8 @@ async function main() {
         if (!text || pr.name === 'none') { audio.push(null); continue; }
         const key = crypto.createHash('sha1').update([pr.name, pr.voice, pr.rate, ...(pr.style ? [pr.style, pr.model] : []), text].join('|')).digest('hex').slice(0, 16);
         const f = path.join(BUILD, 'audio', `${key}.${['piper', 'gemini'].includes(pr.name) ? 'wav' : 'mp3'}`);
-        if (!fs.existsSync(f)) { process.stdout.write(`[film] tts ${i + 1}/${film.scenes.length}\r`); await tts(pr, text, f); }
+        if (!fs.existsSync(f) || fs.statSync(f).size < 1000) { fs.rmSync(f, { force: true }); process.stdout.write(`[film] tts ${i + 1}/${film.scenes.length}\r`); await tts(pr, text, f); }
+        if (!fs.existsSync(f) || fs.statSync(f).size < 1000) { fs.rmSync(f, { force: true }); throw new Error(`${pr.name}: empty audio for scene ${i + 1}`); }
         audio.push({ file: f, dur: mediaDuration(f) });
       }
       break;
@@ -231,7 +233,18 @@ async function main() {
   // 2) timeline
   const clipFiles = film.scenes.map((sc) => (sc.type === 'clip' ? path.resolve(path.dirname(filmPath), sc.file) : null));
   const clipDur = clipFiles.map((f) => (f ? mediaDuration(f) : 0));
-  const { timeline, total } = FilmTimeline.build(film, audio.map((x) => x?.dur ?? null), clipDur);
+  let { timeline, total } = FilmTimeline.build(film, audio.map((x) => x?.dur ?? null), clipDur);
+  // --sound-only and --scenes work on the existing picture: keep its timeline when every new line fits its scene
+  const pictureNote = path.join(BUILD, 'picture.json');
+  const pic = (SOUND_ONLY || SCENES) && fs.existsSync(pictureNote) ? JSON.parse(fs.readFileSync(pictureNote, 'utf8')) : null;
+  if ((SOUND_ONLY || SCENES) && (!pic || !fs.existsSync(pic.file))) { console.error('--sound-only / --scenes: no picture in build/ (render once without them)'); process.exit(1); }
+  if (pic && pic.timeline && pic.timeline.length === timeline.length && Math.abs(pic.total - total) > 0.05) {
+    const bad = [];
+    pic.timeline.forEach((p, i) => { const sp = timeline[i].speechEnd - timeline[i].speechStart; if (p.speechStart + sp > p.dur - 0.15) bad.push(i + 1); });
+    if (bad.length) { console.error(`the new lines do not fit scenes ${bad.join(', ')} of the existing picture; render without --sound-only / --scenes`); process.exit(1); }
+    pic.timeline.forEach((p, i) => { const sp = timeline[i].speechEnd - timeline[i].speechStart; Object.assign(timeline[i], { start: p.start, dur: p.dur, speechStart: p.speechStart, speechEnd: p.speechStart + sp }); });
+    total = pic.total; log('the new lines fit the scenes of the existing picture');
+  }
   fs.writeFileSync(path.join(BUILD, 'film.data.js'), `window.FILM = ${JSON.stringify({ ...film, timeline, timeline_total: total })};`);
   fs.writeFileSync(path.join(BUILD, 'timeline.json'), JSON.stringify(timeline.map((x, i) => ({ i: i + 1, type: film.scenes[i].type, start: +x.start.toFixed(2), dur: +x.dur.toFixed(2) })), null, 1));
   log(`length ${Math.floor(total / 60)}:${String(Math.round(total % 60)).padStart(2, '0')}, ${film.scenes.length} scenes`);
@@ -271,6 +284,7 @@ async function main() {
   if (SOUND) {
     const page = await newPage();
     years = await page.evaluate(({ total, fps }) => {
+      window.__probe = true;
       const el = document.querySelector('#hud-year .val'), out = []; let prev = null;
       for (let f = 0; f < Math.ceil(total * fps); f++) { window.__seek(f / fps); const y = el ? el.textContent : null; if (prev !== null && y !== prev) out.push(f / fps); prev = y; }
       return out;
@@ -280,15 +294,46 @@ async function main() {
 
   const slug = (film.company.short_name || film.company.name).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '');
   const out = path.resolve(opt('out', path.join(ROOT, 'out', `${slug || 'film'}.mp4`)));
-  const pictureNote = path.join(BUILD, 'picture.json');
   let videoFile;
   const t0 = Date.now();
   if (SOUND_ONLY) {
     // a sound revision never re-renders the picture: reuse the last picture of this same timeline
-    const pic = fs.existsSync(pictureNote) ? JSON.parse(fs.readFileSync(pictureNote, 'utf8')) : null;
     if (!pic || !fs.existsSync(pic.file) || Math.abs(pic.total - total) > 0.05) { console.error(`--sound-only: no picture of this timeline in build/ (render once without it)${pic ? ` [picture ${pic.total.toFixed(2)} s, timeline ${total.toFixed(2)} s]` : ''}`); process.exit(1); }
     videoFile = pic.file; await browser.close();
     log('sound only: picture reused from ' + path.relative(ROOT, videoFile));
+  } else if (SCENES) {
+    if (Math.abs(pic.total - total) > 0.05) { console.error(`--scenes: the timeline (${total.toFixed(2)} s) is not the picture's (${pic.total.toFixed(2)} s)`); process.exit(1); }
+    const jobs = SCENES.filter((n) => n >= 1 && n <= timeline.length);
+    let k0 = 0;
+    await Promise.all(Array.from({ length: Math.min(WORKERS, jobs.length) }, async () => {
+      const page = await newPage(); const cdp = await page.context().newCDPSession(page);
+      while (k0 < jobs.length) {
+        const n = jobs[k0++], x = timeline[n - 1];
+        const seg = path.join(BUILD, `scene-${n}.mp4`);
+        const ff = spawn(FFMPEG, ['-hide_banner', '-loglevel', 'error', '-y', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '22', '-pix_fmt', 'yuv420p', '-r', String(FPS), seg], { stdio: ['pipe', 'inherit', 'inherit'] });
+        const closed = new Promise((res, rej) => ff.on('close', (c) => (c === 0 ? res() : rej(new Error('ffmpeg scene failed')))));
+        const fa = Math.ceil(x.start * FPS), fb = Math.ceil((x.start + x.dur) * FPS);
+        for (let f = fa; f < fb; f++) {
+          await page.evaluate((tt) => window.__seek(tt), f / FPS);
+          const { data } = await cdp.send('Page.captureScreenshot', { format: 'jpeg', quality: 92, optimizeForSpeed: true, ...(RES !== 1080 ? { clip: { x: 0, y: 0, width: 1920, height: 1080, scale: RES / 1080 } } : {}) });
+          if (!ff.stdin.write(Buffer.from(data, 'base64'))) await new Promise((r) => ff.stdin.once('drain', r));
+        }
+        ff.stdin.end(); await closed; log(`scene ${n} rendered (${fb - fa} frames)`);
+      }
+      await page.close();
+    }));
+    await browser.close();
+    const next = path.join(BUILD, `video-scenes-${Date.now()}.mp4`), inputs = ['-i', pic.file], parts = []; let prev = '[0:v]';
+    jobs.forEach((n, k) => {
+      const x = timeline[n - 1], a0 = Math.ceil(x.start * FPS) / FPS;
+      inputs.push('-i', path.join(BUILD, `scene-${n}.mp4`));
+      parts.push(`[${k + 1}:v]setpts=PTS-STARTPTS+${a0.toFixed(4)}/TB[s${k}]`, `${prev}[s${k}]overlay=eof_action=pass:enable='between(t,${a0.toFixed(4)},${(x.start + x.dur).toFixed(4)})'[o${k}]`);
+      prev = `[o${k}]`;
+    });
+    await run([...inputs, '-filter_complex', parts.join(';'), '-map', prev, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '22', '-pix_fmt', 'yuv420p', '-r', String(FPS), next]);
+    videoFile = next;
+    fs.writeFileSync(pictureNote, JSON.stringify({ ...pic, file: videoFile }));
+    log(`scenes ${jobs.join(', ')} replaced in the picture`);
   } else {
     // 5) frames -> segments in parallel
     const frames = Math.ceil(total * FPS);
@@ -341,7 +386,7 @@ async function main() {
       videoFile = withClips;
       log(`clips: ${clips.length} inserted`);
     }
-    fs.writeFileSync(pictureNote, JSON.stringify({ file: videoFile, total }));
+    fs.writeFileSync(pictureNote, JSON.stringify({ file: videoFile, total, timeline: timeline.map((x) => ({ start: x.start, dur: x.dur, speechStart: x.speechStart })) }));
   }
 
   // 7) sound: designed bed and events locked to the picture, the narration on top, one master
@@ -408,7 +453,7 @@ async function launchBrowser() {
     {}, { channel: 'chrome' }, { channel: 'msedge' },
   ].filter(Boolean);
   for (const o of tries) {
-    try { return await chromium.launch({ ...o, args: ['--force-color-profile=srgb', '--hide-scrollbars', '--font-render-hinting=none'] }); } catch (e) { var last = e; }
+    try { return await chromium.launch({ ...o, args: ['--force-color-profile=srgb', '--hide-scrollbars', '--font-render-hinting=none', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader', '--use-angle=swiftshader'] }); } catch (e) { var last = e; }
   }
   console.error('Could not start Chromium. Run: npx playwright install chromium\n' + last?.message);
   process.exit(1);

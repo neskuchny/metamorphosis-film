@@ -29,6 +29,7 @@ Key files:
 - `scripts/sound.mjs` — sound design in code (bed, hits, year ticks, picture-locked taps, silences), used by render; `--sound-only` re-mixes without re-rendering the picture
 - `scripts/qc.mjs` — measured checks on the MP4 (hook, black, freeze, dead air, loudness) and a contact sheet for the cold review
 - `scripts/voices.mjs` — the same line in several free voices, to choose the voice by ear
+- `player/world.js` — the 3D world of `world` scenes (the company as a lit town; built from `player/world/src.js` with `npm run build:world`; three.js MIT, postprocessing Zlib)
 - `scripts/clip.mjs`, `examples/styles/` — hand-drawn sketch and comic scenes as video clips (studio tier, optional)
 - `scripts/bundle.mjs` — packs the browser player (optionally with a film inside) into one HTML file
 - `dist/film-player.html` — the browser player: paste film.json, watch it, no install

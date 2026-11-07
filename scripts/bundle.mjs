@@ -34,10 +34,10 @@ if (filmArg) {
 }
 const scripts =
   `${embedded}<script type="text/plain" id="film-js">${safeScript(read('film.js'))}</script>\n` +
-  `<script>${safeScript(read('timeline.js'))}</script>\n<script>${safeScript(read('validate.js'))}</script>\n<script>${safeScript(read('model.js'))}</script>\n<script>${safeScript(read('map-data.js'))}</script>\n<script>${safeScript(read('web.js'))}</script>`;
-html = html.replace(/<script src="timeline\.js"><\/script>\s*<script src="validate\.js"><\/script>\s*<script src="model\.js"><\/script>\s*<script src="map-data\.js"><\/script>\s*<script src="web\.js"><\/script>/, () => scripts);
+  `<script>${safeScript(read('timeline.js'))}</script>\n<script>${safeScript(read('validate.js'))}</script>\n<script>${safeScript(read('model.js'))}</script>\n<script>${safeScript(read('map-data.js'))}</script>\n<script>${safeScript(read('world.js'))}</script>\n<script>${safeScript(read('web.js'))}</script>`;
+html = html.replace(/<script src="timeline\.js"><\/script>\s*<script src="validate\.js"><\/script>\s*<script src="model\.js"><\/script>\s*<script src="map-data\.js"><\/script>\s*<script src="world\.js"><\/script>\s*<script src="web\.js"><\/script>/, () => scripts);
 
-if (/(href|src)="(fonts\.css|style\.css|web\.css|timeline\.js|validate\.js|model\.js|map-data\.js|web\.js|film\.js)"/.test(html)) { console.error('bundle: a local reference is left in the output'); process.exit(1); }
+if (/(href|src)="(fonts\.css|style\.css|web\.css|timeline\.js|validate\.js|model\.js|map-data\.js|world\.js|web\.js|film\.js)"/.test(html)) { console.error('bundle: a local reference is left in the output'); process.exit(1); }
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, html);
 console.log(`[bundle] ${out} (${(html.length / 1024).toFixed(0)} KB)${filmArg ? ' with ' + path.basename(filmArg) + (flag('autoload') ? ', opens automatically' : '') : ''}`);

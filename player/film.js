@@ -183,6 +183,34 @@ function init() {
     };
   };
 
+  // the world: the company as a lit town at night (or a paper diorama), drawn in WebGL by player/world.js.
+  // One canvas and one WebGL context for all world scenes; it moves into the scene that is on screen.
+  let WORLD = null, worldCanvas = null;
+  const worldOf = () => {
+    if (WORLD || !window.FilmWorld) return WORLD;
+    worldCanvas = document.createElement('canvas'); worldCanvas.className = 'world-canvas';
+    const w = F.world || {};
+    try { WORLD = window.FilmWorld.create(worldCanvas, { ...w, look: w.look || 'night', width: 1920, height: 1080 }); }
+    catch (e) { console.warn('world: WebGL is not available', e); WORLD = null; }
+    return WORLD;
+  };
+  B.world = (s, root) => {
+    const world = worldOf();
+    if (!world) h('div', 'world-fallback abs', '', root);
+    h('div', 'world-shade abs', '', root);
+    const num = s.num ? pos(h('div', 'ch-num world-num abs', esc(s.num), root), L - 6, 590) : null;
+    const title = pos(h('div', 'ch-title world-title abs', esc(s.title || ''), root), L, 700, R - L);
+    fit(title, 92, 48, R - L, 140);
+    const cap = s.caption ? pos(h('div', 'world-cap abs', esc(s.caption), root), L, 0, 1200) : null;
+    if (cap) cap.style.top = 700 + title.scrollHeight + 22 + 'px';   // clear of the subtitles below
+    return (t, d) => {
+      if (world && !window.__probe) { if (worldCanvas.parentNode !== root) root.insertBefore(worldCanvas, root.firstChild); world.render(s.beat || 'open', t, d); }   // __probe: the renderer reads text only
+      if (num) show(num, P(t, 0.3, 0.9), 0, -30);
+      show(title, P(t, 0.6, 0.9), 30);
+      if (cap) show(cap, P(t, 1.3, 0.8), 12);
+    };
+  };
+
   B.dossier = (s, root) => {
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
@@ -998,7 +1026,7 @@ function init() {
   // push = dolly in, pull = pull back, breathe = a <= 1.5% push that leaves reading undisturbed, none = locked.
   // ease: inertia (35% linear + 65% smoothstep) inside the film; ease-out on the first scene so it moves from frame 0.
   const CAM = { cold_open: ['push', 1.045, 'out'], chapter: ['push', 1.05], statement: ['push', 1.03], moment: ['push', 1.04],
-    case: ['push', 1.025], questions: ['push', 1.02], end: ['pull', 1.04], clip: ['none'] };
+    case: ['push', 1.025], questions: ['push', 1.02], end: ['pull', 1.04], clip: ['none'], world: ['none'] };
   const inertia = (x) => 0.35 * x + 0.65 * x * x * (3 - 2 * x), easeOut = (x) => 1 - (1 - x) * (1 - x);
   function camera(s, t, d) {
     const mode = s.camera || (CAM[s.type] || ['breathe', 1.015])[0];

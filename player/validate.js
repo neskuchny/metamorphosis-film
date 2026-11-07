@@ -2,7 +2,7 @@
    validate(film, { exists(file) }) -> { errors, warnings, estimatedSeconds }
    exists is optional: when given, "clip" files are checked for presence. */
 (function (root) {
-  const TYPES = ['cold_open', 'statement', 'chapter', 'dossier', 'timeline', 'race', 'scissors', 'pillars', 'signals', 'map', 'waves', 'moment', 'attackers', 'anatomy', 'ladder', 'myths', 'plan', 'parallels', 'scenarios', 'beneath', 'case', 'fork', 'questions', 'clip', 'end'];
+  const TYPES = ['cold_open', 'statement', 'chapter', 'dossier', 'timeline', 'race', 'scissors', 'pillars', 'signals', 'map', 'waves', 'moment', 'attackers', 'anatomy', 'ladder', 'myths', 'plan', 'parallels', 'scenarios', 'beneath', 'world', 'case', 'fork', 'questions', 'clip', 'end'];
   const TAGS = ['known', 'estimate', 'model'];
   const SIDES = ['you', 'them', 'market'];
 
@@ -18,6 +18,15 @@
     if (!film.language) err('language is required (BCP-47 short code, e.g. "ru", "en", "uz", "ja")');
     if (!Array.isArray(film.scenes) || film.scenes.length < 5) err('scenes must be an array with at least 5 scenes');
     if (film.style != null && !['default', 'sketch', 'editorial', 'poster'].includes(film.style)) err('style must be "default", "sketch", "editorial" or "poster"');
+    if (film.world != null) {
+      const w = film.world;
+      if (typeof w !== 'object') err('world must be an object { you, them_start, them_end, sites, look }');
+      else {
+        if (w.look != null && !['night', 'paper'].includes(w.look)) err('world.look must be night or paper');
+        for (const k of ['you', 'them_start', 'them_end', 'sites']) if (w[k] != null && !(typeof w[k] === 'number' && w[k] > 0)) err(`world.${k} must be a positive number`);
+        if (w.you > 12000) warn('world.you above 12 000: the town shows 12 000 windows; say in a caption that one window stands for several people');
+      }
+    }
     if (film.sound != null && film.sound !== false && typeof film.sound !== 'object') err('sound must be false or an object { music, room_db, body_db, machine_db, music_db, room_wet }');
     if (film.camera != null && film.camera !== false) err('camera at film level can only be false (turns all camera moves off)');
     if (['sketch', 'editorial', 'poster'].includes(film.style) && film.language && !['ru', 'en', 'uz', 'de', 'fr', 'es', 'it', 'pt', 'uk', 'be', 'nl', 'sv'].includes(film.language)) warn(`style "${film.style}" has fonts for Latin and basic Cyrillic only: for "${film.language}" some letters fall back to a system font, prefer the default style`);
@@ -204,6 +213,12 @@
       case 'scenarios':
         if (!Array.isArray(s.items) || s.items.length < 2 || s.items.length > 3) err(`${at}: items[] (2–3 paths: tradition, evolution, revolution) required`);
         else s.items.forEach((it, j) => { if (!it.name || !it.outcome) err(`${at}: item ${j + 1} needs name and outcome`); if (len(it.what) > 110) warn(`${at}: item ${j + 1} what > 110 chars`); if (len(it.outcome) > 80) warn(`${at}: item ${j + 1} outcome > 80 chars`); });
+        break;
+      case 'world':
+        if (!['open', 'neighbor', 'newcomer', 'finale'].includes(s.beat)) err(`${at}: beat must be open, neighbor, newcomer or finale`);
+        if (!s.title) err(`${at}: title required (it works as the chapter title over the world)`);
+        if (len(s.title) > 40) warn(`${at}: title > 40 chars`);
+        if (s.caption && len(s.caption) > 90) warn(`${at}: caption > 90 chars`);
         break;
       case 'beneath':
         if (!s.surface || !s.surface.text) err(`${at}: surface.text required (what is visible from outside, often a clumsy first AI step)`);
