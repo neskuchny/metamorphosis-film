@@ -148,7 +148,18 @@ export function create(canvas, cfg = {}) {
   const O = new THREE.Object3D();
   const putDot = (mesh, k, x, y, z, s = 1) => { O.position.set(x, y, z); O.rotation.set(0, 0, 0); O.scale.setScalar(s); O.updateMatrix(); mesh.setMatrixAt(k, O.matrix); };
   const LIGHT = glow(cfg.light, look.warm), COOL = new THREE.Color(...look.cool), OFF = new THREE.Color(...look.off), WARM = new THREE.Color(...look.warm);
-  const ctx = { THREE, scene, camera, look, R, seed, mat, pool, strip, water, trees, instDots, pick, makeWindows, setWin, putDot, dotGeo, LIGHT, COOL, OFF, WARM, cfg, hallGeometry, poly, along };
+  // the crowd: copies of the newcomer that assemble in the finale (a success is copied; the newcomer is never alone)
+  const copycat = (x, z, w, hgt, d, k) => {
+    const g = new THREE.Group(); g.position.set(x, 0, z); scene.add(g);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(w, hgt, d), mat(look.them, look.post === 'night' ? { roughness: 0.35, metalness: 0.4 } : {})); body.position.y = hgt / 2; body.castShadow = true; g.add(body);
+    const slots = []; const rows = Math.max(1, Math.floor((hgt - 0.8) / 0.9)), cols = Math.max(2, Math.floor((w - 1) / 0.9));
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) if (hash(r * 31 + c * 7 + k * 101) < 0.45) slots.push([-w / 2 + 0.7 + c * 0.9, 0.7 + r * 0.9, d / 2 + 0.03]);
+    const win = makeWindows(slots, new THREE.PlaneGeometry(0.5, 0.5), g);
+    const pl = pool(COOL, x, z, w * 2.2, d * 3, 0.06);
+    return { g, update(p) { const a = smooth(p); body.visible = a > 0.001; body.scale.y = Math.max(0.001, a); body.position.y = hgt / 2 * a;
+      slots.forEach((_, i) => setWin(win, i, a > 0.6 + 0.4 * hash(i * 1.7 + k) ? COOL : OFF, 1.2)); win.instanceColor.needsUpdate = true; win.visible = a > 0.4; if (pl) pl.material.opacity = a * 0.9; } };
+  };
+  const ctx = { THREE, scene, camera, look, R, seed, mat, pool, strip, water, trees, instDots, pick, makeWindows, setWin, putDot, dotGeo, LIGHT, COOL, OFF, WARM, cfg, hallGeometry, poly, along, copycat };
 
   const kit = (KITS[cfg.kit] || KITS.factory)(ctx);
   scene.fog.density *= kit.fog || 1;   // bigger worlds need thinner air
@@ -257,6 +268,7 @@ KITS.factory = (X) => {
   const beacon = new THREE.Mesh(X.dotGeo, new THREE.MeshBasicMaterial({ color: X.COOL.clone().multiplyScalar(1.4), toneMapped: false })); beacon.position.set(11, 11.6, -9); beacon.scale.setScalar(1.6); newco.add(beacon);
   const poolYou = X.pool(X.LIGHT, -2, 26, 150, 80, 0.05), poolThem = X.pool(X.COOL, 16, -40, 70, 40, 0.09);
   const insideSite = Math.min(SITES - 1, Math.floor(X.R() * SITES));
+  const copies = [X.copycat(-44, -50, 12, 6, 7, 1), X.copycat(66, -48, 10, 8, 6, 2), X.copycat(36, -66, 14, 5, 7, 3)];
   return {
     info: { you: youSlots.length, them: themList.length },
     state(beat, u) {
@@ -264,7 +276,7 @@ KITS.factory = (X) => {
       if (beat === 'open') S.on = 0.12 + 0.88 * smooth(u / 0.55);
       if (beat === 'neighbor') S.nb = smooth((u - 0.15) / 0.7);
       if (beat === 'newcomer') { S.nb = 1; S.build = clamp((u - 0.08) / 0.5); S.them = lerp(THEM0, Math.round((THEM0 + THEM1) / 2.4), smooth((u - 0.45) / 0.45)) * smooth((u - 0.35) / 0.15); }
-      if (beat === 'finale') { S.nb = 1; S.build = 1; S.them = lerp(Math.round((THEM0 + THEM1) / 2.4), THEM1, smooth(u / 0.6)); S.inside = smooth((u - 0.55) / 0.35); }
+      if (beat === 'finale') { S.nb = 1; S.build = 1; S.them = lerp(Math.round((THEM0 + THEM1) / 2.4), THEM1, smooth(u / 0.6)); S.inside = smooth((u - 0.55) / 0.35); S.crowd = clamp((u - 0.1) / 0.5); }
       return S;
     },
     camera(beat, u) {
@@ -293,6 +305,7 @@ KITS.factory = (X) => {
       const nThem = Math.round(S.them);
       themList.forEach((s, i) => X.setWin(winThem, i, i < nThem ? X.COOL : X.OFF, i < nThem ? 1.2 : 1));
       winThem.instanceColor.needsUpdate = true; winThem.visible = S.build > 0.4; beacon.visible = S.build > 0.95;
+      copies.forEach((c, k) => c.update(clamp(((S.crowd || 0) - k * 0.25) / 0.45)));
       if (poolYou) poolYou.material.opacity = 0.35 + 0.65 * S.on;
       if (poolThem) poolThem.material.opacity = clamp(nThem / THEM1) * 0.8 + 0.2 * S.build;
       redLights.forEach((r, i) => { r.visible = ((t + i * 0.37) % 1.6) < 0.8; });
@@ -376,9 +389,12 @@ KITS.city = (X) => {
     return { p, off: R(), speed: 9 + R() * 7 }; });
   const cNb = mkCouriers(70, () => { const s = sTheirs[Math.floor(R() * Math.max(1, sTheirs.length))] || { x: -100, z: 20 }; return { x: s.x, z: s.z + 2.5 }; });
   const cThem = mkCouriers(THEM1, () => { const g = dsGate(); return { x: g[0], z: g[1], bridge: true }; });
+  const cpX = [ds.position.x - 95, ds.position.x + 95];
+  const copies = cpX.map((x, k) => X.copycat(x, -80 + k * 6, 30, 7, 14, 10 + k));
+  const cCopy = mkCouriers(Math.round(THEM1 * 0.9), (k) => ({ x: cpX[k % 2] + (R() - 0.5) * 20, z: -70, bridge: true }));
   const cOurs = mkCouriers(90, () => { const s = sOurs[Math.floor(R() * sOurs.length)]; return { x: s.x, z: s.z + 2.5 }; });
   const cars = mkCouriers(90, () => { const c = corners[Math.floor(R() * corners.length)]; return { x: c[0], z: c[1] }; });
-  const dNb = X.instDots(cNb.length, NB_COLOR), dThem = X.instDots(cThem.length, X.COOL.clone().multiplyScalar(1.15)), dOurs = X.instDots(cOurs.length, X.LIGHT), dCars = X.instDots(cars.length, new THREE.Color(2.2, 2.0, 1.6));
+  const dNb = X.instDots(cNb.length, NB_COLOR), dThem = X.instDots(cThem.length, X.COOL.clone().multiplyScalar(1.15)), dCopy = X.instDots(cCopy.length, X.COOL.clone().multiplyScalar(0.95)), dOurs = X.instDots(cOurs.length, X.LIGHT), dCars = X.instDots(cars.length, new THREE.Color(2.2, 2.0, 1.6));
   const lamps = X.instDots(400, new THREE.Color(...look.lamp)); { let k = 0; for (const z of streetsZ) for (let x = X0 - 12; x < X0 + COLS * STEP && k < 400; x += 10) X.putDot(lamps, k++, x, 3.0, z + 2.6, 0.7); lamps.count = k; }
   X.trees(200, () => { const z = -50 + R() * 22, x = -260 + R() * 520; return [x, z]; });
   const moveDots = (mesh, list, n, t, y, s) => { let k = 0; for (let i = 0; i < Math.min(n, list.length); i++) { const c = list[i], cyc = c.p.len / c.speed + 3, ph = ((t / cyc + c.off) % 1) * cyc; if (ph * c.speed > c.p.len) continue; const [x, z] = X.along(c.p, ph * c.speed); X.putDot(mesh, k++, x, y, z, s); } mesh.count = k; mesh.instanceMatrix.needsUpdate = true; };
@@ -391,7 +407,7 @@ KITS.city = (X) => {
       if (beat === 'open') S.nb = 0;
       if (beat === 'neighbor') { S.nb = smooth((u - 0.1) / 0.6); S.share = 0.06 * S.nb; S.dim = 0.08 * S.nb; }
       if (beat === 'newcomer') { S.nb = 1; S.build = clamp((u - 0.05) / 0.45); S.them = lerp(THEM0, (THEM0 + THEM1) / 2.2, smooth((u - 0.45) / 0.45)) * smooth((u - 0.4) / 0.12); S.share = 0.06 + 0.1 * smooth((u - 0.5) / 0.5); S.dim = 0.08 + 0.12 * smooth((u - 0.5) / 0.5); }
-      if (beat === 'finale') { S.nb = 1; S.build = 1; S.them = lerp((THEM0 + THEM1) / 2.2, THEM1, smooth(u / 0.6)); S.share = lerp(0.16, SHARE, smooth(u / 0.6)); S.dim = lerp(0.2, 0.35, smooth(u / 0.6)); S.inside = smooth((u - 0.55) / 0.35); }
+      if (beat === 'finale') { S.nb = 1; S.build = 1; S.them = lerp((THEM0 + THEM1) / 2.2, THEM1, smooth(u / 0.6)); S.share = lerp(0.16, SHARE, smooth(u / 0.6)); S.dim = lerp(0.2, 0.35, smooth(u / 0.6)); S.inside = smooth((u - 0.55) / 0.35); S.crowd = clamp((u - 0.1) / 0.5); }
       return S;
     },
     camera(beat, u) {
@@ -409,7 +425,7 @@ KITS.city = (X) => {
       // your stores: signs come on one by one; each wave dims them a little (the signature)
       sOurs.forEach((s, k) => { const on = k / sOurs.length < S.on ? 1 : 0; const lit = on * (1 - S.dim * (0.6 + 0.8 * hash(k * 9.1)));
         s.sign.material.color.copy(X.LIGHT).multiplyScalar(lit * 1.4); s.top.material.color.copy(X.LIGHT).multiplyScalar(lit * 1.2); s.front.material.color.copy(X.WARM).multiplyScalar(lit * 0.7);
-        if (s.pl) s.pl.material.color.copy(X.LIGHT).multiplyScalar(0.05 * lit); });
+        if (s.pl) s.pl.material.color.copy(X.LIGHT).multiplyScalar(0.022 * lit); });
       const nbk = 0.35 + 0.65 * S.nb; sTheirs.forEach((s) => { s.sign.material.color.copy(NB_COLOR).multiplyScalar(0.9 * nbk); s.top.material.color.copy(NB_COLOR).multiplyScalar(0.8 * nbk); s.front.material.color.copy(X.WARM).multiplyScalar(0.5); if (s.pl) s.pl.material.color.copy(NB_COLOR).multiplyScalar(0.04 * nbk); });
       dsBody.scale.y = Math.max(0.001, smooth(S.build)); dsBody.position.y = 4.5 * dsBody.scale.y; dsBody.visible = S.build > 0.001;
       for (let k = 0; k < 14; k++) X.setWin(docks, k, S.build > 0.6 + k * 0.02 ? X.COOL : X.OFF, 1.1); docks.instanceColor.needsUpdate = true; docks.visible = S.build > 0.3;
@@ -418,6 +434,8 @@ KITS.city = (X) => {
       if (cityPool) cityPool.material.opacity = 0.4 + 0.6 * S.on - 0.3 * S.dim;
       moveDots(dNb, cNb, Math.round(cNb.length * S.nb), t, 1.0, 2.6);
       moveDots(dThem, cThem, Math.round(S.them), t, 1.0, 2.6);
+      copies.forEach((c, k) => c.update(clamp(((S.crowd || 0) - k * 0.3) / 0.45)));
+      moveDots(dCopy, cCopy, Math.round(cCopy.length * clamp(((S.crowd || 0) - 0.3) / 0.7)), t * 1.1, 1.0, 2.4);
       moveDots(dOurs, cOurs, Math.round(cOurs.length * S.inside), t, 1.0, 2.8);
       moveDots(dCars, cars, cars.length, t * 0.8, 0.8, 1.6);
     },
@@ -459,8 +477,13 @@ KITS.logistics = (X) => {
   const tNb = mk(80, () => (R() < 0.5 ? nbPath : nbPath2));
   const themPaths = [X.poly([[bridgeX, -92], [bridgeX, 12], [300, 12]]), X.poly([[bridgeX, -92], [bridgeX, 12], [-300, 12]]), X.poly([[bridgeX, -92], [bridgeX, 70], [300, 70]]), X.poly([[bridgeX, -92], [bridgeX, 70], [-300, 70]])];
   const tThem = mk(THEM1, () => themPaths[Math.floor(R() * themPaths.length)]);
+  const cpX = [bridgeX - 140, bridgeX + 130];
+  const copies = cpX.map((x, k) => X.copycat(x, -100 - k * 8, 46, 9, 20, 20 + k));
+  for (const x of cpX) X.strip(x, -45, 5, 120, look.road);
+  const copyPaths = cpX.flatMap((x) => [X.poly([[x, -88], [x, 12], [300, 12]]), X.poly([[x, -88], [x, 70], [-300, 70]])]);
+  const tCopy = mk(Math.round(THEM1 * 0.9), () => copyPaths[Math.floor(R() * copyPaths.length)]);
   const head = X.instDots(TRUCKS * 2, new THREE.Color(2.4, 2.1, 1.6)), tail = X.instDots(TRUCKS * 2, new THREE.Color(2.6, 0.2, 0.1));
-  const nbHead = X.instDots(160, new THREE.Color(1.3, 2.4, 1.8)), themHead = X.instDots(THEM1 * 2, X.COOL.clone().multiplyScalar(1.2)), ourNew = X.instDots(TRUCKS * 2, X.LIGHT);
+  const nbHead = X.instDots(160, new THREE.Color(1.3, 2.4, 1.8)), themHead = X.instDots(THEM1 * 2, X.COOL.clone().multiplyScalar(1.2)), copyHead = X.instDots(Math.round(THEM1 * 0.9) * 2, X.COOL.clone().multiplyScalar(1.0)), ourNew = X.instDots(TRUCKS * 2, X.LIGHT);
   const lamps = X.instDots(300, new THREE.Color(...look.lamp)); { let k = 0; for (const z of [70, 12]) for (let x = -300; x < 300 && k < 300; x += 9) X.putDot(lamps, k++, x, 4, z + 3.2, 0.8); lamps.count = k; }
   X.trees(240, () => [-300 + R() * 600, [-22, 120, -60][Math.floor(R() * 3)] + (R() - 0.5) * 10]);
   const drive = (meshA, meshB, list, n, t, mult, filter) => { let k = 0; for (let i = 0; i < Math.min(n, list.length); i++) { const c = list[i]; if (filter && !filter(i)) continue; const L = c.p.len, d = ((c.off * L + c.dir * c.speed * mult * t) % L + L) % L; const [x, z] = X.along(c.p, c.dir > 0 ? d : L - d);
@@ -476,7 +499,7 @@ KITS.logistics = (X) => {
       if (beat === 'open') S.on = 0.15 + 0.85 * smooth(u / 0.55);
       if (beat === 'neighbor') { S.nb = smooth((u - 0.1) / 0.6); S.idle = 0.35 + 0.1 * S.nb; }
       if (beat === 'newcomer') { S.nb = 1; S.build = clamp((u - 0.05) / 0.45); S.them = lerp(THEM0, (THEM0 + THEM1) / 2.2, smooth((u - 0.45) / 0.45)) * smooth((u - 0.4) / 0.12); S.idle = 0.45 + 0.1 * smooth((u - 0.5) / 0.5); }
-      if (beat === 'finale') { S.nb = 1; S.build = 1; S.them = lerp((THEM0 + THEM1) / 2.2, THEM1, smooth(u / 0.6)); S.idle = 0.55; S.inside = smooth((u - 0.55) / 0.35); }
+      if (beat === 'finale') { S.nb = 1; S.build = 1; S.them = lerp((THEM0 + THEM1) / 2.2, THEM1, smooth(u / 0.6)); S.idle = 0.55; S.inside = smooth((u - 0.55) / 0.35); S.crowd = clamp((u - 0.1) / 0.5); }
       return S;
     },
     camera(beat, u) {
@@ -499,6 +522,8 @@ KITS.logistics = (X) => {
       drive(ourNew, null, tYou, Math.round(TRUCKS * (1 - S.idle)), t, 1.3, (i) => S.inside > 0 && hash(i * 2.2) < S.inside * 0.3);
       drive(nbHead, null, tNb, Math.round(tNb.length * S.nb), t, 1 + 0.8 * S.nb);
       drive(themHead, null, tThem, Math.round(S.them), t, 1.4);
+      copies.forEach((c, k) => c.update(clamp(((S.crowd || 0) - k * 0.3) / 0.45)));
+      drive(copyHead, null, tCopy, Math.round(tCopy.length * clamp(((S.crowd || 0) - 0.3) / 0.7)), t, 1.3);
     },
   };
 };

@@ -2,18 +2,29 @@
    The renderer calls window.__seek(t) for each frame and screenshots the stage. */
 (function boot() {
   const allText = JSON.stringify(window.FILM.scenes) + (window.FILM.company?.name || '');
+  const LK = window.FilmLook ? window.FilmLook.resolve(window.FILM) : null;
   const loads = ['400', '600', '700', '800'].map((w) => document.fonts.load(`${w} 40px Inter`, allText))
     .concat(['400', '600'].map((w) => document.fonts.load(`${w} 20px "JetBrains Mono"`, allText + '0123456789')))
     .concat(window.FILM.style === 'sketch' ? ['400 40px Caveat', '700 40px Caveat', '400 20px Neucha'].map((f) => document.fonts.load(f, allText + '0123456789')) : [])
     .concat(window.FILM.style === 'editorial' ? ['400 40px "Source Serif 4"', '600 40px "Source Serif 4"'].map((f) => document.fonts.load(f, allText + '0123456789')) : [])
-    .concat(window.FILM.style === 'poster' ? ['500 40px Oswald', '700 40px Oswald'].map((f) => document.fonts.load(f, allText + '0123456789')) : []);
+    .concat(window.FILM.style === 'poster' ? ['500 40px Oswald', '700 40px Oswald'].map((f) => document.fonts.load(f, allText + '0123456789')) : [])
+    .concat(LK ? LK.fonts.map((f) => document.fonts.load(f, allText + '0123456789')) : []);
   Promise.all(loads).catch(() => {}).then(() => document.fonts.ready).then(init);
 })();
 
 function init() {
   const F = window.FILM;
-  const W = 1920, H = 1080, L = 160, R = 1760;
+  // the film's look (player/look.js): fonts, colours, margins, layout variants and transitions chosen for this company
+  const LOOK = window.FilmLook ? window.FilmLook.resolve(F) : null;
+  const W = 1920, H = 1080, L = LOOK ? LOOK.L : 160, R = LOOK ? LOOK.R : 1760;
   const STAGE = document.getElementById('stage');
+  const V = (type, dflt) => (LOOK && LOOK.variants[type]) || dflt;
+  if (LOOK && !LOOK.named) {
+    for (const k in LOOK.css) STAGE.style.setProperty(k, LOOK.css[k]);
+    const fl = LOOK.flags;
+    STAGE.classList.add('lk', 'lk-cards-' + fl.cards, 'lk-bg-' + fl.bg, 'lk-cap-' + fl.captions, 'lk-num-' + fl.numeral, 'lk-mode-' + LOOK.mode);
+    if (fl.upper) STAGE.classList.add('lk-upper');
+  }
   const SKETCH = F.style === 'sketch';
   const THEME = ['sketch', 'editorial', 'poster'].includes(F.style) ? F.style : 'default';
   if (THEME === 'editorial' || THEME === 'poster') STAGE.classList.add('th-' + THEME);
@@ -47,6 +58,14 @@ function init() {
       root.insertBefore(d, root.firstChild);
       return (t) => { const p = 1 - Math.pow(1 - Math.min(1, Math.max(0, t / 0.9)), 3); d.style.opacity = p; d.style.transform = kind === 'band' ? `rotate(-8deg) translateX(${(1 - p) * -300}px)` : `scale(${0.6 + 0.4 * p})`; };
     },
+  };
+  // the look's own decoration on the scenes that carry the film's voice (not on data scenes)
+  const lookDecor = (s, root) => {
+    if (!LOOK || LOOK.named || LOOK.flags.decor === 'none' || !['cold_open', 'chapter', 'statement', 'end', 'questions', 'moment'].includes(s.type)) return null;
+    const kind = LOOK.flags.decor, d = document.createElement('div'); d.className = 'lk-dec ' + kind;
+    if (kind === 'watermark') d.textContent = String((F.company && (F.company.short_name || F.company.name)) || '').slice(0, 1);
+    root.insertBefore(d, root.firstChild);
+    return (t) => { const p = 1 - Math.pow(1 - Math.min(1, Math.max(0, t / 1.2)), 3); d.style.opacity = p; d.style.transform = kind === 'bar' ? `scaleY(${p})` : kind === 'corner' ? `translate(${(1 - p) * 80}px, ${(1 - p) * -80}px)` : `scale(${0.9 + 0.1 * p})`; };
   };
   if (SKETCH) {
     // hand-drawn look: paper, marker ink, and lines that "boil" (three wobble filters swapped 8 times a second, like redrawn frames)
@@ -129,36 +148,55 @@ function init() {
   const B = {};
 
   B.cold_open = (s, root) => {
-    const k = s.kicker ? pos(h('div', 'kicker abs', esc(s.kicker), root), L, 300) : null;
+    const v = V('cold_open', 'stack'), mid = (L + R) / 2;
+    const k = s.kicker ? pos(h('div', 'kicker abs', esc(s.kicker), root), L, v === 'number' ? 220 : 300) : null;
+    if (k && v === 'center') { k.style.left = L + 'px'; k.style.width = (R - L) + 'px'; k.style.textAlign = 'center'; }
+    const n = (s.lines || []).length;
     const lines = (s.lines || []).map((txt, i) => {
-      const el = pos(h('div', 'co-line abs', esc(txt), root), L, 380 + i * 118);
-      fit(el, 96, 44, R - L);
-      if (i === s.lines.length - 1 && s.accent_last !== false) el.style.color = 'var(--them)';
+      let el;
+      if (v === 'center') { el = pos(h('div', 'co-line abs', esc(txt), root), L, 470, R - L); el.style.textAlign = 'center'; el.style.whiteSpace = 'normal'; fit(el, 104, 44, R - L, 240); }
+      else if (v === 'number' && i === 0) { el = pos(h('div', 'co-line co-hero abs', esc(txt), root), L - 6, 280); fit(el, 190, 60, R - L); }
+      else if (v === 'number') { el = pos(h('div', 'co-line co-small abs', esc(txt), root), L, 560 + (i - 1) * 86); fit(el, 64, 34, R - L); }
+      else { el = pos(h('div', 'co-line abs', esc(txt), root), L, 380 + i * 118); fit(el, 96, 44, R - L); }
+      if (i === n - 1 && s.accent_last !== false) el.style.color = 'var(--them)';
       return el;
     });
+    void mid;
+    // the hook: the first line arrives word by word from the first frame, so the film opens on movement, not a still title
+    const words = lines[0] ? (() => { const el = lines[0]; el.innerHTML = el.textContent.split(/(\s+)/).map((w) => (/^\s*$/.test(w) ? w : `<span class="cw">${esc(w)}</span>`)).join(''); return [...el.querySelectorAll('.cw')]; })() : [];
     return (t, d, sc) => {
-      if (k) show(k, P(t, 0.2, 0.8), 10);
+      if (k) { show(k, P(t, 0, 0.7), 0); k.style.clipPath = `inset(0 ${(100 * (1 - P(t, 0, 0.9, ease.inOut))).toFixed(1)}% 0 0)`; }
       const span = Math.max(1.5, (sc.speechEnd || d - 1) - 0.6);
+      const gap = Math.min(0.32, 1.5 / Math.max(1, words.length));   // the line takes about as long as it is said
+      words.forEach((w, j) => { const q = P(t, 0.05 + j * gap, 0.8); w.style.opacity = q; w.style.transform = `translateY(${((1 - q) * 110).toFixed(1)}px)`; w.style.filter = q < 1 ? `blur(${((1 - q) * 10).toFixed(1)}px)` : ''; });
       lines.forEach((el, i) => {
-        const at = 0.5 + (i * span) / lines.length;
-        const p = P(t, at, 0.9);
-        show(el, p, 40);
-        const next = 0.5 + ((i + 1) * span) / lines.length;
-        if (i < lines.length - 1) el.style.opacity = p * (1 - 0.6 * P(t, next, 0.8));
+        const at = i === 0 ? 0 : 0.5 + (i * span) / lines.length, next = 0.5 + ((i + 1) * span) / lines.length;
+        const p = i === 0 ? 1 : P(t, at, 0.9);
+        if (v === 'center') { show(el, p * (i < lines.length - 1 ? 1 - P(t, next - 0.3, 0.3) : 1), 30); return; }   // one line at a time, in the middle
+        show(el, p, v === 'number' && i === 0 ? 0 : 40, v === 'number' && i === 0 ? -40 : 0);
+        if (v !== 'number' && i < lines.length - 1) el.style.opacity = p * (1 - 0.6 * P(t, next, 0.8));
       });
     };
   };
 
   B.statement = (s, root) => {
-    const k = s.kicker ? pos(h('div', 'kicker abs', esc(s.kicker), root), L, 330) : null;
-    const el = pos(h('div', 'stmt abs', esc(s.text), root), L, 390, R - L);
-    fit(el, 92, 48, R - L, 380);
-    const sub = s.sub ? pos(h('div', 'end-sub abs', esc(s.sub), root), L, 0, 1300) : null;
-    if (sub) sub.style.top = 390 + el.scrollHeight + 40 + 'px';
+    const v = V('statement', 'left');
+    const x = v === 'split' ? L + 470 : L, w = v === 'split' ? R - L - 470 : R - L;
+    const k = s.kicker ? pos(h('div', 'kicker abs', esc(s.kicker), root), L, v === 'split' ? 400 : 330, v === 'split' ? 380 : null) : null;
+    const rule = v === 'split' ? pos(h('div', 'st-vrule abs', '', root), L + 420, 380) : null;
+    const quote = v === 'center' ? pos(h('div', 'st-quote abs', '“', root), (L + R) / 2 - 60, 190) : null;
+    const el = pos(h('div', 'stmt abs', esc(s.text), root), x, v === 'center' ? 360 : 390, w);
+    if (v === 'center') el.style.textAlign = 'center';
+    fit(el, v === 'split' ? 84 : 92, 46, w, 380);
+    const sub = s.sub ? pos(h('div', 'end-sub abs', esc(s.sub), root), x, 0, Math.min(1300, w)) : null;
+    if (sub) { sub.style.top = (v === 'center' ? 360 : 390) + el.scrollHeight + 40 + 'px'; if (v === 'center') { sub.style.left = L + 'px'; sub.style.width = (R - L) + 'px'; sub.style.textAlign = 'center'; } }
     if (s.accent) el.style.color = 'var(--them)';
+    if (rule) rule.style.height = Math.max(200, el.scrollHeight + 60) + 'px';
     return (t, d) => {
       if (k) show(k, P(t, 0.1, 0.7), 10);
-      show(el, P(t, 0.3, 1.1), 50);
+      if (quote) show(quote, P(t, 0.0, 0.8), -20);
+      if (rule) rule.style.transform = `scaleY(${P(t, 0.1, 0.8, ease.inOut)})`;
+      show(el, P(t, 0.3, 1.1), v === 'split' ? 0 : 50, v === 'split' ? 60 : 0);
       if (sub) show(sub, P(t, 1.4, 0.9), 20);
     };
   };
@@ -170,6 +208,35 @@ function init() {
   };
 
   B.chapter = (s, root) => {
+    const v = V('chapter', 'numeral');
+    if (v === 'split') {
+      // a panel in the company's colour holds the number; the title stands on the right
+      const panel = pos(h('div', 'ch-panel abs', '', root), 0, 0); panel.style.width = '700px'; panel.style.height = '1080px';
+      const num = pos(h('div', 'ch-num ch-num-panel abs', esc(s.num ?? ''), root), 90, 330);
+      const title = pos(h('div', 'ch-title abs', esc(s.title), root), 800, 400, R - 800);
+      fit(title, 108, 52, R - 800, 320);
+      const sub = s.sub ? pos(h('div', 'end-sub abs', esc(s.sub), root), 800, 0, R - 800) : null;
+      if (sub) sub.style.top = 400 + title.scrollHeight + 36 + 'px';
+      return (t) => {
+        panel.style.transform = `translateX(${-(1 - P(t, 0, 0.8, ease.inOut)) * 700}px)`;
+        show(num, P(t, 0.4, 0.8), 0, -30); show(title, P(t, 0.5, 0.9), 0, 50);
+        if (sub) show(sub, P(t, 1.0, 0.8), 16);
+      };
+    }
+    if (v === 'center') {
+      const num = pos(h('div', 'kicker ch-num-small abs', esc(s.num ?? ''), root), L, 330, R - L); num.style.textAlign = 'center';
+      const title = pos(h('div', 'ch-title abs', esc(s.title), root), L, 420, R - L); title.style.textAlign = 'center';
+      fit(title, 120, 56, R - L, 260);
+      const rule = pos(h('div', 'ch-rule abs', '', root), (L + R) / 2, 400);
+      const sub = s.sub ? pos(h('div', 'end-sub abs', esc(s.sub), root), L, 0, R - L) : null;
+      if (sub) { sub.style.top = 420 + title.scrollHeight + 36 + 'px'; sub.style.textAlign = 'center'; }
+      return (t) => {
+        show(num, P(t, 0.0, 0.7), 10);
+        const rw = 260 * P(t, 0.3, 0.9, ease.inOut); rule.style.width = rw + 'px'; rule.style.left = (L + R) / 2 - rw / 2 + 'px';
+        show(title, P(t, 0.45, 0.9), 40);
+        if (sub) show(sub, P(t, 1.0, 0.8), 16);
+      };
+    }
     const num = pos(h('div', 'ch-num abs', esc(s.num ?? ''), root), L - 10, 250);
     const title = pos(h('div', 'ch-title abs', esc(s.title), root), L, 520, R - L);
     fit(title, 120, 56, R - L, 260);
@@ -213,32 +280,60 @@ function init() {
   };
 
   B.dossier = (s, root) => {
+    const v = V('dossier', 'grid');
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const facts = (s.facts || []).slice(0, 6);
-    const cols = 3, cw = 520, gap = (R - L - cols * cw) / (cols - 1);
-    const cards = facts.map((f, i) => {
-      const c = pos(h('div', 'ds-card', '', root), L + (i % cols) * (cw + gap), 320 + Math.floor(i / cols) * 290);
-      h('div', 'ds-label', esc(f.label), c);
-      const v = h('div', 'ds-value', esc(f.value), c);
-      fit(v, 76, 30, cw - 10);
-      if (f.note) h('div', 'ds-note', esc(f.note), c);
-      const tag = f.tag || 'known';
-      h('div', `chip ds-tag tag-${tag}`, esc(UI[tag] || tag), c);
-      const scan = h('div', 'ds-scan', '', c);
-      return { c, v, f, scan };
-    });
+    let cards;
+    if (v === 'ledger') {
+      // a ledger: label on the left, the number on the right, one row per fact
+      const rowH = Math.min(110, 620 / Math.max(1, facts.length));
+      cards = facts.map((f, i) => {
+        const c = pos(h('div', 'ds-row abs', '', root), L, 300 + i * rowH, R - L); c.style.height = rowH + 'px';
+        h('div', 'ds-label', esc(f.label), c);
+        if (f.note) h('div', 'ds-note ds-note-row', esc(f.note), c);
+        const v2 = h('div', 'ds-value ds-value-row', esc(f.value), c);
+        const tag = f.tag || 'known'; h('div', `chip ds-tag-row tag-${tag}`, esc(UI[tag] || tag), c);
+        return { c, v: v2, f, scan: null };
+      });
+    } else if (v === 'hero') {
+      // the first fact as the hero on the left, the rest as a list on the right
+      cards = facts.map((f, i) => {
+        if (i === 0) {
+          const c = pos(h('div', 'ds-hero abs', '', root), L, 330, 780);
+          h('div', 'ds-label', esc(f.label), c);
+          const v2 = h('div', 'ds-value ds-value-hero', esc(f.value), c); fit(v2, 200, 60, 760);
+          if (f.note) h('div', 'ds-note', esc(f.note), c);
+          return { c, v: v2, f, scan: null };
+        }
+        const c = pos(h('div', 'ds-item abs', '', root), L + 900, 300 + (i - 1) * 124, R - L - 900);
+        h('div', 'ds-label', esc(f.label), c);
+        const v2 = h('div', 'ds-value ds-value-item', esc(f.value), c); fit(v2, 54, 28, R - L - 900);
+        if (f.note) h('div', 'ds-note ds-note-item', esc(f.note), c);
+        return { c, v: v2, f, scan: null };
+      });
+    } else {
+      const cols = 3, cw = 520, gap = (R - L - cols * cw) / (cols - 1);
+      cards = facts.map((f, i) => {
+        const c = pos(h('div', 'ds-card', '', root), L + (i % cols) * (cw + gap), 320 + Math.floor(i / cols) * 290);
+        h('div', 'ds-label', esc(f.label), c);
+        const v2 = h('div', 'ds-value', esc(f.value), c);
+        fit(v2, 76, 30, cw - 10);
+        if (f.note) h('div', 'ds-note', esc(f.note), c);
+        const tag = f.tag || 'known';
+        h('div', `chip ds-tag tag-${tag}`, esc(UI[tag] || tag), c);
+        return { c, v: v2, f, scan: h('div', 'ds-scan', '', c) };
+      });
+    }
     return (t, d, sc) => {
       show(title, P(t, 0.1, 0.8), 20);
       const span = Math.max(2, (sc.speechEnd || d) * 0.85 - 0.8);
-      cards.forEach(({ c, v, f, scan }, i) => {
+      cards.forEach(({ c, v: val, f, scan }, i) => {
         const at = 0.8 + (i * span) / cards.length;
         const p = P(t, at, 0.7);
-        show(c, p, 30);
-        v.textContent = countText(f.value, P(t, at, 1.4, ease.expo));
-        const ps = clamp((t - at) / 0.9);
-        scan.style.opacity = ps > 0 && ps < 1 ? 1 : 0;
-        scan.style.top = ps * 230 + 'px';
+        show(c, p, v === 'ledger' ? 0 : 30, v === 'ledger' ? -30 : 0);
+        val.textContent = countText(f.value, P(t, at, 1.4, ease.expo));
+        if (scan) { const ps = clamp((t - at) / 0.9); scan.style.opacity = ps > 0 && ps < 1 ? 1 : 0; scan.style.top = ps * 230 + 'px'; }
       });
     };
   };
@@ -451,12 +546,15 @@ function init() {
   B.case = (s, root) => {
     const kk = pos(h('div', 'kicker abs', esc(s.kicker || ''), root), L, 230);
     const nm = pos(h('div', 'cs-name abs', esc(s.name), root), L, 290);
-    fit(nm, 118, 56, 960);
+    fit(nm, 118, 48, Math.min(960, 1180 - L - 40));
     const wh = pos(h('div', 'cs-where abs', esc([s.where, s.year].filter(Boolean).join(' · ')), root), L, 430);
     const hd = pos(h('div', 'cs-head abs', esc(s.headline), root), L, 490, 920);
     fit(hd, 40, 26, 920, 300);
+    const below = V('case', 'right') === 'below';
+    if (below) { hd.style.width = (R - L) + 'px'; fit(hd, 40, 26, R - L, 140); }
     const stats = (s.stats || []).slice(0, 3).map((st, i) => {
-      const el = pos(h('div', 'cs-stat', `<div class="v"></div><div class="l">${esc(st.label)}</div>`, root), 1180, 250 + i * 190);
+      const el = below ? pos(h('div', 'cs-stat cs-stat-below', `<div class="v"></div><div class="l">${esc(st.label)}</div>`, root), L + i * ((R - L) / 3), 690)
+        : pos(h('div', 'cs-stat', `<div class="v"></div><div class="l">${esc(st.label)}</div>`, root), 1180, 250 + i * 190);
       const v = el.querySelector('.v');
       v.textContent = st.value; fit(v, 96, 44, 600);
       return { el, v, st };
@@ -501,6 +599,21 @@ function init() {
   };
 
   B.questions = (s, root) => {
+    if (V('questions', 'list') === 'cards') {
+      // all questions stay on screen as numbered cards; the one being read lights up
+      const items = (s.items || []).slice(0, 4), n = Math.max(1, items.length), gap = 36, w = (R - L - gap * (n - 1)) / n;
+      const cards = items.map((q, i) => {
+        const c = pos(h('div', 'q-card abs', '', root), L + i * (w + gap), 300, w);
+        h('div', 'q-idx', String(i + 1).padStart(2, '0'), c);
+        const tx = h('div', 'q-text q-text-card', esc(q), c); tx.style.marginTop = '22px'; fit(tx, 46, 26, w - 40, 420);
+        return c;
+      });
+      return (t, d, sc) => {
+        const slots = (sc.slots && sc.slots.length === cards.length) ? sc.slots : cards.map((_, i) => (i * d) / cards.length);
+        cards.forEach((c, i) => { const p = P(t, slots[i] + 0.1, 0.6); const on = t >= slots[i] && (i === cards.length - 1 || t < slots[i + 1]);
+          show(c, p, 30); c.classList.toggle('on', on); });
+      };
+    }
     const qs = (s.items || []).slice(0, 6).map((q, i, arr) => {
       const box = pos(h('div', 'abs', '', root), L, 0, R - L);
       h('div', 'q-idx', `${String(i + 1).padStart(2, '0')} / ${String(arr.length).padStart(2, '0')}`, box);
@@ -520,12 +633,19 @@ function init() {
   };
 
   B.end = (s, root) => {
+    const v = V('end', 'left');
+    const block = v === 'block' ? pos(h('div', 'end-block abs', '', root), 0, 250) : null;
+    if (block) { block.style.width = '1920px'; block.style.height = '420px'; }
     const tt = pos(h('div', 'end-title abs', esc(s.title), root), L, 330, R - L);
+    if (v === 'center') tt.style.textAlign = 'center';
     fit(tt, 104, 52, R - L, 300);
-    const sb = s.subtitle ? pos(h('div', 'end-sub abs', esc(s.subtitle), root), L, 0, 1400) : null;
-    if (sb) sb.style.top = 330 + tt.scrollHeight + 36 + 'px';
-    const cta = s.cta ? pos(h('div', 'end-cta abs', esc(s.cta), root), L, 760) : null;
+    if (v === 'block') tt.style.top = 250 + (420 - tt.scrollHeight) / 2 + 'px';
+    const sb = s.subtitle ? pos(h('div', 'end-sub abs', esc(s.subtitle), root), L, 0, v === 'center' ? R - L : 1400) : null;
+    if (sb) { sb.style.top = (v === 'block' ? 700 : 330 + tt.scrollHeight + 36) + 'px'; if (v === 'center') sb.style.textAlign = 'center'; }
+    const cta = s.cta ? pos(h('div', 'end-cta abs', esc(s.cta), root), L, v === 'block' ? 800 : 760, v === 'center' ? R - L : null) : null;
+    if (cta && v === 'center') cta.style.textAlign = 'center';
     return (t) => {
+      if (block) block.style.transform = `scaleX(${P(t, 0.0, 0.8, ease.inOut)})`;
       show(tt, P(t, 0.3, 1.0), 40);
       if (sb) show(sb, P(t, 1.0, 0.8), 16);
       if (cta) show(cta, P(t, 1.8, 0.8), 10);
@@ -882,6 +1002,73 @@ function init() {
     };
   };
 
+  // the crowd ("zoo"): every segment of the market is attacked by every kind of player at once, many of each.
+  // Small players bite slices everywhere, AI-native newcomers take big pieces, a success is copied; the company's
+  // share in each segment (its colour, from the bottom) shrinks until no safe niche is left. Deterministic schedule.
+  B.swarm = (s, root) => {
+    const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
+    fit(title, 64, 40, R - L);
+    const KD = F.language === 'ru'
+      ? ['Оптимизируют свой бизнес', 'Перестраивают процессы', 'Переходят на AI-first', 'AI-native с нуля']
+      : ['Optimise their business', 'Rebuild their processes', 'Go AI-first', 'AI-native from scratch'];
+    const kinds = (s.kinds || KD).slice(0, 4);
+    const counts = (s.counts || [18, 11, 6, 3]).slice(0, 4);
+    const bite = [0.012, 0.026, 0.05, 0.11], onset = [0.0, 0.15, 0.32, 0.45], SH = ['circle', 'square', 'tri', 'diamond'];
+    const segs = (s.segments || []).slice(0, 6), n = Math.max(1, segs.length);
+    const endShare = clamp(s.end_share ?? 0.25, 0.05, 0.9);
+    const y0 = s.years?.[0] ?? F.start_year ?? 2026, y1 = s.years?.[1] ?? y0 + 5;
+    // legend
+    const legX = L, legW = 470, fieldX = L + legW + 60, fieldW = R - fieldX, top = 260, bot = 720, colGap = 26, colW = (fieldW - colGap * (n - 1)) / n;
+    const leg = kinds.map((k, i) => { const el = pos(h('div', 'sw-leg abs', `<i class="sw-shape ${SH[i]}"></i><span>${esc(k)}</span><b>×0</b>`, root), legX, top + 20 + i * 92, legW); return { el, b: el.querySelector('b') }; });
+    const yearEl = pos(h('div', 'sw-year abs', String(y0), root), legX, top + 420);
+    const copyNote = pos(h('div', 'sw-note abs', esc(s.copy_note || (F.language === 'ru' ? 'Успех копируют: за первым приходят следующие' : 'Success is copied: the first is followed by others')), root), legX, top + 500, legW);
+    // columns
+    const R0 = (() => { let a = 7 + (F.company?.name || '').length; return () => { a = (a * 16807) % 2147483647; return a / 2147483647; }; })();
+    const cols = segs.map((sg, j) => {
+      const x = fieldX + j * (colW + colGap);
+      const box = pos(h('div', 'sw-col abs', '', root), x, top, colW); box.style.height = (bot - top) + 'px';
+      const fill = h('div', 'sw-fill', '', box);
+      const lab = pos(h('div', 'sw-lab abs', esc(typeof sg === 'string' ? sg : sg.name), root), x, bot + 14, colW);
+      const pct = h('div', 'sw-pct', '', box);
+      return { x, box, fill, lab, pct, start: (typeof sg === 'object' && sg.share) || 1 };
+    });
+    // entrants: who, where, when, how big; AI-native successes are copied in other segments
+    const ents = [];
+    counts.forEach((c, k) => { for (let i = 0; i < c; i++) ents.push({ k, seg: Math.floor(R0() * n), at: onset[k] + (1 - onset[k]) * 0.85 * (i / Math.max(1, c)) + R0() * 0.05, size: bite[k] * (0.7 + 0.6 * R0()) }); });
+    ents.filter((e) => e.k === 3).forEach((e) => { for (let c = 0; c < 2; c++) ents.push({ k: 3, copy: true, seg: (e.seg + 1 + c + Math.floor(R0() * (n - 1))) % n, at: Math.min(0.98, e.at + 0.12 + c * 0.08), size: bite[3] * 0.7 }); });
+    // scale bites so each segment ends near the company's end share
+    const raw = Array(n).fill(0); ents.forEach((e) => (raw[e.seg] += e.size));
+    ents.forEach((e) => { e.size *= (1 - endShare) * (0.85 + 0.3 * ((e.seg * 37) % 10) / 10) / Math.max(0.01, raw[e.seg]); });
+    const placed = ents.sort((a, b) => a.at - b.at).map((e) => {
+      const c = cols[e.seg]; const el = h('i', `sw-shape ${SH[e.k]} sw-tok${e.copy ? ' copy' : ''}`, '', c.box);
+      const sz = 14 + Math.min(40, e.size * 260); el.style.width = el.style.height = sz + 'px';
+      el.style.left = (8 + R0() * Math.max(10, colW - sz - 16)) + 'px'; e.el = el; e.sz = sz; e.y = R0(); return e;
+    });
+    const punch = s.punchline ? pos(h('div', 'sw-punch abs', esc(s.punchline), root), fieldX, bot + 80, fieldW) : null;
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20);
+      leg.forEach((l, i) => show(l.el, P(t, 0.5 + i * 0.25, 0.6), 0, -20));
+      cols.forEach((c, j) => { show(c.box, P(t, 0.6 + j * 0.1, 0.6), 20); show(c.lab, P(t, 0.8 + j * 0.1, 0.6), 10); });
+      const span = Math.max(3, (sc.speechEnd || d) - 2.2), u = clamp((t - 1.4) / span);
+      yearEl.textContent = String(Math.round(y0 + (y1 - y0) * u)); show(yearEl, P(t, 1.2, 0.6), 10);
+      show(copyNote, P(t, 1.4 + span * 0.55, 0.6), 10);
+      const taken = Array(n).fill(0), cnt = [0, 0, 0, 0];
+      placed.forEach((e) => {
+        const p = clamp((u - e.at) / 0.06);
+        if (p > 0) { taken[e.seg] += e.size * p; cnt[e.k] += p >= 1 ? 1 : 0; }
+        e.el.style.opacity = p; e.el.style.transform = `scale(${0.4 + 0.6 * p})`;
+      });
+      cols.forEach((c, j) => {
+        const share = Math.max(0, 1 - taken[j]), hgt = (bot - top) * share;
+        c.fill.style.height = hgt + 'px';
+        c.pct.textContent = Math.round(share * 100) + '%'; c.pct.style.bottom = Math.max(6, hgt - 40) + 'px';   // inside the company's own colour
+        placed.filter((e) => e.seg === j).forEach((e, q) => { e.el.style.top = Math.max(6, (bot - top - hgt) - e.sz - 6 - ((q * 41 + e.y * 60) % Math.max(20, (bot - top - hgt) * 0.85))) + 'px'; });
+      });
+      leg.forEach((l, i) => (l.b.textContent = '×' + cnt[i]));
+      if (punch) show(punch, P(t, 1.4 + span * 0.9, 0.7), 10);
+    };
+  };
+
   B.myths = (s, root) => {
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
@@ -1023,7 +1210,7 @@ function init() {
     root.style.display = 'block';
     const builder = B[s.type] || B.statement;
     const upd0 = builder(s, root);
-    const deco = DECOR[THEME] ? DECOR[THEME](s, root, i) : null;
+    const deco = DECOR[THEME] ? DECOR[THEME](s, root, i) : lookDecor(s, root);
     const update = deco ? (t, d, sc) => { deco(t, d, sc); upd0(t, d, sc); } : upd0;
     root.style.display = 'none';
     const t = F.timeline[i];
@@ -1090,7 +1277,23 @@ function init() {
     // fade through black between scenes
     const fin = 1 - P(t, 0, i === 0 ? 0.12 : 0.45, (x) => x);   // the first frame already shows the picture (hook)
     const fout = P(t, sc.dur - 0.35, 0.35, (x) => x);
-    fade.style.opacity = Math.max(i === 0 ? fin : fin * 0.9, fout * (i === SC.length - 1 ? 1 : 0.9));
+    const TR = LOOK ? LOOK.transition : 'dip', last = i === SC.length - 1;
+    if (TR === 'wipe' && !last && i > 0) {
+      // a panel in the company's colour sweeps across the cut
+      const a = P(t, sc.dur - 0.4, 0.4, ease.inOut), b = P(t, 0, 0.4, ease.inOut);
+      fade.style.background = 'var(--you)'; fade.style.opacity = 1;
+      fade.style.clipPath = a > 0 ? `inset(0 ${100 - a * 100}% 0 0)` : `inset(0 0 0 ${b * 100}%)`;
+      if (a === 0 && b >= 1) fade.style.opacity = 0;
+    } else if (TR === 'slide' && i > 0 && !last) {
+      // the scene slides in from the right and out to the left, over the background
+      fade.style.background = ''; fade.style.clipPath = ''; fade.style.opacity = 0;
+      const a = P(t, sc.dur - 0.4, 0.4, ease.inOut), b = 1 - P(t, 0, 0.5, ease.out);
+      sc.root.style.transform = `translateX(${(b * 160 - a * 160).toFixed(1)}px) ` + sc.root.style.transform;
+      sc.root.style.opacity = 1 - Math.max(a, b);
+    } else {
+      fade.style.background = TR === 'dissolve' ? 'var(--bg)' : ''; fade.style.clipPath = '';
+      fade.style.opacity = Math.max(i === 0 ? fin : fin * 0.9, fout * (last ? 1 : 0.9));
+    }
     if (SKETCH) STAGE.dataset.boil = Math.floor(T * 8) % 3;
     // living background
     grid.style.transform = `translate(${-(T * 6) % 80}px, ${-(T * 3) % 80}px)`;

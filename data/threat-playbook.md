@@ -17,6 +17,24 @@ Use these to explain *why*, in the company's own terms. The first one always app
 6. **The buyer's side changes too.** Buyers ask AI assistants which brand or supplier to choose; procurement agents compare offers in seconds. Relationships and brand recognition protect less when an agent shortlists.
 7. **Capital follows the efficiency.** Investors now fund buying traditional companies and running them on AI (General Catalyst's $1.5B for AI-driven services transformation, November 2025; Thrive Holdings with over $1B, December 2025), and funding factories built from scratch for automation (Hadrian, $1.37B raised, August 2026).
 
+## 1b. Not three waves: a crowd from every side
+
+The waves describe **when each kind becomes visible**, not who comes. In reality every segment of every market gets **all kinds at once, and many of each**:
+
+- **those who optimise a little** — the same business with AI in a few tasks (cheaper quotes, better ads, a bot): dozens of them, each takes a slice;
+- **those who rebuild their processes** — the neighbour who went AI-first in pricing, supply, service: fewer, each takes a bigger slice;
+- **those who convert to AI-first** — an existing company that rebuilds its whole operating model around agents;
+- **those who build AI-native from scratch** — newcos on venture money; few, but each takes a big piece, and **a success is copied**: when one works, investors fund the next two.
+
+Then the dynamics that kill the "we'll keep our niche" hope:
+1. **Bites from everywhere.** The small ones take slices in every segment at once; the big ones take whole pieces in a few. Nobody needs your whole market; together they take it.
+2. **Success breeds copies.** If the first AI-native newco works, there will be a second and a third, and the neighbour copies their moves.
+3. **The strong fight each other, and you are crushed in between.** Newcos compete on price and speed with each other, not with you; the price they reach is below your cost. You are not their target; you are the ground they fight on.
+4. **No safe niche.** A niche survives only when nobody wants it; profitable niches are exactly what the crowd picks first. "He takes his niche, we keep ours" assumes one attacker; there will be many.
+5. **It does not stop at the model's horizon.** The model ends in five years; the crowd does not.
+
+Show it in the film: the `swarm` scene (every kind, in every segment of this company's market, with copies), a myth about the niche, and the world's finale where the newcomer is no longer alone. One attacker in the `race` is the cleanest number; the `swarm` says it will not be one.
+
 ## 2. Who can come: eight types of attacker
 
 Score each for this company: **likelihood** (low / medium / high), **when** (years from now), **what they take first**, **damage** if it happens. Choose the top two or three for the film; mention the rest in one `attackers` scene. Never name a real local competitor as one of these; types are composites. Real companies appear only as sourced `case` scenes.
@@ -88,6 +106,7 @@ Every owner has reasons why "this is not about us". The film names two or three 
 | "Not in our country / our market." | Foreign players enter with AI-made localisation; capital is global; the map scene. |
 | "We have no money for this." | The first steps cost a pilot, not a programme; the finale's 30-day steps. |
 | "We are too big to be caught." | Size is the reason they come: big market, healthy margin, advantage that can be bought (risk rubric). |
+| "Only a company a head above us could hurt us, and there will be one at most." / "The newcomer takes its niche, we keep ours." | There will be all kinds at once: those who optimise a little, those who rebuild, those who go AI-first, those who start from scratch; and a success is copied. Bite by bite and in big pieces, no niche is left (the `swarm` scene, section 1b). |
 
 ## 7. Speed of the industry
 

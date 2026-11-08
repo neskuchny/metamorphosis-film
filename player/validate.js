@@ -2,7 +2,7 @@
    validate(film, { exists(file) }) -> { errors, warnings, estimatedSeconds }
    exists is optional: when given, "clip" files are checked for presence. */
 (function (root) {
-  const TYPES = ['cold_open', 'statement', 'chapter', 'dossier', 'timeline', 'race', 'scissors', 'pillars', 'signals', 'map', 'waves', 'moment', 'attackers', 'anatomy', 'ladder', 'myths', 'plan', 'parallels', 'scenarios', 'beneath', 'world', 'path', 'case', 'fork', 'questions', 'clip', 'end'];
+  const TYPES = ['cold_open', 'statement', 'chapter', 'dossier', 'timeline', 'race', 'scissors', 'pillars', 'signals', 'map', 'waves', 'moment', 'attackers', 'anatomy', 'ladder', 'myths', 'plan', 'parallels', 'scenarios', 'beneath', 'world', 'path', 'swarm', 'case', 'fork', 'questions', 'clip', 'end'];
   const TAGS = ['known', 'estimate', 'model'];
   const SIDES = ['you', 'them', 'market'];
 
@@ -30,6 +30,14 @@
         for (const k of ['you', 'them_start', 'them_end', 'sites']) if (w[k] != null && !(typeof w[k] === 'number' && w[k] > 0)) err(`world.${k} must be a positive number`);
         if (w.you > 12000) warn('world.you above 12 000: the town shows 12 000 windows; say in a caption that one window stands for several people');
       }
+    }
+    if (!(film.scenes || []).some((x) => x.type === 'swarm')) warn('no swarm scene: show that the challenger will not be alone — every kind, in every segment, copies (threat-playbook 1b)');
+    if (film.look != null) {
+      const o = film.look, P = ['grotesk', 'geometric', 'classic', 'editorial', 'news', 'friendly', 'russian', 'modern', 'tech', 'elegant'];
+      if (o.pairing && !P.includes(o.pairing)) err('look.pairing must be one of ' + P.join(', '));
+      if (o.mode && !['night', 'paper', 'field', 'snow', 'ink'].includes(o.mode)) err('look.mode must be night, paper, field, snow or ink');
+      if (o.brand && !/^#[0-9a-f]{6}$/i.test(o.brand)) err('look.brand must be a hex colour');
+      if (o.transition && !['dip', 'wipe', 'slide', 'dissolve'].includes(o.transition)) err('look.transition must be dip, wipe, slide or dissolve');
     }
     // the film's own idea (Step 2c): without it, films for different companies drift towards the example
     if (!film.concept || typeof film.concept !== 'object') warn('concept missing: write the film\'s own idea (data/film-architectures.md) — idea, architecture, central_image, signature, specifics[]');
@@ -223,6 +231,14 @@
       case 'scenarios':
         if (!Array.isArray(s.items) || s.items.length < 2 || s.items.length > 3) err(`${at}: items[] (2–3 paths: tradition, evolution, revolution) required`);
         else s.items.forEach((it, j) => { if (!it.name || !it.outcome) err(`${at}: item ${j + 1} needs name and outcome`); if (len(it.what) > 110) warn(`${at}: item ${j + 1} what > 110 chars`); if (len(it.outcome) > 80) warn(`${at}: item ${j + 1} outcome > 80 chars`); });
+        break;
+      case 'swarm':
+        if (!Array.isArray(s.segments) || s.segments.length < 3 || s.segments.length > 6) err(`${at}: 3–6 segments of this company's market required`);
+        (s.segments || []).forEach((g, j) => { const nm = typeof g === 'string' ? g : g && g.name; if (!nm) err(`${at}: segment ${j + 1} needs a name`); else if (len(nm) > 28) warn(`${at}: segment ${j + 1} name > 28 chars`); });
+        if (s.kinds && (!Array.isArray(s.kinds) || s.kinds.length !== 4)) err(`${at}: kinds must list 4 labels (optimise, rebuild, AI-first, AI-native)`);
+        if (s.counts && (!Array.isArray(s.counts) || s.counts.length !== 4)) err(`${at}: counts must list 4 numbers`);
+        if (s.end_share != null && !(s.end_share > 0 && s.end_share < 1)) err(`${at}: end_share must be between 0 and 1`);
+        if (s.punchline && len(s.punchline) > 90) warn(`${at}: punchline > 90 chars`);
         break;
       case 'path':
         if (!Array.isArray(s.steps) || s.steps.length < 3 || s.steps.length > 6) err(`${at}: 3–6 steps required`);

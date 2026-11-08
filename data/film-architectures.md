@@ -7,7 +7,8 @@ So every film has a fixed **logic** and a free **telling**. Read this file in St
 ## 1. What every film shares (the logic)
 
 - An honest risk verdict, with the strength of the company named before the threat.
-- Change arrives in waves of growing size: the environment speeds up, a neighbour rebuilds, a company is built from scratch. The order is the argument. The waves may be told in any form (see the architectures), not always as three chapters.
+- Change arrives in waves of growing size: the environment speeds up, a neighbour rebuilds, a company is built from scratch. The waves may be told in any form (see the architectures), not always as three chapters.
+- **It is never one attacker.** In every segment all kinds arrive at once and in numbers (those who optimise a little, rebuild, go AI-first, start from scratch); a success is copied; they fight each other and the company is crushed in between; no niche is safe. Every film has a `swarm` scene and answers the niche belief (`data/threat-playbook.md`, 1b).
 - The experience gap: the neighbour's clumsy first step is a step the viewer has not taken; experience piles up underneath.
 - A fictional composite challenger that only does what real companies have done, said on screen.
 - A model, labelled as a model.
@@ -26,7 +27,7 @@ So every film has a fixed **logic** and a free **telling**. Read this file in St
 | **Attackers** | The top threats from this company's threat map. A retailer's monster is usually a platform or a dark-store network, a services firm's is a roll-up, a manufacturer's is a newco with its own plants. |
 | **Myths and questions** | Beliefs in the owner's own words as found in interviews, the site, job ads; questions that only this owner can answer, with this company's numbers. |
 | **World** | `world.kit` from the business (factory, city, logistics), `world.time` (night, dusk, dawn, snow) from the region and season, `world.light` in the brand's colour, the beats re-cast in this business's terms. |
-| **Theme** | `style` and accent chosen for this owner (a family manufacturer and a fintech should not look alike). |
+| **Look** | `look` (player/look.js): the type pairing (ten, all with Cyrillic), the colour mode (night, paper, field, snow, ink), the company's colour as "you" and a challenger colour across the wheel, cards, background, decoration, captions, transitions and a layout variant for each hero scene (cold open, chapter, statement, dossier, questions, case, end). Without `look` it is derived from the company's name and colour, so it already differs; set it on purpose for this owner (a family manufacturer and a fintech should not look alike). A named `style` (editorial, poster, sketch) keeps its own colours and fonts. |
 | **Sound identity** | `sound.identity` from the kit (machine room, city, highway) and one signature sound tied to the central image. |
 | **Signature motif** | One element that returns three times, changed each time (the lit windows of Artel; a store sign that dims; a truck that drives empty). |
 

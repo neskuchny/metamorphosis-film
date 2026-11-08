@@ -80,6 +80,18 @@ for (const o of others) {
   if (m1 && m2 && norm(m1.channel || '') === norm(m2.channel || '') && norm(m1.from || '').split(' ')[0] === norm(m2.from || '').split(' ')[0]) say('WARN', 'moment', `the moment comes through the same channel and sender as in ${name}`);
 }
 
+// the look: the same fonts and colours as a friend's film read as the same template
+{
+  const vm = await import('node:vm'); const ctx = { self: {} }; vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'player', 'look.js'), 'utf8'), ctx);
+  const LK = ctx.self.FilmLook, mine = LK.resolve(film);
+  for (const o of others) {
+    const th = LK.resolve(o.j), name = path.relative(ROOT, o.f);
+    const sameV = Object.keys(mine.variants).filter((k) => mine.variants[k] === th.variants[k]).length;
+    if (mine.pairing === th.pairing && mine.mode === th.mode) say('WARN', 'look', `same fonts (${mine.pairing}) and colour mode (${mine.mode}) as ${name}: set look.pairing or look.mode`);
+    else say(sameV >= 6 ? 'WARN' : 'PASS', 'look', `${mine.pairing}/${mine.mode} vs ${th.pairing}/${th.mode}; ${sameV} of ${Object.keys(mine.variants).length} scene layouts shared with ${name}`);
+  }
+}
+
 // this company's own words
 const spec = (c.specifics || []).map((w) => String(w).toLowerCase()).filter(Boolean);
 const stem = (w) => (w.length > 6 ? w.slice(0, w.length - 2) : w);
