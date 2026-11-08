@@ -313,9 +313,9 @@ function init() {
         return { c, v: v2, f, scan: null };
       });
     } else {
-      const cols = 3, cw = 520, gap = (R - L - cols * cw) / (cols - 1);
+      const cols = 3, cw = Math.min(520, (R - L - 2 * 48) / cols), gap = (R - L - cols * cw) / (cols - 1);   // narrow margins must not make the cards overlap
       cards = facts.map((f, i) => {
-        const c = pos(h('div', 'ds-card', '', root), L + (i % cols) * (cw + gap), 320 + Math.floor(i / cols) * 290);
+        const c = pos(h('div', 'ds-card', '', root), L + (i % cols) * (cw + gap), 320 + Math.floor(i / cols) * 290, cw);
         h('div', 'ds-label', esc(f.label), c);
         const v2 = h('div', 'ds-value', esc(f.value), c);
         fit(v2, 76, 30, cw - 10);
@@ -491,7 +491,7 @@ function init() {
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const items = (s.items || []).slice(0, 5);
-    const n = items.length, cw = 292, gap = (R - L - n * cw) / Math.max(1, n - 1);
+    const n = items.length, cw = Math.min(292, (R - L - 24 * Math.max(0, n - 1)) / Math.max(1, n)), gap = (R - L - n * cw) / Math.max(1, n - 1);
     const cols = items.map((it, i) => {
       const c = pos(h('div', 'pl-col', '', root), L + i * (cw + gap), 330, cw);
       const bar = h('div', 'pl-bar', '<i></i>', c);
@@ -904,7 +904,7 @@ function init() {
       a.style.setProperty('--sh', r.margin ? 1 : shades[i] || '.2'); b.style.setProperty('--sh', r.margin ? 1 : shades[i] || '.2');
       if (r.margin) { a.classList.add('margin'); b.classList.add('margin'); }
       a.innerHTML = `<span>${esc(String(r.you))}</span>`; b.innerHTML = `<span>${esc(String(r.them))}</span>`;
-      const lab = pos(h('div', 'an-lab', esc(r.label), root), L, 0, xa - L - 30);
+      const lx = Math.min(L, 160), lab = pos(h('div', 'an-lab', esc(r.label), root), lx, 0, xa - lx - 30); fit(lab, 28, 18, xa - lx - 30);   // one line, whatever the margins
       segA.push(a); segB.push(b); labs.push(lab);
     });
     const unit = s.unit ? pos(h('div', 'an-unit', esc(s.unit), root), xa, yBot + 18, xb + colW - xa) : null;
