@@ -72,6 +72,8 @@ for (const o of others) {
   const pp = cases(o.j), sameP = cases(film).filter((x) => pp.includes(x));
   const nCases = caseNames(film).length;
   say(nCases && sameC.length === nCases ? 'FAIL' : sameC.length + sameP.length >= 3 ? 'WARN' : 'PASS', 'cases', sameC.length || sameP.length ? `shared with ${name}: ${[...sameC, ...sameP].join(' · ')}` : 'cases and parallels differ');
+  const sa = new Set(seq(film)), sb = new Set(seq(o.j)), jac = [...sa].filter((x) => sb.has(x)).length / new Set([...sa, ...sb]).size;
+  say(jac > 0.9 ? 'WARN' : 'PASS', 'scenes', `${(jac * 100).toFixed(0)}% of scene types shared with ${name}${jac > 0.9 ? ' — tell some functions with other scene types (film-architectures 3b)' : ''}`);
   const a = seq(film), b = seq(o.j), sim = 1 - lev(a, b) / Math.max(a.length, b.length);
   say(sim > 0.9 ? 'WARN' : 'PASS', 'order', `scene order ${(sim * 100).toFixed(0)}% like ${name}${sim > 0.9 ? ' — the architecture looks borrowed (Step 2c)' : ''}`);
   if (worldKey(film) && worldKey(film) === worldKey(o.j)) say('WARN', 'world', `same world (${worldKey(film)}) as ${name}: change the time, the kit or the look if the business allows`);
@@ -86,9 +88,10 @@ for (const o of others) {
   const LK = ctx.self.FilmLook, mine = LK.resolve(film);
   for (const o of others) {
     const th = LK.resolve(o.j), name = path.relative(ROOT, o.f);
-    const sameV = Object.keys(mine.variants).filter((k) => mine.variants[k] === th.variants[k]).length;
+    const used = new Set([...seq(film), ...seq(o.j)]), keys = Object.keys(mine.variants).filter((k) => used.has(k));   // only the scene types these films show
+    const sameV = keys.filter((k) => mine.variants[k] === th.variants[k]).length;
     if (mine.pairing === th.pairing && mine.mode === th.mode) say('WARN', 'look', `same fonts (${mine.pairing}) and colour mode (${mine.mode}) as ${name}: set look.pairing or look.mode`);
-    else say(sameV >= 6 ? 'WARN' : 'PASS', 'look', `${mine.pairing}/${mine.mode} vs ${th.pairing}/${th.mode}; ${sameV} of ${Object.keys(mine.variants).length} scene layouts shared with ${name}`);
+    else say(sameV > keys.length / 2 ? 'WARN' : 'PASS', 'look', `${mine.pairing}/${mine.mode} vs ${th.pairing}/${th.mode}; ${sameV} of ${keys.length} scene layouts shared with ${name}${sameV > keys.length / 2 ? ' — set look.variants on purpose' : ''}`);
   }
 }
 

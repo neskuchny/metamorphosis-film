@@ -4,7 +4,7 @@
    clipSeconds[i]:   length of the video file of a "clip" scene, 0 otherwise. */
 (function (root) {
   const CHARS_PER_SEC = 14.5;
-  const MIN_DUR = { cold_open: 7, statement: 5, chapter: 3.2, dossier: 10, timeline: 12, race: 12, scissors: 10, pillars: 12, signals: 10, map: 12, waves: 14, moment: 10, attackers: 12, anatomy: 12, ladder: 12, myths: 12, plan: 14, parallels: 12, scenarios: 12, beneath: 12, world: 8, path: 12, swarm: 13, case: 9, fork: 10, questions: 10, clip: 4, end: 6 };
+  const MIN_DUR = { cold_open: 7, statement: 5, chapter: 3.2, dossier: 10, timeline: 12, race: 12, scissors: 10, pillars: 12, signals: 10, map: 12, waves: 14, moment: 10, attackers: 12, anatomy: 12, ladder: 12, myths: 12, plan: 14, parallels: 12, scenarios: 12, beneath: 12, world: 8, path: 12, swarm: 13, flank: 13, case: 9, fork: 10, questions: 10, clip: 4, end: 6 };
 
   function splitCaptions(text) {
     const sents = String(text).replace(/\s+/g, ' ').trim().split(/(?<=[.!?…。！？])\s*/).filter(Boolean);

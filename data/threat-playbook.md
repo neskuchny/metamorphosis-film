@@ -35,6 +35,34 @@ Then the dynamics that kill the "we'll keep our niche" hope:
 
 Show it in the film: the `swarm` scene (every kind, in every segment of this company's market, with copies), a myth about the niche, and the world's finale where the newcomer is no longer alone. One attacker in the `race` is the cleanest number; the `swarm` says it will not be one.
 
+## 1c. From the side: dangers that are not competitors
+
+Competitors are only part of it. AI also arrives in the hands of this company's clients, suppliers, neighbours in other markets and in what people expect, and some of the biggest losses come from there. They differ from company to company: some apply here, some do not. Two passes, both mandatory, written into `threats.md` (section "From the side") and into one `flank` scene.
+
+**Pass 1 — the catalogue.** Test every line on this company: does it apply, how likely in five years (low / mid / high), how much revenue or margin it could take, what the first sign would be. Keep the ones that apply; drop the rest without regret.
+
+| # | Danger | The test question for this company | A real parallel |
+|---|---|---|---|
+| S1 | **The client does it himself** | Could a client build or run what you sell with AI tools and his own people? (software studios, agencies, recruiters, translators, design, accounting, analytics, simple manufacturing of spare parts) | Companies writing their own internal tools with AI instead of buying them; Klarna said in 2024 it dropped Salesforce and Workday (it moved to other software and its own stack) |
+| S2 | **The client tries, fails, and still does not come back for a while** | If a client leaves to "do it with AI" and it goes badly, how long until he returns, and can you survive that gap? | Klarna replaced much of its support with an AI assistant in 2024 and began hiring human agents again in 2025: whoever lost that contract lost the money in between |
+| S3 | **Price falls in the head** | Will clients believe your work is "easier now" and refuse to pay what they paid, even if your costs did not change? | Clients asking agencies, lawyers and developers for lower rates "because there is AI" |
+| S4 | **Expectations jump** | What will "normal" look like after people use AI products elsewhere: instant answers, personal offers, things that adjust themselves? Is your product suddenly old? | "Smart" home and devices: switching lights on is no longer smart; people expect it to decide |
+| S5 | **A general tool absorbs part of your service** | Is there a general AI tool, made for something else, that already does a slice of what clients pay you for? | Students moving from Chegg to ChatGPT and Gemini: revenue −30% in a year, 22% of staff cut (May 2025); site builders and landing agencies against Cursor/Lovable; task trackers against people organising work in Claude Code |
+| S6 | **An adjacent market starts doing it in its own way** | Which company from another market touches your client at the same moment and could add your slice as a feature? | A fridge that sees what is running out and orders groceries through Instacart (Samsung, 2025): the shopping list leaves the store |
+| S7 | **Answer engines and agents choose instead of people** | When a client asks an assistant "what to buy / whom to hire", are you in the answer? Does your brand still matter if an agent compares specs and price? | Pew Research (2025): with an AI summary in Google results people click links in 8% of visits, without it in 15% |
+| S8 | **The channel or platform owns the client** | Can the marketplace, bank, super-app or distributor that stands between you and the client use AI to sell its own version or steer the client elsewhere? | Marketplaces launching private labels; banks steering purchases with cashback |
+| S9 | **The supplier goes direct** | Could your supplier reach your clients himself now that AI handles sales, support and paperwork in any language? | Factories selling direct on marketplaces with AI-written listings and support |
+| S10 | **Demand itself shrinks** | Will AI make clients need less of your product (fewer breakdowns, less waste, fewer trips, fewer hires, less paperwork)? | Predictive maintenance cutting spare-part and repair demand; translation and call-centre volumes |
+| S11 | **The model is replaced by a service** | Could someone sell the result instead of the product (pay per hour of comfort, per kilometre, per outcome) and choose the cheapest supplier behind it? | Cooling as a Service: the operator owns the equipment, the client pays per unit of cooling (BASE initiative) |
+| S12 | **Your clients' own business shrinks** | Are your B2B clients themselves exposed? If their market shrinks, your orders shrink with it | Suppliers of call centres, print, travel agencies |
+| S13 | **People: the best leave, the young are not trained** | Will your strongest people leave to start AI-native companies? Will the junior work that trained experts disappear, so there is no one to grow? | Founders of AI-native firms coming out of incumbents |
+| S14 | **Noise and fraud in the channel** | Will AI flood your channels with fake leads, fake reviews, fake applicants, deepfake fraud, raising your cost of every real deal? | Recruiters drowning in AI-written applications |
+| S15 | **Money looks at you differently** | Will banks, investors or buyers of your company price in AI risk (lower valuation, stricter credit) before anything happens to sales? | The "black February" of 2026: Thomson Reuters −18% on one day |
+
+**Pass 2 — what is not in the catalogue.** The catalogue is what we already know; the film must also say what we did not. Look at this company through these lenses and write at least eight candidate dangers specific to it, without filtering: the client's job (what does the client really want done, and who else could do that job?), the moment of purchase (who stands next to the client when he decides?), every partner in the chain (suppliers, channels, banks, insurers, landlords, regulators), the data (who else sees this company's clients' behaviour?), the physical world (devices, vehicles, buildings that start deciding), other countries (who solved this differently?), the second order (what happens to this company's clients' clients?). Search for real signals of each. Then score every candidate, from both passes, on probability, impact and surprise (would the owner have thought of it himself?).
+
+**What goes into the film.** Three to five dangers with real weight, at least one from pass 2 when one holds up. Exactly one is marked `surprise`: the most important danger this owner most likely has not considered. It must be concrete, grounded in a real signal, and plausible for this company within five years; never a stretch made to sound clever. If nothing from the side is weighty for this company, say so in `threats.md` and keep the scene short; do not invent.
+
 ## 2. Who can come: eight types of attacker
 
 Score each for this company: **likelihood** (low / medium / high), **when** (years from now), **what they take first**, **damage** if it happens. Choose the top two or three for the film; mention the rest in one `attackers` scene. Never name a real local competitor as one of these; types are composites. Real companies appear only as sourced `case` scenes.
@@ -182,6 +210,9 @@ Cases from the deck that are not yet verified (Manifest, Alpha School, "Hexion" 
 
 ## What AI changes on each step
 - <step>: today <time/cost> → AI-native <time/cost>; evidence <case or source>
+
+## From the side (section 1c)
+Catalogue S1–S15: applies / probability / impact / first sign, for the ones that apply. Pass 2: eight or more candidates of your own, each with its signal. Scored list; the 3–5 that go into the film; the one marked surprise and why the owner would not think of it.
 
 ## Attackers (score all eight)
 | type | likelihood | when | takes first | damage | why (one line) |

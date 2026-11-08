@@ -75,7 +75,7 @@ html,body{background:#000;width:1920px;height:1080px;overflow:hidden}
 .rc-end{position:absolute;font-size:44px;font-weight:700;transform:translateY(-50%)}
 .rc-end small{display:block;font-family:var(--mono);font-size:15px;letter-spacing:.12em;font-weight:500;text-transform:uppercase;color:var(--muted)}
 .rc-gap{position:absolute;right:120px;font-size:150px;font-weight:800;letter-spacing:-.04em;color:var(--them);text-align:right;line-height:1}
-.rc-gap small{display:block;font-family:var(--mono);font-size:18px;letter-spacing:.12em;font-weight:500;color:var(--muted);text-transform:uppercase;margin-top:10px}
+.rc-gap small{display:block;max-width:440px;margin-left:auto;white-space:normal;line-height:1.35;font-family:var(--mono);font-size:18px;letter-spacing:.12em;font-weight:500;color:var(--muted);text-transform:uppercase;margin-top:10px}
 
 /* scissors */
 .sc-head{position:absolute;top:300px;font-family:var(--mono);font-size:20px;letter-spacing:.14em;text-transform:uppercase;text-align:right;width:420px}
@@ -484,3 +484,56 @@ html,body{background:#000;width:1920px;height:1080px;overflow:hidden}
 .sw-pct{position:absolute;left:12px;font-family:var(--mono);font-size:24px;font-weight:600;color:var(--bg);z-index:2}
 .sw-lab{font-family:var(--mono);font-size:17px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center;line-height:1.25}
 .sw-punch{font-family:var(--head,var(--sans));font-size:31px;line-height:1.2;font-weight:700;color:var(--ink)}
+
+/* second layouts (look.variants) */
+.rb-key{font-family:var(--mono);font-size:17px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px;white-space:nowrap}
+.rb-key i{display:inline-block;width:16px;height:16px;border-radius:2px;margin-left:14px}.rb-key i:first-child{margin-left:0}
+.rb-key i.you,.rb-bar.you,.sb-bar.you{background:var(--you)}.rb-key i.them,.rb-bar.them,.sb-bar.them{background:var(--them)}
+.rb-base{height:2px;background:var(--dim);transform-origin:left}
+.rb-bar{border-radius:3px 3px 0 0}
+.rb-val{font-family:var(--mono);font-size:18px;font-weight:600;text-align:center;white-space:nowrap}.rb-val.you,.sb-val.you{color:var(--you)}.rb-val.them,.sb-val.them{color:var(--them)}
+.rb-year{font-family:var(--mono);font-size:20px;color:var(--muted);text-align:center}
+.sb-label{font-size:30px;line-height:1.2;color:var(--ink)}
+.sb-bar{height:28px;border-radius:0 4px 4px 0}
+.sb-val{font-size:30px;font-weight:700;white-space:nowrap;line-height:1.1}
+.my-big{font-size:62px;color:var(--ink);font-weight:700;line-height:1.12}
+.my-strike{height:5px;background:var(--them);transform-origin:left;transform:scaleX(0)}
+.my-count{font-family:var(--mono);font-size:20px;color:var(--muted);text-align:right}
+.px-tile{border-top:3px solid var(--them);padding-top:18px}
+.px-speed-tile{text-align:left;font-size:64px;line-height:1}
+.px-field-tile{width:auto;margin-top:16px;font-size:30px}
+.px-what-tile{width:auto;margin-top:10px}
+.sn-band{border-top:1px solid var(--line)}.sn-band.accent{border-top:3px solid var(--ok)}.sn-band.accent .sn-name{color:var(--ok)}
+.sn-out-r small{display:block;font-family:var(--mono);font-size:16px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.sn-out-r span{display:block;font-size:32px;font-weight:700;line-height:1.2}
+.sl-rail{background:var(--line);transform-origin:top}
+.sl-dot{width:16px;height:16px;border-radius:50%;background:var(--them)}
+.sl-meta{font-family:var(--mono);font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:right;line-height:1.4}
+.sl-meta b{display:block;color:var(--ink);font-weight:600}
+.sl-text{font-size:32px;line-height:1.25}
+.pq-row{border-top:1px solid var(--line);padding:10px 0 0 70px}
+.pq-row i{position:absolute;left:0;top:12px;font-style:normal;font-family:var(--mono);font-size:24px;font-weight:600;color:var(--them)}
+.pq-row small{display:block;font-family:var(--mono);font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pq-row span{display:block;font-size:27px;line-height:1.2;margin-top:2px}
+.sw-col.hz{overflow:hidden}.sw-fill.hz{top:0;bottom:0;right:auto;width:100%;height:auto}
+.sw-lab.hz{text-align:left}
+.sw-col.hz .sw-pct{top:50%;bottom:auto!important;transform:translateY(-50%)}
+/* flank: the dangers that come from the side */
+.fl-from{font-family:var(--mono);font-size:16px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.fl-what{font-size:28px;font-weight:700;line-height:1.15;margin-top:8px}
+.fl-why{font-size:21px;line-height:1.3;color:var(--muted);margin-top:8px}
+.fl-case{font-family:var(--mono);font-size:14px;letter-spacing:.06em;color:var(--muted);margin-top:10px}
+.fl-flag{display:inline-block;margin-top:12px;font-family:var(--mono);font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--bg);background:var(--them);padding:4px 10px;border-radius:3px}
+.fl-card{border:1px solid var(--line);border-radius:10px;padding:18px 20px;background:var(--card)}
+.fl-card.surprise{border:2px solid var(--them)}
+.fl-card.surprise .fl-what{font-size:44px}
+.fl-node{background:var(--bg)}
+.fl-node.surprise .fl-what{font-size:30px}
+.fl-hub{width:180px;height:180px;border-radius:50%;background:var(--you);color:var(--bg);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:34px;line-height:1.05;padding:20px;box-sizing:border-box}
+.fl-line{stroke:var(--line);stroke-width:2;stroke-dasharray:6 8}.fl-line.surprise{stroke:var(--them);stroke-width:3}
+.fl-row{display:flex;align-items:flex-start;gap:40px;border-top:1px solid var(--line);padding-top:16px}
+.fl-row.surprise{border-top:3px solid var(--them)}
+.fl-from-col{flex-direction:column;align-items:flex-start;gap:10px;font-size:18px;color:var(--ink)}
+.fl-row .fl-what{margin-top:0;font-size:32px}
+.fl-row .fl-flag{position:absolute;right:0;top:16px;margin-top:0}
+.fl-pun{font-family:var(--mono);font-size:22px;letter-spacing:.06em;text-transform:uppercase;color:var(--them)}

@@ -399,6 +399,7 @@ function init() {
   };
 
   B.race = (s, root) => {
+    if (V('race', 'line') === 'bars') return VB.race_bars(s, root);
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const years = s.years, a = s.you, b = s.them;
@@ -452,16 +453,18 @@ function init() {
   };
 
   B.scissors = (s, root) => {
+    if (V('scissors', 'rows') === 'bars') return VB.scissors_bars(s, root);
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
-    const hy = pos(h('div', 'sc-head you', esc(s.you_label || youName), root), 640, 300);
-    const ht = pos(h('div', 'sc-head them', esc(s.them_label || themName), root), 1080, 300);
+    const cA = Math.round((R - L) * 0.4), cB = Math.round((R - L) * 0.675);   // value columns follow the margins
+    const hy = pos(h('div', 'sc-head you', esc(s.you_label || youName), root), L + cA, 300);
+    const ht = pos(h('div', 'sc-head them', esc(s.them_label || themName), root), L + cB, 300);
     const rows = (s.rows || []).slice(0, 5).map((r, i) => {
       const row = pos(h('div', 'sc-row', '', root), L, 350 + i * 112);
       row.style.width = R - L + 'px';
-      const lab = h('div', 'sc-label', esc(r.label), row);
-      fit(lab, 32, 20, 700, 80);
-      const y = h('div', 'sc-you you', '', row), m = h('div', 'sc-them them', '', row);
+      const lab = h('div', 'sc-label', esc(r.label), row); lab.style.width = cA - 40 + 'px';
+      fit(lab, 32, 20, cA - 40, 80);
+      const y = h('div', 'sc-you you', '', row), m = h('div', 'sc-them them', '', row); y.style.left = cA + 'px'; m.style.left = cB + 'px';
       const q = h('div', 'sc-ratio', esc(r.ratio || ''), row);
       return { row, r, y, m, q };
     });
@@ -514,11 +517,13 @@ function init() {
   };
 
   B.signals = (s, root) => {
+    if (V('signals', 'stack') === 'list') return VB.signals_list(s, root);
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 330, 600);
     fit(title, 64, 36, 600, 400);
     const items = (s.items || []).slice(0, 5);
     const cards = items.map((it) => {
       const c = h('div', 'sg-card', `<div class="sg-meta">${esc([it.when, it.from].filter(Boolean).join(' · '))}</div><div class="sg-text">${esc(it.text)}</div>`, root);
+      c.style.left = L + 660 + 'px'; c.style.width = R - L - 660 - 54 + 'px';
       return c;
     });
     const hs = cards.map((c) => c.offsetHeight + 18);
@@ -1024,11 +1029,12 @@ function init() {
     const copyNote = pos(h('div', 'sw-note abs', esc(s.copy_note || (F.language === 'ru' ? 'Успех копируют: за первым приходят следующие' : 'Success is copied: the first is followed by others')), root), legX, top + 500, legW);
     // columns
     const R0 = (() => { let a = 7 + (F.company?.name || '').length; return () => { a = (a * 16807) % 2147483647; return a / 2147483647; }; })();
+    const hz = V('swarm', 'columns') === 'rows', rowH = (bot + 40 - top) / n, barH = Math.min(70, rowH - 40);   // rows: each segment a horizontal bar
     const cols = segs.map((sg, j) => {
-      const x = fieldX + j * (colW + colGap);
-      const box = pos(h('div', 'sw-col abs', '', root), x, top, colW); box.style.height = (bot - top) + 'px';
-      const fill = h('div', 'sw-fill', '', box);
-      const lab = pos(h('div', 'sw-lab abs', esc(typeof sg === 'string' ? sg : sg.name), root), x, bot + 14, colW);
+      const x = hz ? fieldX : fieldX + j * (colW + colGap), y = hz ? top + j * rowH + 30 : top;
+      const box = pos(h('div', 'sw-col abs' + (hz ? ' hz' : ''), '', root), x, y, hz ? fieldW : colW); box.style.height = (hz ? barH : bot - top) + 'px';
+      const fill = h('div', 'sw-fill' + (hz ? ' hz' : ''), '', box);
+      const lab = pos(h('div', 'sw-lab abs' + (hz ? ' hz' : ''), esc(typeof sg === 'string' ? sg : sg.name), root), x, hz ? y - 28 : bot + 14, hz ? fieldW : colW);
       const pct = h('div', 'sw-pct', '', box);
       return { x, box, fill, lab, pct, start: (typeof sg === 'object' && sg.share) || 1 };
     });
@@ -1041,8 +1047,9 @@ function init() {
     ents.forEach((e) => { e.size *= (1 - endShare) * (0.85 + 0.3 * ((e.seg * 37) % 10) / 10) / Math.max(0.01, raw[e.seg]); });
     const placed = ents.sort((a, b) => a.at - b.at).map((e) => {
       const c = cols[e.seg]; const el = h('i', `sw-shape ${SH[e.k]} sw-tok${e.copy ? ' copy' : ''}`, '', c.box);
-      const sz = 14 + Math.min(40, e.size * 260); el.style.width = el.style.height = sz + 'px';
-      el.style.left = (8 + R0() * Math.max(10, colW - sz - 16)) + 'px'; e.el = el; e.sz = sz; e.y = R0(); return e;
+      const sz = Math.min(hz ? barH - 10 : 54, 14 + Math.min(40, e.size * 260)); el.style.width = el.style.height = sz + 'px';
+      if (hz) el.style.top = Math.max(4, (barH - sz) / 2 + (R0() - 0.5) * (barH - sz) * 0.8) + 'px'; else el.style.left = (8 + R0() * Math.max(10, colW - sz - 16)) + 'px';
+      e.el = el; e.sz = sz; e.y = R0(); return e;
     });
     const punch = s.punchline ? pos(h('div', 'sw-punch abs', esc(s.punchline), root), fieldX, bot + 80, fieldW) : null;
     return (t, d, sc) => {
@@ -1060,6 +1067,8 @@ function init() {
       });
       cols.forEach((c, j) => {
         const share = Math.max(0, 1 - taken[j]), hgt = (bot - top) * share;
+        if (hz) { const wd = fieldW * share; c.fill.style.width = wd + 'px'; c.pct.textContent = Math.round(share * 100) + '%'; c.pct.style.left = Math.max(8, wd - 74) + 'px';
+          placed.filter((e) => e.seg === j).forEach((e, q) => { e.el.style.left = Math.min(fieldW - e.sz - 4, wd + 6 + ((q * 53 + e.y * 90) % Math.max(20, (fieldW - wd) * 0.9))) + 'px'; }); return; }
         c.fill.style.height = hgt + 'px';
         c.pct.textContent = Math.round(share * 100) + '%'; c.pct.style.bottom = Math.max(6, hgt - 40) + 'px';   // inside the company's own colour
         placed.filter((e) => e.seg === j).forEach((e, q) => { e.el.style.top = Math.max(6, (bot - top - hgt) - e.sz - 6 - ((q * 41 + e.y * 60) % Math.max(20, (bot - top - hgt) * 0.85))) + 'px'; });
@@ -1070,6 +1079,7 @@ function init() {
   };
 
   B.myths = (s, root) => {
+    if (V('myths', 'rows') === 'stack') return VB.myths_stack(s, root);
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const items = (s.items || []).slice(0, 3);
@@ -1097,6 +1107,7 @@ function init() {
 
   // the attack plan of a company that does not exist yet: a founder's memo and ten moves in four columns
   B.plan = (s, root) => {
+    if (V('plan', 'columns') === 'list') return VB.plan_list(s, root);
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const memo = s.memo ? pos(h('div', 'pl-memo abs', esc(s.memo), root), L, 236, R - L) : null;
@@ -1127,6 +1138,7 @@ function init() {
 
   // where it already happened faster: industries, what changed, how fast
   B.parallels = (s, root) => {
+    if (V('parallels', 'rows') === 'tiles') return VB.parallels_tiles(s, root);
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const rows = (s.rows || []).slice(0, 5), rh = rows.length > 4 ? 118 : 136;
@@ -1149,6 +1161,7 @@ function init() {
 
   // three paths (the metAImorphosis NewCo scenarios): tradition, evolution, revolution, each with where it leads
   B.scenarios = (s, root) => {
+    if (V('scenarios', 'columns') === 'rows') return VB.scenarios_rows(s, root);
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const items = (s.items || []).slice(0, 3), n = items.length || 1, gap = 32, cw = (R - L - (n - 1) * gap) / n;
@@ -1168,6 +1181,245 @@ function init() {
     };
   };
 
+
+
+  // ---- second layouts: the same scene type told another way, so two films never share the same slides (look.variants) ----
+  const VB = {};
+  const fmtNum = (v, r) => { const dec = r.decimals ?? (Math.abs(v) < 10 && v % 1 ? 1 : 0); let n = (+v).toFixed(dec); if (Math.abs(+v) >= 10000) n = n.replace(/\B(?=(\d{3})+(?!\d))/g, ' '); return (r.prefix || '') + n + (r.unit ? ' ' + r.unit : ''); };
+  const mkTitle = (s, root) => { const t = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L); fit(t, 64, 40, R - L); return t; };
+
+  // race as paired bars that grow year by year
+  VB.race_bars = (s, root) => {
+    const title = mkTitle(s, root);
+    const years = s.years, a = s.you, b = s.them, n = years.length;
+    const x0 = L + 20, x1 = s.gap_label ? Math.min(1180, R - 560) : R - 20, yTop = 340, yBot = 800, maxV = Math.max(...a, ...b) * 1.12;
+    const slot = (x1 - x0) / n, bw = Math.min(70, slot * 0.34);
+    const fmt = (v) => (s.format === 'int' ? Math.round(v) : (+v).toFixed(s.decimals ?? 0)) + (s.suffix || '');
+    const unit = pos(h('div', 'rc-legend abs', `${esc((s.metric || '').toUpperCase())}${s.unit ? ' · ' + esc(s.unit) : ''}`, root), x0, yTop - 70);
+    const key = pos(h('div', 'rb-key abs', `<i class="you"></i>${esc(youName)}<i class="them"></i>${esc(themName)}`, root), x0, yTop - 36);
+    const base = pos(h('div', 'rb-base abs', '', root), x0, yBot, x1 - x0);
+    const cols = years.map((y, i) => {
+      const cx = x0 + slot * (i + 0.5);
+      return { ba: pos(h('div', 'rb-bar you abs', '', root), cx - bw - 4, yBot, bw), bb: pos(h('div', 'rb-bar them abs', '', root), cx + 4, yBot, bw),
+        va: pos(h('div', 'rb-val you abs', '', root), cx - bw - 30, 0, bw + 52), vb: pos(h('div', 'rb-val them abs', '', root), cx - 18, 0, bw + 52),
+        yl: pos(h('div', 'rb-year abs', String(y), root), cx - 60, yBot + 16, 120) };
+    });
+    const gap = s.gap_label ? h('div', 'rc-gap', `${esc(s.gap_label)}<small>${esc(s.gap_caption || '')}</small>`, root) : null;
+    if (gap) { gap.style.top = '360px'; fit(gap, 150, 80, 440); }
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); show(unit, P(t, 0.5, 0.6)); show(key, P(t, 0.6, 0.6)); base.style.transform = `scaleX(${P(t, 0.4, 0.8, ease.inOut)})`;
+      const t0 = 1.0, t1 = Math.max(t0 + 3, (sc.speechEnd || d) - 1.2), f = P(t, t0, t1 - t0, ease.inOut) * (n - 1);
+      cols.forEach((c, i) => {
+        const q = ease.out(clamp(f - i + 1)), ha = (a[i] / maxV) * (yBot - yTop) * q, hb = (b[i] / maxV) * (yBot - yTop) * q;
+        c.ba.style.top = yBot - ha + 'px'; c.ba.style.height = ha + 'px'; c.bb.style.top = yBot - hb + 'px'; c.bb.style.height = hb + 'px';
+        c.va.textContent = fmt(a[i]); c.vb.textContent = fmt(b[i]); c.va.style.top = yBot - ha - 30 + 'px'; c.vb.style.top = yBot - hb - 30 + 'px';
+        c.va.style.opacity = c.vb.style.opacity = i === n - 1 || i === 0 ? q : q * 0.55; c.yl.style.opacity = P(t, 0.6 + i * 0.05, 0.4);
+      });
+      sc.year = years[Math.min(n - 1, Math.round(f))];
+      if (gap) show(gap, P(t, t1 + 0.1, 0.8), 30);
+    };
+  };
+
+  // scissors as pairs of bars: today's number and the newcomer's, per row
+  VB.scissors_bars = (s, root) => {
+    const title = mkTitle(s, root);
+    const rows = (s.rows || []).slice(0, 5), n = rows.length || 1, rh = Math.min(128, 580 / n), lw = Math.min(520, (R - L) * 0.34), bx = L + lw + 40, bwMax = R - bx - 190;
+    const key = pos(h('div', 'rb-key abs', `<i class="you"></i>${esc(s.you_label || youName)}<i class="them"></i>${esc(s.them_label || themName)}`, root), bx, 290);
+    const els = rows.map((r, i) => {
+      const y = 350 + i * rh;
+      const lab = pos(h('div', 'sb-label abs', esc(r.label), root), L, y + 6, lw); fit(lab, 30, 18, lw, rh - 20);
+      const ba = pos(h('div', 'sb-bar you abs', '', root), bx, y + 8, 0), bb = pos(h('div', 'sb-bar them abs', '', root), bx, y + 44, 0);
+      const va = pos(h('div', 'sb-val you abs', '', root), bx, y + 2), vb = pos(h('div', 'sb-val them abs', '', root), bx, y + 38);
+      const q = r.ratio ? pos(h('div', 'sc-ratio abs', esc(r.ratio), root), R - 150, y + 20, 150) : null;
+      if (q) q.style.textAlign = 'right';
+      return { r, lab, ba, bb, va, vb, q, max: Math.max(Math.abs(r.you), Math.abs(r.them), 1e-6) };
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); show(key, P(t, 0.5, 0.6));
+      const span = Math.max(2, (sc.speechEnd || d) * 0.8 - 1);
+      els.forEach((e, i) => {
+        const at = 1.0 + (i * span) / els.length, p = P(t, at + 0.3, 1.6, ease.inOut), vis = P(t, at, 0.6);
+        show(e.lab, vis, 12);
+        const v2 = e.r.you + (e.r.them - e.r.you) * p, wa = bwMax * Math.abs(e.r.you) / e.max * P(t, at, 0.8), wb = bwMax * Math.abs(v2) / e.max * vis;
+        e.ba.style.width = wa + 'px'; e.bb.style.width = wb + 'px';
+        e.va.textContent = fmtNum(e.r.you, e.r); e.vb.textContent = fmtNum(v2, e.r);
+        e.va.style.left = bx + wa + 14 + 'px'; e.vb.style.left = bx + wb + 14 + 'px'; e.va.style.opacity = e.vb.style.opacity = vis;
+        if (e.q) e.q.style.opacity = P(t, at + 1.6, 0.5);
+      });
+      if (s.year) sc.year = s.year;
+    };
+  };
+
+  // myths one at a time: the belief in large type, struck out, the answer beneath
+  VB.myths_stack = (s, root) => {
+    const title = mkTitle(s, root);
+    const items = (s.items || []).slice(0, 3), w = Math.min(1300, R - L);
+    const els = items.map((it) => {
+      const b = pos(h('div', 'my-belief my-big abs', '«' + esc(it.belief) + '»', root), L, 330, w); fit(b, 62, 34, w, 230);
+      b.style.display = 'inline-block'; b.style.width = 'auto'; b.style.maxWidth = w + 'px';
+      const st = pos(h('div', 'my-strike abs', '', root), L - 6, 330 + b.offsetHeight / 2 - 3, Math.min(w, b.offsetWidth) + 12);
+      const a = pos(h('div', 'my-answer abs', esc(it.answer), root), L, 330 + b.offsetHeight + 56, w); fit(a, 38, 24, w, 240);
+      return { b, st, a };
+    });
+    const count = pos(h('div', 'my-count abs', '', root), R - 200, 160, 200);
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20);
+      const span = Math.max(2, (sc.speechEnd || d) - 1.0), seg = span / Math.max(1, els.length);
+      let cur = 0;
+      els.forEach((e, i) => {
+        const at = 0.8 + i * seg, out = i < els.length - 1 ? 1 - P(t, at + seg - 0.35, 0.35) : 1;
+        if (t >= at) cur = i + 1;
+        show(e.b, P(t, at, 0.6) * out, 20); e.b.style.color = P(t, at + seg * 0.35, 0.4) > 0.5 ? 'var(--muted)' : 'var(--ink)';
+        e.st.style.transform = `scaleX(${P(t, at + seg * 0.33, 0.45, ease.inOut)})`; e.st.style.opacity = out;
+        show(e.a, P(t, at + seg * 0.42, 0.6) * out, 16);
+      });
+      count.textContent = els.length > 1 ? `${cur} / ${els.length}` : ''; count.style.opacity = P(t, 0.8, 0.5);
+    };
+  };
+
+  // parallels as tiles: the speed first, then where and what
+  VB.parallels_tiles = (s, root) => {
+    const title = mkTitle(s, root);
+    const rows = (s.rows || []).slice(0, 6), n = rows.length || 1, cols = n <= 3 ? n : Math.ceil(n / 2), rn = Math.ceil(n / cols), gap = 28;
+    const tw = (R - L - gap * (cols - 1)) / cols, th = Math.min(320, (560 - gap * (rn - 1)) / rn);
+    const els = rows.map((r, i) => {
+      const c = pos(h('div', 'px-tile abs', '', root), L + (i % cols) * (tw + gap), 300 + Math.floor(i / cols) * (th + gap), tw); c.style.height = th + 'px';
+      const sd = h('div', 'px-speed px-speed-tile', esc(r.speed || ''), c); fit(sd, 64, 28, tw - 10);
+      const f = h('div', 'px-field px-field-tile', esc(r.field), c); fit(f, 30, 20, tw - 10);
+      const wv = h('div', 'px-what px-what-tile', `<span></span>${r.source ? `<em>${esc(r.source)}</em>` : ''}`, c);
+      const sp = wv.querySelector('span'); sp.textContent = r.what; fit(sp, 24, 16, tw - 10, th - 160);
+      return c;
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20);
+      const span = Math.max(2, (sc.speechEnd || d) * 0.88 - 1);
+      els.forEach((e, i) => show(e, P(t, 0.9 + (i * span) / els.length, 0.6), 24));
+    };
+  };
+
+  // three paths as bands across the screen
+  VB.scenarios_rows = (s, root) => {
+    const title = mkTitle(s, root);
+    const items = (s.items || []).slice(0, 3), n = items.length || 1, bh = Math.min(180, 560 / n), nw = Math.min(380, (R - L) * 0.26), ow = Math.min(460, (R - L) * 0.32), ww = R - L - nw - ow - 80;
+    const els = items.map((it, i) => {
+      const y = 300 + i * (bh + 10);
+      const band = pos(h('div', 'sn-band abs' + (it.accent ? ' accent' : ''), '', root), L, y, R - L); band.style.height = bh + 'px';
+      const nm = pos(h('div', 'sn-name abs', esc(it.name), band), 0, 22, nw); fit(nm, 52, 30, nw);
+      const wt = pos(h('div', 'sn-what abs', esc(it.what || ''), band), nw + 40, 22, ww); wt.style.marginTop = '0'; fit(wt, 28, 18, ww, bh - 34);
+      const o = pos(h('div', 'sn-out-r abs', `<small>${esc(it.outcome_label || '')}</small><span></span>`, band), nw + ww + 80, 20, ow);
+      const sp = o.querySelector('span'); sp.textContent = it.outcome || ''; fit(sp, 32, 20, ow, bh - 60);
+      return band;
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20);
+      const span = Math.max(2, (sc.speechEnd || d) * 0.85 - 1);
+      els.forEach((e, i) => show(e, P(t, 0.9 + (i * span) / els.length, 0.7), 0, -40));
+    };
+  };
+
+  // signals as a dated list down the page
+  VB.signals_list = (s, root) => {
+    const title = mkTitle(s, root);
+    const items = (s.items || []).slice(0, 5), n = items.length || 1, rh = Math.min(120, 580 / n), mw = 300;
+    const rail = pos(h('div', 'sl-rail abs', '', root), L + mw - 22, 300, 2); rail.style.height = n * rh - 20 + 'px';
+    const els = items.map((it, i) => {
+      const y = 300 + i * rh;
+      const m = pos(h('div', 'sl-meta abs', `<b>${esc(it.when || '')}</b>${esc(it.from || '')}`, root), L, y + 4, mw - 50);
+      const dot = pos(h('div', 'sl-dot abs', '', root), L + mw - 30, y + 14);
+      const tx = pos(h('div', 'sl-text abs', esc(it.text), root), L + mw + 10, y, R - L - mw - 10); fit(tx, 32, 20, R - L - mw - 10, rh - 16);
+      return { m, dot, tx };
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); rail.style.transform = `scaleY(${P(t, 0.5, (sc.speechEnd || d) * 0.8, ease.inOut)})`;
+      const span = Math.max(2, (sc.speechEnd || d) * 0.85 - 0.6);
+      els.forEach((e, i) => { const p = P(t, 0.6 + (i * span) / els.length, 0.6); show(e.m, p, 10); show(e.tx, p, 0, 40); e.dot.style.opacity = p; e.dot.style.transform = `scale(${0.3 + 0.7 * p})`; });
+    };
+  };
+
+  // the attack plan as one numbered list in two columns, each move tagged with its area
+  VB.plan_list = (s, root) => {
+    const title = mkTitle(s, root);
+    const memo = s.memo ? pos(h('div', 'pl-memo abs', esc(s.memo), root), L, 236, R - L) : null;
+    if (memo) fit(memo, 22, 15, R - L);
+    const all = []; (s.columns || []).slice(0, 4).forEach((c) => (c.items || []).slice(0, 3).forEach((it) => all.push({ it, area: c.name })));
+    const per = Math.ceil(all.length / 2), cw = (R - L - 60) / 2, rh = Math.min(104, 560 / Math.max(1, per));
+    const els = all.map(({ it, area }, k) => {
+      const x = L + (k < per ? 0 : cw + 60), y = 310 + (k % per) * rh;
+      const e = pos(h('div', 'pq-row abs', `<i>${String(k + 1).padStart(2, '0')}</i><small>${esc(area)}${it.when ? ' · ' + esc(it.when) : ''}</small><span></span>`, root), x, y, cw);
+      const sp = e.querySelector('span'); sp.textContent = it.text; fit(sp, 27, 17, cw - 80, rh - 40);
+      return e;
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); if (memo) show(memo, P(t, 0.5, 0.7), 8);
+      const span = Math.max(2, (sc.speechEnd || d) * 0.9 - 1.2);
+      els.forEach((e, i) => show(e, P(t, 1.0 + (i * span) / els.length, 0.5), 0, -24));
+    };
+  };
+
+  // the side: dangers that come not from competitors (data/threat-playbook.md, 1c); the surprise comes last
+  B.flank = (s, root) => {
+    const v0 = V('flank', 'radar'), v = v0 === 'radar' && (s.items || []).length > 5 ? 'doors' : v0;   // six do not fit around the hub
+    const title = mkTitle(s, root);
+    const kicker = s.kicker ? pos(h('div', 'kicker abs', esc(s.kicker), root), L, 112) : null;
+    const items = (s.items || []).slice(0, 6), lvl = { low: 1, mid: 2, medium: 2, high: 3 };
+    const sIdx = Math.max(0, items.findIndex((it) => it.surprise)); const order = items.map((_, i) => i).filter((i) => i !== sIdx).concat(items.length ? [sIdx] : []);
+    const meter = (it) => `<span class="at-meter">${[1, 2, 3].map((k) => `<i class="${k <= (lvl[it.weight] || 2) ? 'on' : ''}"></i>`).join('')}</span>`;
+    const inner = (it, wd, big) => `<div class="fl-from">${esc(it.from || '')}${meter(it)}</div><div class="fl-what"></div>${it.why ? `<div class="fl-why"></div>` : ''}${it.case ? `<div class="fl-case">${esc(it.case)}</div>` : ''}${it.surprise ? `<div class="fl-flag">${F.language === 'ru' ? 'об этом обычно не думают' : 'rarely considered'}</div>` : ''}`;
+    const fill = (c, it, wd, hw, hy) => { const w = c.querySelector('.fl-what'); w.textContent = it.what || ''; fit(w, hw, 20, wd, hy); const y = c.querySelector('.fl-why'); if (y) { y.textContent = it.why; fit(y, 22, 15, wd, 90); } };
+    let els = [], svg = null, hub = null;
+    if (v === 'doors') {
+      const n = items.length || 1, rh = Math.min(132, 600 / n), fw = 300, mw = R - L - fw - 40;
+      els = items.map((it, i) => {
+        const y = 290 + order.indexOf(i) * rh;
+        const c = pos(h('div', 'fl-row abs' + (it.surprise ? ' surprise' : ''), '', root), L, y, R - L); c.style.height = rh - 10 + 'px';
+        c.innerHTML = `<div class="fl-from fl-from-col">${esc(it.from || '')}${meter(it)}</div><div class="fl-body"><div class="fl-what"></div>${it.why ? '<div class="fl-why"></div>' : ''}</div>${it.surprise ? `<div class="fl-flag">${F.language === 'ru' ? 'об этом обычно не думают' : 'rarely considered'}</div>` : ''}`;
+        c.querySelector('.fl-from-col').style.width = fw + 'px'; c.querySelector('.fl-body').style.width = mw + 'px';
+        fill(c, it, mw - (it.surprise ? 260 : 0), 32, 46);
+        return c;
+      });
+    } else if (v === 'cards') {
+      const rest = order.slice(0, -1), cols = rest.length > 2 ? 2 : 1, rn = Math.ceil(rest.length / cols), gap = 24, lw = (R - L) * 0.6, cw = (lw - gap * (cols - 1)) / cols, ch = Math.min(260, (600 - gap * (rn - 1)) / Math.max(1, rn));
+      els = items.map((it, i) => {
+        const k = rest.indexOf(i);
+        if (k < 0) { const x = L + lw + 40, w = R - x; const c = pos(h('div', 'fl-card abs surprise', inner(it), root), x, 290, w); fill(c, it, w - 60, 46, 220); c.style.minHeight = Math.min(560, 2 * ch + gap) + 'px'; return c; }
+        const c = pos(h('div', 'fl-card abs', inner(it), root), L + (k % cols) * (cw + gap), 290 + Math.floor(k / cols) * (ch + gap), cw); c.style.height = ch + 'px'; fill(c, it, cw - 52, 28, 90);
+        return c;
+      });
+    } else {
+      // radar: the company in the middle, dangers arriving from around it
+      const cx = W / 2, cy = 625, rx = Math.min(640, (R - L) / 2 - 170), ry = 235, bw = 400, hr = 90;
+      const NS = 'http://www.w3.org/2000/svg'; svg = document.createElementNS(NS, 'svg'); svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('class', 'rc-svg'); root.appendChild(svg);
+      hub = pos(h('div', 'fl-hub abs', esc(youName), root), cx - hr, cy - hr); fit(hub, 32, 16, 150);
+      const n = items.length || 1;
+      // fixed slots around the hub so cards never collide: top, the four corners
+      const SL = { T: [cx - bw / 2, 'top'], TL: [L - 20, 'top'], TR: [R - bw + 20, 'top'], BL: [L - 20, 'bot'], BR: [R - bw + 20, 'bot'] };
+      const slots = ({ 3: ['T', 'BR', 'BL'], 4: ['TL', 'TR', 'BR', 'BL'], 5: ['T', 'TR', 'BR', 'BL', 'TL'] })[Math.min(5, Math.max(3, items.length))];
+      els = items.map((it, i) => {
+        const k = order.indexOf(i), [x, vy] = SL[slots[k % slots.length]];
+        const c = pos(h('div', 'fl-card fl-node abs' + (it.surprise ? ' surprise' : ''), inner(it), root), x, 300, bw);
+        fill(c, it, bw - 40, 26, 70); if (vy === 'bot') c.style.top = 870 - c.offsetHeight + 'px';
+        const ccx = x + bw / 2, ccy = (vy === 'bot' ? 870 - c.offsetHeight / 2 : 300 + c.offsetHeight / 2), ang = Math.atan2(ccy - cy, ccx - cx);
+        const ln = document.createElementNS(NS, 'line'); const ex = cx + hr * Math.cos(ang), ey = cy + hr * Math.sin(ang);
+        ln.setAttribute('x1', ccx); ln.setAttribute('y1', ccy); ln.setAttribute('x2', ex); ln.setAttribute('y2', ey); ln.setAttribute('class', 'fl-line' + (it.surprise ? ' surprise' : '')); svg.appendChild(ln);
+        const L2 = Math.hypot(ccx - ex, ccy - ey); ln.style.strokeDasharray = L2; ln.style.strokeDashoffset = L2; c._ln = ln; c._len = L2;
+        return c;
+      });
+    }
+    const pun = s.punchline ? pos(h('div', 'fl-pun abs', esc(s.punchline), root), L, 236, R - L) : null;
+    if (pun) fit(pun, 34, 22, R - L);
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); if (kicker) show(kicker, P(t, 0.2, 0.6), 10);
+      if (hub) { hub.style.opacity = P(t, 0.4, 0.6); hub.style.transform = `scale(${0.7 + 0.3 * P(t, 0.4, 0.8)})`; }
+      const span = Math.max(2, (sc.speechEnd || d) * 0.86 - 1.2), n = Math.max(1, els.length);
+      els.forEach((c, i) => {
+        const k = order.indexOf(i), last = k === n - 1 && items[i].surprise, at = 1.0 + (k * span) / n + (last ? span / n * 0.25 : 0), p = P(t, at, last ? 0.9 : 0.6);
+        show(c, p, v === 'doors' ? 0 : 20, v === 'doors' ? -30 : 0);
+        if (c._ln) c._ln.style.strokeDashoffset = c._len * (1 - P(t, at + 0.2, 0.7, ease.inOut));
+        if (last) c.style.transform += ` scale(${(1.06 - 0.06 * P(t, at + 0.5, 0.6)).toFixed(3)})`;
+      });
+      if (pun) show(pun, P(t, 1.0 + span + 0.3, 0.7), 10);
+    };
+  };
 
   // what is really happening: the visible (often clumsy) AI step above the waterline, the experience piling up beneath it
   B.beneath = (s, root) => {

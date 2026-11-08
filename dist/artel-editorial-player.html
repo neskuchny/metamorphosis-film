@@ -168,7 +168,7 @@ html,body{background:#000;width:1920px;height:1080px;overflow:hidden}
 .rc-end{position:absolute;font-size:44px;font-weight:700;transform:translateY(-50%)}
 .rc-end small{display:block;font-family:var(--mono);font-size:15px;letter-spacing:.12em;font-weight:500;text-transform:uppercase;color:var(--muted)}
 .rc-gap{position:absolute;right:120px;font-size:150px;font-weight:800;letter-spacing:-.04em;color:var(--them);text-align:right;line-height:1}
-.rc-gap small{display:block;font-family:var(--mono);font-size:18px;letter-spacing:.12em;font-weight:500;color:var(--muted);text-transform:uppercase;margin-top:10px}
+.rc-gap small{display:block;max-width:440px;margin-left:auto;white-space:normal;line-height:1.35;font-family:var(--mono);font-size:18px;letter-spacing:.12em;font-weight:500;color:var(--muted);text-transform:uppercase;margin-top:10px}
 
 /* scissors */
 .sc-head{position:absolute;top:300px;font-family:var(--mono);font-size:20px;letter-spacing:.14em;text-transform:uppercase;text-align:right;width:420px}
@@ -578,6 +578,59 @@ html,body{background:#000;width:1920px;height:1080px;overflow:hidden}
 .sw-lab{font-family:var(--mono);font-size:17px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center;line-height:1.25}
 .sw-punch{font-family:var(--head,var(--sans));font-size:31px;line-height:1.2;font-weight:700;color:var(--ink)}
 
+/* second layouts (look.variants) */
+.rb-key{font-family:var(--mono);font-size:17px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px;white-space:nowrap}
+.rb-key i{display:inline-block;width:16px;height:16px;border-radius:2px;margin-left:14px}.rb-key i:first-child{margin-left:0}
+.rb-key i.you,.rb-bar.you,.sb-bar.you{background:var(--you)}.rb-key i.them,.rb-bar.them,.sb-bar.them{background:var(--them)}
+.rb-base{height:2px;background:var(--dim);transform-origin:left}
+.rb-bar{border-radius:3px 3px 0 0}
+.rb-val{font-family:var(--mono);font-size:18px;font-weight:600;text-align:center;white-space:nowrap}.rb-val.you,.sb-val.you{color:var(--you)}.rb-val.them,.sb-val.them{color:var(--them)}
+.rb-year{font-family:var(--mono);font-size:20px;color:var(--muted);text-align:center}
+.sb-label{font-size:30px;line-height:1.2;color:var(--ink)}
+.sb-bar{height:28px;border-radius:0 4px 4px 0}
+.sb-val{font-size:30px;font-weight:700;white-space:nowrap;line-height:1.1}
+.my-big{font-size:62px;color:var(--ink);font-weight:700;line-height:1.12}
+.my-strike{height:5px;background:var(--them);transform-origin:left;transform:scaleX(0)}
+.my-count{font-family:var(--mono);font-size:20px;color:var(--muted);text-align:right}
+.px-tile{border-top:3px solid var(--them);padding-top:18px}
+.px-speed-tile{text-align:left;font-size:64px;line-height:1}
+.px-field-tile{width:auto;margin-top:16px;font-size:30px}
+.px-what-tile{width:auto;margin-top:10px}
+.sn-band{border-top:1px solid var(--line)}.sn-band.accent{border-top:3px solid var(--ok)}.sn-band.accent .sn-name{color:var(--ok)}
+.sn-out-r small{display:block;font-family:var(--mono);font-size:16px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.sn-out-r span{display:block;font-size:32px;font-weight:700;line-height:1.2}
+.sl-rail{background:var(--line);transform-origin:top}
+.sl-dot{width:16px;height:16px;border-radius:50%;background:var(--them)}
+.sl-meta{font-family:var(--mono);font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:right;line-height:1.4}
+.sl-meta b{display:block;color:var(--ink);font-weight:600}
+.sl-text{font-size:32px;line-height:1.25}
+.pq-row{border-top:1px solid var(--line);padding:10px 0 0 70px}
+.pq-row i{position:absolute;left:0;top:12px;font-style:normal;font-family:var(--mono);font-size:24px;font-weight:600;color:var(--them)}
+.pq-row small{display:block;font-family:var(--mono);font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pq-row span{display:block;font-size:27px;line-height:1.2;margin-top:2px}
+.sw-col.hz{overflow:hidden}.sw-fill.hz{top:0;bottom:0;right:auto;width:100%;height:auto}
+.sw-lab.hz{text-align:left}
+.sw-col.hz .sw-pct{top:50%;bottom:auto!important;transform:translateY(-50%)}
+/* flank: the dangers that come from the side */
+.fl-from{font-family:var(--mono);font-size:16px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.fl-what{font-size:28px;font-weight:700;line-height:1.15;margin-top:8px}
+.fl-why{font-size:21px;line-height:1.3;color:var(--muted);margin-top:8px}
+.fl-case{font-family:var(--mono);font-size:14px;letter-spacing:.06em;color:var(--muted);margin-top:10px}
+.fl-flag{display:inline-block;margin-top:12px;font-family:var(--mono);font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--bg);background:var(--them);padding:4px 10px;border-radius:3px}
+.fl-card{border:1px solid var(--line);border-radius:10px;padding:18px 20px;background:var(--card)}
+.fl-card.surprise{border:2px solid var(--them)}
+.fl-card.surprise .fl-what{font-size:44px}
+.fl-node{background:var(--bg)}
+.fl-node.surprise .fl-what{font-size:30px}
+.fl-hub{width:180px;height:180px;border-radius:50%;background:var(--you);color:var(--bg);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:34px;line-height:1.05;padding:20px;box-sizing:border-box}
+.fl-line{stroke:var(--line);stroke-width:2;stroke-dasharray:6 8}.fl-line.surprise{stroke:var(--them);stroke-width:3}
+.fl-row{display:flex;align-items:flex-start;gap:40px;border-top:1px solid var(--line);padding-top:16px}
+.fl-row.surprise{border-top:3px solid var(--them)}
+.fl-from-col{flex-direction:column;align-items:flex-start;gap:10px;font-size:18px;color:var(--ink)}
+.fl-row .fl-what{margin-top:0;font-size:32px}
+.fl-row .fl-flag{position:absolute;right:0;top:16px;margin-top:0}
+.fl-pun{font-family:var(--mono);font-size:22px;letter-spacing:.06em;text-transform:uppercase;color:var(--them)}
+
 </style>
 <style>
 /* Browser player shell: paste film.json, watch it. The film itself is drawn by film.js on the 1920x1080 stage. */
@@ -746,7 +799,7 @@ body.fin #bigplay,body.fin #ui,body.fin #toast{display:none!important}
   </section>
 </section>
 
-<script type="application/json" id="example-film" data-autoload>{"company":{"name":"Artel Electronics","short_name":"Artel","website":"artelgroup.com","country":"Узбекистан","industry":"Производство бытовой техники и электроники"},"language":"ru","brand":"metAImorphosis","start_year":2026,"attacker":{"name":"Arqon","is_fictional":true,"built_from":["Xiaomi Changping","Xometry","Hadrian","Dwelly"]},"risk":{"level":"high","why":"Большой растущий рынок Центральной Азии, крупный бизнес с лидирующей позицией (Fitch), преимущества (локальное производство, дистрибуция, бренд) воспроизводимы при наличии капитала. Защитных факторов из списка низкого риска нет. Маржа публично не раскрыта — признак засчитан по размеру бизнеса."},"concept":{"idea":"Девять тысяч человек и одиннадцать заводов — сила Artel сегодня, и именно её можно купить за деньги инвесторов","architecture":"A — хроника пяти лет: производителю с длинным циклом понятнее всего год за годом","central_image":"Artel ночью: город цехов у реки, одно окно — один человек","signature":"окна: у соседа свет меняется волной, у новичка мало холодных окон, в финале внутри Artel загорается свой","specifics":["Artel","Ташкент","кондиционер","девять тысяч","9 000","одиннадцать","дистрибьютор","дилер","Узбекистан","Samsung","Arqon","экспорт"],"why":"собственник-производитель мыслит планами и площадками; образ окон делает девять тысяч человек видимыми и показывает, сколько людей нужно новичку для той же работы"},"assumptions":"Сейчас конец 2026 года. Модель: рынок +4% в год; доля Artel в своём сегменте ~35%; вымышленная компания Arqon идёт по S-кривой к 30% рынка, середина в 2029.5; 60% её доли забирается у Artel. «Сосед» во второй волне — собирательный конкурент, не конкретная компания; его цифры — сценарная оценка по кейсам. Письмо дистрибьютора вымышлено. Выручка на сотрудника Artel посчитана из публичных данных 2021–2022: ~$450 млн / ~9 000 человек. Структура цены кондиционера в сцене «Почему они дешевле» — модель, а не данные Artel. Этап зрелости Artel — оценка по открытым данным. План Arqon (раунд $150 млн, 40 человек) — модель; ориентиры: Dwelly $170 млн (2026), Hadrian $1,37 млрд (2026). Сцена «Что происходит на самом деле» — собирательный сценарий, а не данные конкретной компании.","sources":[{"title":"bne IntelliNews — Artel leading Central Asia's white goods revolution (2022)","url":"https://www.intellinews.com/artel-leading-central-asia-s-white-goods-revolution-237783/"},{"title":"Kursiv — How Artel managed to become the leader of the home appliances industry in Central Asia (2022)","url":"https://kz.kursiv.media/en/2022-05-11/how-artel-managed-to-become-the-leader-of-the-home-appliances-industry-in-central-asia/"},{"title":"Spot.uz — Artel: выход на рынок ЕС (28.09.2026, на правах рекламы)","url":"https://www.spot.uz/ru/2026/09/28/artel/"},{"title":"Trend.az — Fitch affirms Artel at B (2022)","url":"https://www.trend.az/casia/uzbekistan/3619151.html"},{"title":"New Atlas — Xiaomi dark robotic factory (2024)","url":"https://newatlas.com/robotics/xiaomi-dark-robotic-factory/"},{"title":"CIMdata — Xometry full year 2025 results","url":"https://www.cimdata.com/en/industry-summary-articles/item/29521-xometry-reports-record-fourth-quarter-and-strong-full-year-2025-results"},{"title":"PR Newswire — Hadrian raises $1.37B Series D (08.2026)","url":"https://digital-release.wowktv.com/business/press-releases/cision/20260806LA20310/hadrian-raises-1-37b-series-d-to-build-highly-automated-factories-to-accelerate-americas-industrial-renewal"},{"title":"BNN Bloomberg — Hadrian valued at US$7.87B (08.2026)","url":"https://www.bnnbloomberg.ca/business/company-news/2026/08/06/manufacturing-company-hadrian-valued-at-us787-billion-in-latest-funding-round/"},{"title":"Habr / Selectel — Anthropic отказалась от Git ради Scion (14.10.2026), по инженерному блогу Anthropic (13.10.2026)","url":"https://habr.com/ru/companies/selectel/news/1094398/"},{"title":"SaaStr — $500K ARR per employee is the new $200K (26.01.2026)","url":"https://www.saastr.com/the-new-rule-500k-arr-per-employee-is-the-new-200k"},{"title":"Pulse 2.0 — Dwelly announces $170M Series B (31.07.2026)","url":"https://pulse2.com/dwelly-announces-170-million-series-b/"},{"title":"Techleap — General Catalyst's $1.5B AI services transformation (11.2025)","url":"https://finder.techleap.nl/news/feed/general-catalyst-s-1-5b-ai-services-transformation"},{"title":"Trending Topics — The Anthropic effect: SaaS sell-off (05.02.2026)","url":"https://www.trendingtopics.eu/the-anthropic-effect-fear-of-ai-agents-trigger-major-saas-stock-sell-off/"}],"now":"2026 Q4","model":{"from":2026,"to":2031,"market_growth":0.04,"your_share":0.35,"attacker_cap":0.3,"attacker_mid":2029.5,"attacker_k":1.3,"taken_from_you":0.6},"scenes":[{"type":"cold_open","act":"","kicker":"Artel · Ташкент · конец 2026","lines":["Это фильм про Artel.","Про то, как изменится ваша отрасль.","И почему это уже не остановить."],"narration":"Это фильм про Артель. Сейчас конец две тысячи двадцать шестого. О том, кто может к вам прийти за пять лет, и почему это уже не остановить."},{"type":"chapter","act":"I · Кто вы сегодня","num":"01","title":"Кто вы сегодня","year":2026},{"type":"dossier","act":"I · Кто вы сегодня","year":2026,"title":"Что о вас видно снаружи","facts":[{"label":"Первый свой завод","value":"2006","note":"Группа начинала с импорта в 1990-х","tag":"known"},{"label":"Сотрудников","value":"≈9 000","note":"Данные 2022 года","tag":"known"},{"label":"Производств и складов","value":"11","note":"Ташкент, Нукус, Хорезм, Заамин","tag":"known"},{"label":"Выручка","value":"$450 млн","note":"2021 год, последняя публичная цифра","tag":"known"},{"label":"Типов продукции","value":"1 500","note":"Включая Samsung, Toshiba, Carrier","tag":"known"},{"label":"Стран экспорта","value":"20+","note":"С 2026 года — Мальта и Бельгия","tag":"known"}],"narration":"Вот что видно о вас снаружи. Свой завод с две тысячи шестого. Около девяти тысяч сотрудников, одиннадцать площадок, выручка около четырёхсот пятидесяти миллионов долларов, экспорт в двадцать стран."},{"type":"statement","act":"I · Кто вы сегодня","year":2026,"kicker":"Сильная позиция","text":"Двадцать лет данных, сервиса и дилеров.","sub":"Этого нет ни у одного новичка. Но заводы, дилеров и бренд можно воспроизвести, если есть капитал и другая скорость.","narration":"У вас есть то, чего нет у новичка: двадцать лет данных, сервис и дилеры. Но заводы, дилеров и бренд можно воспроизвести, если есть капитал и другая скорость."},{"type":"chapter","act":"II · Как это происходит","num":"02","title":"Как это происходит","sub":"Три волны. Они приходят по очереди, и каждая больше предыдущей.","year":2026},{"type":"waves","act":"II · Как это происходит","title":"Три волны","from":2026,"to":2031,"now":"2026 Q4","now_label":"Сейчас · конец 2026","waves":[{"title":"Всё вокруг ускоряется","text":"Поставщики, маркетплейсы, конкуренты, инструменты","from":"2026 Q1","to":"2028 Q1","when":"2026–2027"},{"title":"Сосед перестраивается","text":"Один из конкурентов работает вдвое быстрее","from":"2027 Q2","to":"2029 Q3","when":"2027–2029"},{"title":"Компания с нуля","text":"Построена на ИИ с первого дня. Её уже не обойти","from":"2028 Q3","to":"2031 Q1","when":"2029–2031"}],"narration":"Это происходит тремя волнами. Сначала всё вокруг ускоряется. Потом кто-то из соседей перестраивается и работает вдвое быстрее. Потом появляется компания, построенная на ИИ с первого дня. Каждая волна больше предыдущей."},{"type":"ladder","act":"II · Как это происходит","year":2026,"title":"Где вы, где сосед, где новичок","stages":[{"name":"Вручную","text":"Люди, телефон, Excel"},{"name":"Инструменты","text":"Сотрудники пользуются чатами"},{"name":"Процессы","text":"Агенты считают цены, ведут поддержку"},{"name":"Операции","text":"Агенты ведут сквозные процессы"},{"name":"ИИ-нативная компания","text":"Малые команды, много агентов"},{"name":"ИИ-нативные заводы","text":"Производство под автоматизацию"}],"markers":[{"label":"Artel","stage":1,"side":"you","when":"сейчас · оценка"},{"label":"Сосед","from":1,"to":3,"side":"neighbour","when":"2027–2029"},{"label":"Arqon","from":4,"to":5,"side":"them","when":"с первого дня → 2030"}],"narration":"Разница — в этапе зрелости. Вы, по нашей оценке, на втором. Сосед за два года дойдёт до четвёртого, а новичок рождается сразу на пятом."},{"type":"attackers","act":"II · Как это происходит","year":2026,"title":"Кто может прийти к Artel","items":[{"type":"Иностранный бренд с ИИ","text":"Выходит напрямую: карточки, видео и поддержку на узбекском делают агенты","when":"2026–2028","likelihood":"high","takes":"онлайн и цена","focus":true},{"type":"Сосед, который перестроился","text":"Те же заводы и дилеры, но цена и срок в тот же день","when":"2027–2029","likelihood":"high","takes":"дистрибьюторов","focus":true},{"type":"Платформа между вами и покупателем","text":"Маркетплейс с мгновенной ценой и своей маркой","when":"2027–2029","likelihood":"medium","takes":"покупателя"},{"type":"Поставщик со своим брендом","text":"Китайский завод-партнёр продаёт под своей маркой","when":"2027–2029","likelihood":"medium","takes":"стандартные модели"},{"type":"«Снайпер» на сервисе","text":"ИИ-сервис кондиционеров в крупных городах","when":"2027–2028","likelihood":"medium","takes":"маржу сервиса"},{"type":"Стартап на инвестициях","text":"Построен на ИИ с нуля, деньги на годы низких цен","when":"2027–2031","likelihood":"medium","takes":"самый маржинальный сегмент","focus":true}],"narration":"Прийти могут шестью путями: иностранный бренд, перестроившийся сосед, маркетплейс со своей маркой, ваш же поставщик, узкий сервис и стартап на инвестициях."},{"type":"chapter","act":"II · Волна 1","num":"1/3","title":"Всё вокруг ускоряется","year":2027},{"type":"signals","act":"II · Волна 1","year":2027,"title":"Сигналы, которые легко списать","items":[{"when":"2026","from":"Маркетплейс","text":"ИИ-ассистент советует покупателю три бренда кондиционеров. Вашего среди них нет."},{"when":"2027","from":"Иностранный бренд","text":"Линейка под Центральную Азию за полгода, поддержка на узбекском круглосуточно."},{"when":"2027","from":"Поставщик","text":"Модель и цену новой платы присылают за сутки. Раньше на это уходил месяц."},{"when":"2027","from":"Финдиректор","text":"У партнёров обработка заказа подешевела в разы. У нас — нет."}],"narration":"Первая волна выглядит как мелочи. Ассистент маркетплейса советует покупателю три бренда, и вашего среди них нет. Иностранный бренд делает линейку под регион за полгода. Поставщик присылает цену за сутки. Вместе это тренд."},{"type":"chapter","act":"II · Волна 2","num":"2/3","title":"Сосед перестраивается","sub":"Собирательный конкурент, а не конкретная компания","year":2028},{"type":"beneath","act":"II · Волна 2","year":2027,"title":"Что происходит под водой","surface":{"label":"Что видно снаружи · 2027","text":"Сосед запустил чат-бота на маркетплейсе. Он отвечает невпопад."},"label_below":"Что копится под водой","items":["Поняли, что работает, а что нет","Нашли ещё пять процессов, которые можно перестроить","Двадцать человек переучились работать с агентами","Данные о заказах собраны в одном месте","Следующий проект — за недели, а не за год"],"punchline":"Он не умнее и не богаче. Он просто начал.","narration":"Вторая волна начинается незаметно. Сосед запускает чат-бота, и тот отвечает невпопад. Легко усмехнуться. Но под водой у него копится то, чего нет у вас: понимание, что работает, следующие процессы, переученные люди, собранные данные. Неудачный проект — это оплаченный урок. Он не умнее и не богаче вас. Он просто начал."},{"type":"scissors","act":"II · Волна 2","year":2028,"title":"Вы и сосед, который перестроился","you_label":"Artel","them_label":"Сосед","rows":[{"label":"Ответ дистрибьютору с ценой и сроком","you":72,"them":4,"unit":"ч","ratio":"×18"},{"label":"От идеи модели до полки","you":14,"them":8,"unit":"мес","ratio":"×1.8"},{"label":"Сервис: от звонка до решения","you":10,"them":4,"unit":"дн","ratio":"×2.5"}],"narration":"Через год-два это видно в цифрах. Те же заводы и дилеры, но ответ дистрибьютору за четыре часа, а не за трое суток."},{"type":"moment","act":"II · Волна 2","year":2028,"when":"Март 2028","channel":"Письмо","from":"Коммерческий директор · ваш крупнейший дистрибьютор","text":"Добрый день. С апреля переводим сорок процентов заказа по кондиционерам к другому производителю. Цену и срок они дают в тот же день. Если сможете так же — давайте обсудим.","note":"Письмо вымышлено. Механизм — нет.","narration":"Март двадцать восьмого. Письмо крупнейшего дистрибьютора: с апреля сорок процентов заказа уходит к другому производителю. Там цену и срок дают в тот же день."},{"type":"chapter","act":"II · Волна 3","num":"3/3","title":"Компания с нуля","sub":"Arqon — вымышленная компания. Каждый её ход уже делают реальные компании.","year":2029},{"type":"plan","act":"II · Волна 3","year":2027,"title":"План компании, которой пока нет","memo":"Arqon · раунд $150 млн · 40 человек · цель: сделать Artel ненужным за пять лет","columns":[{"name":"Продукт","items":[{"text":"Модели по отзывам за три месяца","when":"2027"},{"text":"Без заводов: контрактная сборка, своя линия позже","when":"2027→29"},{"text":"Прибор с данными и подписка на сервис","when":"2028"}]},{"name":"Продажи и сервис","items":[{"text":"Карточки и ответы для ИИ-ассистентов маркетплейсов","when":"2027"},{"text":"Цена и срок дистрибьютору за минуты","when":"2027"},{"text":"Поддержка 24/7 на трёх языках","when":"2027"}]},{"name":"Бэк-офис","items":[{"text":"Закупки и планирование ведут агенты","when":"2027"},{"text":"Финансы, документы, таможня — агенты, люди проверяют","when":"2028"}]},{"name":"Люди","items":[{"text":"Переманить ключевых инженеров Artel","when":"2027–28"},{"text":"40 человек вместо 400: каждый ведёт агентов","when":"2027"}]}],"narration":"Представим её основателя: сто пятьдесят миллионов долларов, сорок человек и одна цель — сделать Артель ненужным. Его план: модели по отзывам за три месяца, без своих заводов на старте, продажи через ассистентов маркетплейсов, цена дистрибьютору за минуты. И ваши лучшие инженеры в команде."},{"type":"anatomy","act":"II · Волна 3","year":2029,"title":"Почему они дешевле","you_label":"Artel","them_label":"Arqon","unit":"из 100 единиц цены кондиционера · модель","rows":[{"label":"Комплектующие","you":55,"them":53},{"label":"Производство и люди","you":12,"them":7},{"label":"Офис и управление","you":8,"them":2},{"label":"Продажи и дилеры","you":15,"them":6},{"label":"Логистика и сервис","you":5,"them":4},{"label":"Маржа","you":5,"them":6,"margin":true}],"gap_caption":"их цена при большей марже · модель","narration":"Почему это опасно. Возьмём цену кондиционера. Комплектующие стоят всем почти одинаково. Разница в людях, офисе и дилерах: у компании на агентах эта часть вдвое меньше. Она может продавать на пятую часть дешевле и зарабатывать больше."},{"type":"statement","act":"II · Волна 3","year":2029,"kicker":"Капитал","text":"Вы защищаетесь прибылью этого года. Они атакуют деньгами на пять лет вперёд.","sub":"Инвесторы оплачивают годы низких цен. А бьют они не по всему рынку, а по самому прибыльному куску.","narration":"И главное. Вы защищаетесь прибылью этого года, а они атакуют деньгами инвесторов на годы вперёд и бьют по самому прибыльному куску. Заводы остаются у вас, маржа уходит к ним."},{"type":"race","act":"II · Волна 3","title":"Гонка, если ничего не менять","metric":"Выручка","unit":"индекс, Artel 2026 = 100","years":[2026,2027,2028,2029,2030,2031],"you":[100,103,102,93,78,68],"them":[0,2,11,32,65,90],"gap_label":"−32%","gap_caption":"ваша выручка к 2031 · модель","narration":"Это модель, а не прогноз. Первые два года вы ничего не замечаете. Потом кривые сходятся. К тридцать первому ваша выручка на треть ниже, а компания, которой не было, почти догнала вас."},{"type":"swarm","act":"II · Волна 3","year":2031,"title":"Arqon будет не один","segments":["Кондиционеры онлайн","Дистрибьюторы","Крупная техника","Экспорт","Сервис и установка"],"end_share":0.45,"punchline":"Своей ниши не останется: одни отъедят по кусочку, другие — большими кусками","narration":"И Arqon будет не один. В каждом сегменте появятся все сразу: одни чуть оптимизируют свой бизнес, другие перестроят процессы, третьи перейдут на AI-first, четвёртые построят всё с нуля. Удачный формат тут же скопируют. Они будут драться между собой, а Artel раздавят в процессе. Своей ниши не останется."},{"type":"parallels","act":"IV · Это уже происходит","year":2026,"title":"Где это уже случилось быстрее","rows":[{"field":"Разработка ПО","what":"В Anthropic код пишут агенты: слияний в основную ветку стало около 30 000 в день вместо 2 500","speed":"×10 за 5 мес","source":"Anthropic, инженерный блог, 13.10.2026 (пересказ Хабра)"},{"field":"Софт-компании","what":"Cursor: около $1 млрд годовой выручки при ~300 сотрудниках","speed":"×7 на человека","source":"SaaStr, 01.2026, оценки автора; сравнение с Salesforce"},{"field":"Аренда жилья","what":"Dwelly скупает агентства и ведёт их на ИИ: 300+ объектов на сотрудника против ~100","speed":"×3","source":"Pulse 2.0, 07.2026"},{"field":"Сервисные фирмы","what":"Фонды скупают бухгалтерии и консалтинг, чтобы перевести их на ИИ","speed":"$1,5 млрд","source":"General Catalyst, 11.2025 (Techleap)"},{"field":"Экспертные компании","what":"После выхода ИИ-плагинов для юристов и финансистов рынок переоценил их за дни","speed":"−18%","source":"Thomson Reuters, начало 02.2026 (Trending Topics)"}],"narration":"В других отраслях это уже случилось, и быстрее. В Энтропик код пишут агенты: за пять месяцев слияний кода стало в десять раз больше. Курсор зарабатывает миллиард в год с тремя сотнями человек. Фонды скупают бухгалтерии, чтобы перевести их на ИИ. У вас медленнее. Медленнее — не значит никогда."},{"type":"case","act":"IV · Это уже происходит","kicker":"Волна 1 · Покупателя забирают у заводов","name":"Xometry","where":"США и Европа","year":"2025","headline":"Платформа мгновенно считает цену детали по чертежу и раздаёт заказы тысячам заводов. Заказчик принадлежит ей.","stats":[{"value":"$630 млн","label":"выручка маркетплейса за 2025, +30%"},{"value":"81 821","label":"активный заказчик"},{"value":"4 996","label":"заводов-исполнителей"}],"source":"Xometry, итоги 2025 года (CIMdata)","narration":"И в производстве. Первая волна: Ксометри считает цену детали по чертежу за секунды, и заказчик теперь принадлежит не заводам."},{"type":"case","act":"IV · Это уже происходит","kicker":"Волна 2 · Действующая компания перестроилась","name":"Xiaomi","where":"Пекин, Чанпин","year":"2024","headline":"Завод, где ключевые процессы полностью автоматизированы, а люди только наблюдают из диспетчерской.","stats":[{"value":"10 млн+","label":"смартфонов в год — проектная мощность"},{"value":"100%","label":"ключевых процессов автоматизировано"},{"value":"11","label":"производственных линий"}],"source":"New Atlas, 10.07.2024","narration":"Вторая: Сяоми построила завод, где люди только наблюдают."},{"type":"case","act":"IV · Это уже происходит","kicker":"Волна 3 · Заводы с нуля","name":"Hadrian","where":"США","year":"2026","headline":"Строит высокоавтоматизированные заводы прецизионных деталей с нуля: ИИ, роботы и инженерия процессов.","stats":[{"value":"$1,37 млрд","label":"привлечено в августе 2026"},{"value":"$7,87 млрд","label":"оценка компании"},{"value":"6 лет","label":"от первого цеха до сети заводов"}],"source":"PR Newswire; BNN Bloomberg, 08.2026","narration":"Третья: Хэдриан строит заводы с нуля под роботов и привлёк почти полтора миллиарда долларов."},{"type":"myths","act":"IV · Это уже происходит","year":2026,"title":"Вы, скорее всего, сейчас думаете","items":[{"belief":"Мы производство. ИИ — это про софт.","answer":"Сяоми и Хэдриан перестраивают сами заводы. А первый удар — по тому, что вокруг завода: цене, продажам, сервису."},{"belief":"У них ИИ-проекты бесполезные.","answer":"Неудачный проект — полезный проект: он даёт опыт, которого у вас нет. Они впереди, потому что начали."},{"belief":"Новичок займёт свою нишу, а мы — свою.","answer":"Если у него получится, придут ещё. И сосед перестроится. По кусочку и большими кусками — ниши не останется."}],"narration":"Вы, наверное, думаете: мы производство, это про софт. Но перестраивают уже сами заводы. У них ИИ-проекты бесполезные? Каждый даёт опыт, которого у вас нет. Новичок займёт свою нишу, а мы свою? Если у него получится, придут ещё. Ниши не останется."},{"type":"chapter","act":"V · Развилка","num":"05","title":"Развилка","year":2026},{"type":"scenarios","act":"V · Развилка","year":2026,"title":"Три пути","items":[{"name":"Традиция","what":"Всё как есть, плюс немного автоматизации","outcome_label":"к 2031","outcome":"Сценарий этого фильма"},{"name":"Эволюция","what":"Агенты в отдельных процессах. Как электромотор вместо паровой машины: выгода пришла, только когда перестроили сам завод","outcome_label":"к 2031","outcome":"Разрыв меньше, но растёт"},{"name":"Революция","what":"Своя ИИ-нативная компания внутри Artel: туда переходят данные, клиенты и лучшие люди","outcome_label":"к 2031","outcome":"Arqon — это вы","accent":true}],"narration":"У вас три пути. Традиция — сценарий, который вы только что видели. Эволюция — агенты в отдельных процессах; но и с электричеством выгода пришла, только когда перестроили сам завод. Революция — своя компания с нуля внутри Артели. Тогда Аркон — это вы."},{"type":"questions","act":"V · Развилка","items":["Сколько часов сегодня проходит от запроса дилера до цены и срока?","Что вы ответите на письмо, где сорок процентов заказа уходит к соседу?","Если бы вы строили Artel с нуля в 2027 году — что бы вы не стали строить?"],"narration":"Три вопроса, на которые можете ответить только вы. Сколько часов от запроса дилера до цены? Что вы ответите на то письмо? И что бы вы не стали строить, если бы строили Артель с нуля?"},{"type":"end","act":"","title":"Как вы видите Artel теперь?","subtitle":"Это сценарий, а не приговор. Он не сбудется, если вы начнёте раньше других.","cta":"Дальше: ваши цифры за минуту · metAImorphosis","narration":"Это сценарий, а не приговор. Как вы видите Артель теперь? Ответьте себе сами, а потом проверьте свои цифры: это займёт минуту."}],"finale":{"title":"Ваши цифры за минуту","intro":"Фильм построен на публичных данных и допущениях. Сдвиньте ползунки так, как видите сами, и модель пересчитается.","inputs":[{"param":"attacker_mid","label":"Когда новый игрок наберёт силу в вашем сегменте","min":2027.5,"max":2033,"step":0.5,"format":"year"},{"param":"attacker_cap","label":"Какую долю рынка он может занять","min":0.05,"max":0.5,"step":0.05,"format":"pct"},{"param":"taken_from_you","label":"Какая часть его продаж — ваши покупатели","min":0.1,"max":0.9,"step":0.1,"format":"pct"},{"param":"market_growth","label":"Рост вашего рынка в год","min":-0.04,"max":0.12,"step":0.01,"format":"pct"}],"steps_title":"Один шаг на 30 дней. Даже если он не получится, вы начнёте копить опыт","steps":[{"title":"Ответ дилеру в тот же день","text":"Пилот на одной товарной группе: агент собирает цену, срок и наличие по запросу дистрибьютора."},{"title":"Видят ли вас ИИ-ассистенты","text":"Проверка: что ассистенты маркетплейсов советуют покупателю в ваших категориях и почему."},{"title":"Своя «компания с нуля»","text":"Полдня с командой: если бы мы строили Artel в 2027 году, что бы мы не стали строить?"}],"privacy":"Ничего не отправляется: цифры остаются в этом браузере, пока вы сами их не скопируете.","paths_title":"Какой путь вам ближе?","reflection":{"question":"Как вы видите Artel теперь? Одной-двумя фразами"}},"threats":"threats.md","voice":{"rate":"+8%"},"world":{"you":9000,"them_start":40,"them_end":300,"sites":11,"look":"night","kit":"factory","seed":7},"attack_plan":{"title":"Как бы вас атаковали: план компании, которой пока нет","memo":"Arqon вымышлен. Раунд $150 млн, 40 человек, цель — сделать Artel ненужным за пять лет. Бьёт первым по онлайн-продажам кондиционеров и дистрибьюторам в Ташкенте и Алмате. Каждый ход уже делают реальные компании.","moves":[{"area":"Продукт","move":"Модели по отзывам за три месяца","how":"ИИ разбирает отзывы и запросы на маркетплейсах и проектирует модификации","replaces":"14-месячный цикл разработки","takes":"покупателя, которому нужна «своя» модель","when":"2027"},{"area":"Продукт","move":"Без заводов на старте","how":"контрактная сборка в Китае, своя линия под регион с 2029 года","replaces":"11 площадок как условие входа на рынок","takes":"ценовой сегмент","when":"2027→2029"},{"area":"Продукт","move":"Прибор с данными и подписка на сервис","how":"каждый кондиционер в приложении, прогноз поломок","replaces":"гарантийный сервис по звонку","takes":"маржу сервиса","when":"2028"},{"area":"Продажи и сервис","move":"Продажи через ИИ-ассистентов маркетплейсов","how":"карточки, видео и ответы на узбекском и русском делают агенты","replaces":"дилерскую наценку и ручной контент","takes":"онлайн-покупателя","when":"2027"},{"area":"Продажи и сервис","move":"Цена и срок дистрибьютору за минуты","how":"агентский портал: цена, наличие и логистика сразу","replaces":"менеджеров и трое суток ожидания","takes":"дистрибьюторов","when":"2027"},{"area":"Продажи и сервис","move":"Поддержка 24/7 на трёх языках","how":"агенты ведут обращения, люди — сложные случаи","replaces":"колл-центр","takes":"лояльность после покупки","when":"2027"},{"area":"Бэк-офис","move":"Закупки и планирование агентами","how":"прогноз спроса по данным маркетплейсов, автоматические заказы комплектующих","replaces":"отделы закупок и планирования","takes":"оборотный капитал: меньше складов","when":"2027"},{"area":"Бэк-офис","move":"Финансы, документы, таможня","how":"агенты готовят, люди проверяют","replaces":"сотни сотрудников бэк-офиса","when":"2028"},{"area":"Люди","move":"Переманить ключевых инженеров","how":"удалённая работа, доля в компании, команда агентов вокруг каждого","takes":"ведущих конструкторов и технологов","when":"2027–2028"},{"area":"Люди","move":"40 человек вместо 400","how":"малые команды старших специалистов, каждый ведёт агентов","replaces":"оргструктуру со средним звеном","when":"2027"}]},"attack_plan_file":"attack-plan.md","style":"editorial"}</script>
+<script type="application/json" id="example-film" data-autoload>{"company":{"name":"Artel Electronics","short_name":"Artel","website":"artelgroup.com","country":"Узбекистан","industry":"Производство бытовой техники и электроники"},"language":"ru","brand":"metAImorphosis","start_year":2026,"attacker":{"name":"Arqon","is_fictional":true,"built_from":["Xiaomi Changping","Xometry","Hadrian","Dwelly"]},"risk":{"level":"high","why":"Большой растущий рынок Центральной Азии, крупный бизнес с лидирующей позицией (Fitch), преимущества (локальное производство, дистрибуция, бренд) воспроизводимы при наличии капитала. Защитных факторов из списка низкого риска нет. Маржа публично не раскрыта — признак засчитан по размеру бизнеса."},"concept":{"idea":"Девять тысяч человек и одиннадцать заводов — сила Artel сегодня, и именно её можно купить за деньги инвесторов","architecture":"A — хроника пяти лет: производителю с длинным циклом понятнее всего год за годом","central_image":"Artel ночью: город цехов у реки, одно окно — один человек","signature":"окна: у соседа свет меняется волной, у новичка мало холодных окон, в финале внутри Artel загорается свой","specifics":["Artel","Ташкент","кондиционер","девять тысяч","9 000","одиннадцать","дистрибьютор","дилер","Узбекистан","Samsung","Arqon","экспорт"],"why":"собственник-производитель мыслит планами и площадками; образ окон делает девять тысяч человек видимыми и показывает, сколько людей нужно новичку для той же работы"},"assumptions":"Сейчас конец 2026 года. Модель: рынок +4% в год; доля Artel в своём сегменте ~35%; вымышленная компания Arqon идёт по S-кривой к 30% рынка, середина в 2029.5; 60% её доли забирается у Artel. «Сосед» во второй волне — собирательный конкурент, не конкретная компания; его цифры — сценарная оценка по кейсам. Письмо дистрибьютора вымышлено. Выручка на сотрудника Artel посчитана из публичных данных 2021–2022: ~$450 млн / ~9 000 человек. Структура цены кондиционера в сцене «Почему они дешевле» — модель, а не данные Artel. Этап зрелости Artel — оценка по открытым данным. План Arqon (раунд $150 млн, 40 человек) — модель; ориентиры: Dwelly $170 млн (2026), Hadrian $1,37 млрд (2026). Сцена «Что происходит на самом деле» — собирательный сценарий, а не данные конкретной компании.","sources":[{"title":"bne IntelliNews — Artel leading Central Asia's white goods revolution (2022)","url":"https://www.intellinews.com/artel-leading-central-asia-s-white-goods-revolution-237783/"},{"title":"Kursiv — How Artel managed to become the leader of the home appliances industry in Central Asia (2022)","url":"https://kz.kursiv.media/en/2022-05-11/how-artel-managed-to-become-the-leader-of-the-home-appliances-industry-in-central-asia/"},{"title":"Spot.uz — Artel: выход на рынок ЕС (28.09.2026, на правах рекламы)","url":"https://www.spot.uz/ru/2026/09/28/artel/"},{"title":"Trend.az — Fitch affirms Artel at B (2022)","url":"https://www.trend.az/casia/uzbekistan/3619151.html"},{"title":"New Atlas — Xiaomi dark robotic factory (2024)","url":"https://newatlas.com/robotics/xiaomi-dark-robotic-factory/"},{"title":"CIMdata — Xometry full year 2025 results","url":"https://www.cimdata.com/en/industry-summary-articles/item/29521-xometry-reports-record-fourth-quarter-and-strong-full-year-2025-results"},{"title":"PR Newswire — Hadrian raises $1.37B Series D (08.2026)","url":"https://digital-release.wowktv.com/business/press-releases/cision/20260806LA20310/hadrian-raises-1-37b-series-d-to-build-highly-automated-factories-to-accelerate-americas-industrial-renewal"},{"title":"BNN Bloomberg — Hadrian valued at US$7.87B (08.2026)","url":"https://www.bnnbloomberg.ca/business/company-news/2026/08/06/manufacturing-company-hadrian-valued-at-us787-billion-in-latest-funding-round/"},{"title":"Habr / Selectel — Anthropic отказалась от Git ради Scion (14.10.2026), по инженерному блогу Anthropic (13.10.2026)","url":"https://habr.com/ru/companies/selectel/news/1094398/"},{"title":"SaaStr — $500K ARR per employee is the new $200K (26.01.2026)","url":"https://www.saastr.com/the-new-rule-500k-arr-per-employee-is-the-new-200k"},{"title":"Pulse 2.0 — Dwelly announces $170M Series B (31.07.2026)","url":"https://pulse2.com/dwelly-announces-170-million-series-b/"},{"title":"Techleap — General Catalyst's $1.5B AI services transformation (11.2025)","url":"https://finder.techleap.nl/news/feed/general-catalyst-s-1-5b-ai-services-transformation"},{"title":"Trending Topics — The Anthropic effect: SaaS sell-off (05.02.2026)","url":"https://www.trendingtopics.eu/the-anthropic-effect-fear-of-ai-agents-trigger-major-saas-stock-sell-off/"}],"now":"2026 Q4","model":{"from":2026,"to":2031,"market_growth":0.04,"your_share":0.35,"attacker_cap":0.3,"attacker_mid":2029.5,"attacker_k":1.3,"taken_from_you":0.6},"scenes":[{"type":"cold_open","act":"","kicker":"Artel · Ташкент · конец 2026","lines":["Это фильм про Artel.","Про то, как изменится ваша отрасль.","И почему это уже не остановить."],"narration":"Это фильм про Артель. Сейчас конец две тысячи двадцать шестого. О том, кто может к вам прийти за пять лет, и почему это уже не остановить."},{"type":"chapter","act":"I · Кто вы сегодня","num":"01","title":"Кто вы сегодня","year":2026},{"type":"dossier","act":"I · Кто вы сегодня","year":2026,"title":"Что о вас видно снаружи","facts":[{"label":"Первый свой завод","value":"2006","note":"Группа начинала с импорта в 1990-х","tag":"known"},{"label":"Сотрудников","value":"≈9 000","note":"Данные 2022 года","tag":"known"},{"label":"Производств и складов","value":"11","note":"Ташкент, Нукус, Хорезм, Заамин","tag":"known"},{"label":"Выручка","value":"$450 млн","note":"2021 год, последняя публичная цифра","tag":"known"},{"label":"Типов продукции","value":"1 500","note":"Включая Samsung, Toshiba, Carrier","tag":"known"},{"label":"Стран экспорта","value":"20+","note":"С 2026 года — Мальта и Бельгия","tag":"known"}],"narration":"Вот что видно о вас снаружи. Свой завод с две тысячи шестого. Около девяти тысяч сотрудников, одиннадцать площадок, выручка около четырёхсот пятидесяти миллионов долларов, экспорт в двадцать стран."},{"type":"statement","act":"I · Кто вы сегодня","year":2026,"kicker":"Сильная позиция","text":"Двадцать лет данных, сервиса и дилеров.","sub":"Этого нет ни у одного новичка. Но заводы, дилеров и бренд можно воспроизвести, если есть капитал и другая скорость.","narration":"У вас есть то, чего нет у новичка: двадцать лет данных, сервис и дилеры. Но заводы, дилеров и бренд можно воспроизвести, если есть капитал и другая скорость."},{"type":"chapter","act":"II · Как это происходит","num":"02","title":"Как это происходит","sub":"Три волны. Они приходят по очереди, и каждая больше предыдущей.","year":2026},{"type":"waves","act":"II · Как это происходит","title":"Три волны","from":2026,"to":2031,"now":"2026 Q4","now_label":"Сейчас · конец 2026","waves":[{"title":"Всё вокруг ускоряется","text":"Поставщики, маркетплейсы, конкуренты, инструменты","from":"2026 Q1","to":"2028 Q1","when":"2026–2027"},{"title":"Сосед перестраивается","text":"Один из конкурентов работает вдвое быстрее","from":"2027 Q2","to":"2029 Q3","when":"2027–2029"},{"title":"Компания с нуля","text":"Построена на ИИ с первого дня. Её уже не обойти","from":"2028 Q3","to":"2031 Q1","when":"2029–2031"}],"narration":"Это происходит тремя волнами. Сначала всё вокруг ускоряется. Потом кто-то из соседей перестраивается и работает вдвое быстрее. Потом появляется компания, построенная на ИИ с первого дня. Каждая волна больше предыдущей."},{"type":"ladder","act":"II · Как это происходит","year":2026,"title":"Где вы, где сосед, где новичок","stages":[{"name":"Вручную","text":"Люди, телефон, Excel"},{"name":"Инструменты","text":"Сотрудники пользуются чатами"},{"name":"Процессы","text":"Агенты считают цены, ведут поддержку"},{"name":"Операции","text":"Агенты ведут сквозные процессы"},{"name":"ИИ-нативная компания","text":"Малые команды, много агентов"},{"name":"ИИ-нативные заводы","text":"Производство под автоматизацию"}],"markers":[{"label":"Artel","stage":1,"side":"you","when":"сейчас · оценка"},{"label":"Сосед","from":1,"to":3,"side":"neighbour","when":"2027–2029"},{"label":"Arqon","from":4,"to":5,"side":"them","when":"с первого дня → 2030"}],"narration":"Разница — в этапе зрелости. Вы, по нашей оценке, на втором. Сосед за два года дойдёт до четвёртого, а новичок рождается сразу на пятом."},{"type":"attackers","act":"II · Как это происходит","year":2026,"title":"Кто может прийти к Artel","items":[{"type":"Иностранный бренд с ИИ","text":"Выходит напрямую: карточки, видео и поддержку на узбекском делают агенты","when":"2026–2028","likelihood":"high","takes":"онлайн и цена","focus":true},{"type":"Сосед, который перестроился","text":"Те же заводы и дилеры, но цена и срок в тот же день","when":"2027–2029","likelihood":"high","takes":"дистрибьюторов","focus":true},{"type":"Платформа между вами и покупателем","text":"Маркетплейс с мгновенной ценой и своей маркой","when":"2027–2029","likelihood":"medium","takes":"покупателя"},{"type":"Поставщик со своим брендом","text":"Китайский завод-партнёр продаёт под своей маркой","when":"2027–2029","likelihood":"medium","takes":"стандартные модели"},{"type":"«Снайпер» на сервисе","text":"ИИ-сервис кондиционеров в крупных городах","when":"2027–2028","likelihood":"medium","takes":"маржу сервиса"},{"type":"Стартап на инвестициях","text":"Построен на ИИ с нуля, деньги на годы низких цен","when":"2027–2031","likelihood":"medium","takes":"самый маржинальный сегмент","focus":true}],"narration":"Прийти могут шестью путями: иностранный бренд, перестроившийся сосед, маркетплейс со своей маркой, ваш же поставщик, узкий сервис и стартап на инвестициях."},{"type":"chapter","act":"II · Волна 1","num":"1/3","title":"Всё вокруг ускоряется","year":2027},{"type":"signals","act":"II · Волна 1","year":2027,"title":"Сигналы, которые легко списать","items":[{"when":"2026","from":"Маркетплейс","text":"ИИ-ассистент советует покупателю три бренда кондиционеров. Вашего среди них нет."},{"when":"2027","from":"Иностранный бренд","text":"Линейка под Центральную Азию за полгода, поддержка на узбекском круглосуточно."},{"when":"2027","from":"Поставщик","text":"Модель и цену новой платы присылают за сутки. Раньше на это уходил месяц."},{"when":"2027","from":"Финдиректор","text":"У партнёров обработка заказа подешевела в разы. У нас — нет."}],"narration":"Первая волна выглядит как мелочи. Ассистент маркетплейса советует покупателю три бренда, и вашего среди них нет. Иностранный бренд делает линейку под регион за полгода. Поставщик присылает цену за сутки. Вместе это тренд."},{"type":"chapter","act":"II · Волна 2","num":"2/3","title":"Сосед перестраивается","sub":"Собирательный конкурент, а не конкретная компания","year":2028},{"type":"beneath","act":"II · Волна 2","year":2027,"title":"Что происходит под водой","surface":{"label":"Что видно снаружи · 2027","text":"Сосед запустил чат-бота на маркетплейсе. Он отвечает невпопад."},"label_below":"Что копится под водой","items":["Поняли, что работает, а что нет","Нашли ещё пять процессов, которые можно перестроить","Двадцать человек переучились работать с агентами","Данные о заказах собраны в одном месте","Следующий проект — за недели, а не за год"],"punchline":"Он не умнее и не богаче. Он просто начал.","narration":"Вторая волна начинается незаметно. Сосед запускает чат-бота, и тот отвечает невпопад. Легко усмехнуться. Но под водой у него копится то, чего нет у вас: понимание, что работает, следующие процессы, переученные люди, собранные данные. Неудачный проект — это оплаченный урок. Он не умнее и не богаче вас. Он просто начал."},{"type":"scissors","act":"II · Волна 2","year":2028,"title":"Вы и сосед, который перестроился","you_label":"Artel","them_label":"Сосед","rows":[{"label":"Ответ дистрибьютору с ценой и сроком","you":72,"them":4,"unit":"ч","ratio":"×18"},{"label":"От идеи модели до полки","you":14,"them":8,"unit":"мес","ratio":"×1.8"},{"label":"Сервис: от звонка до решения","you":10,"them":4,"unit":"дн","ratio":"×2.5"}],"narration":"Через год-два это видно в цифрах. Те же заводы и дилеры, но ответ дистрибьютору за четыре часа, а не за трое суток."},{"type":"moment","act":"II · Волна 2","year":2028,"when":"Март 2028","channel":"Письмо","from":"Коммерческий директор · ваш крупнейший дистрибьютор","text":"Добрый день. С апреля переводим сорок процентов заказа по кондиционерам к другому производителю. Цену и срок они дают в тот же день. Если сможете так же — давайте обсудим.","note":"Письмо вымышлено. Механизм — нет.","narration":"Март двадцать восьмого. Письмо крупнейшего дистрибьютора: с апреля сорок процентов заказа уходит к другому производителю. Там цену и срок дают в тот же день."},{"type":"chapter","act":"II · Волна 3","num":"3/3","title":"Компания с нуля","sub":"Arqon — вымышленная компания. Каждый её ход уже делают реальные компании.","year":2029},{"type":"plan","act":"II · Волна 3","year":2027,"title":"План компании, которой пока нет","memo":"Arqon · раунд $150 млн · 40 человек · цель: сделать Artel ненужным за пять лет","columns":[{"name":"Продукт","items":[{"text":"Модели по отзывам за три месяца","when":"2027"},{"text":"Без заводов: контрактная сборка, своя линия позже","when":"2027→29"},{"text":"Прибор с данными и подписка на сервис","when":"2028"}]},{"name":"Продажи и сервис","items":[{"text":"Карточки и ответы для ИИ-ассистентов маркетплейсов","when":"2027"},{"text":"Цена и срок дистрибьютору за минуты","when":"2027"},{"text":"Поддержка 24/7 на трёх языках","when":"2027"}]},{"name":"Бэк-офис","items":[{"text":"Закупки и планирование ведут агенты","when":"2027"},{"text":"Финансы, документы, таможня — агенты, люди проверяют","when":"2028"}]},{"name":"Люди","items":[{"text":"Переманить ключевых инженеров Artel","when":"2027–28"},{"text":"40 человек вместо 400: каждый ведёт агентов","when":"2027"}]}],"narration":"Представим её основателя: сто пятьдесят миллионов долларов, сорок человек и одна цель — сделать Артель ненужным. Его план: модели по отзывам за три месяца, без своих заводов на старте, продажи через ассистентов маркетплейсов, цена дистрибьютору за минуты. И ваши лучшие инженеры в команде."},{"type":"anatomy","act":"II · Волна 3","year":2029,"title":"Почему они дешевле","you_label":"Artel","them_label":"Arqon","unit":"из 100 единиц цены кондиционера · модель","rows":[{"label":"Комплектующие","you":55,"them":53},{"label":"Производство и люди","you":12,"them":7},{"label":"Офис и управление","you":8,"them":2},{"label":"Продажи и дилеры","you":15,"them":6},{"label":"Логистика и сервис","you":5,"them":4},{"label":"Маржа","you":5,"them":6,"margin":true}],"gap_caption":"их цена при большей марже · модель","narration":"Почему это опасно. Возьмём цену кондиционера. Комплектующие стоят всем почти одинаково. Разница в людях, офисе и дилерах: у компании на агентах эта часть вдвое меньше. Она может продавать на пятую часть дешевле и зарабатывать больше."},{"type":"statement","act":"II · Волна 3","year":2029,"kicker":"Капитал","text":"Вы защищаетесь прибылью этого года. Они атакуют деньгами на пять лет вперёд.","sub":"Инвесторы оплачивают годы низких цен. А бьют они не по всему рынку, а по самому прибыльному куску.","narration":"И главное. Вы защищаетесь прибылью этого года, а они атакуют деньгами инвесторов на годы вперёд и бьют по самому прибыльному куску. Заводы остаются у вас, маржа уходит к ним."},{"type":"race","act":"II · Волна 3","title":"Гонка, если ничего не менять","metric":"Выручка","unit":"индекс, Artel 2026 = 100","years":[2026,2027,2028,2029,2030,2031],"you":[100,103,102,93,78,68],"them":[0,2,11,32,65,90],"gap_label":"−32%","gap_caption":"ваша выручка к 2031 · модель","narration":"Это модель, а не прогноз. Первые два года вы ничего не замечаете. Потом кривые сходятся. К тридцать первому ваша выручка на треть ниже, а компания, которой не было, почти догнала вас."},{"type":"swarm","act":"II · Волна 3","year":2031,"title":"Arqon будет не один","segments":["Кондиционеры онлайн","Дистрибьюторы","Крупная техника","Экспорт","Сервис и установка"],"end_share":0.45,"punchline":"Своей ниши не останется: одни отъедят по кусочку, другие — большими кусками","narration":"И Arqon будет не один. В каждом сегменте появятся все сразу: одни чуть оптимизируют свой бизнес, другие перестроят процессы, третьи перейдут на AI-first, четвёртые построят всё с нуля. Удачный формат тут же скопируют. Они будут драться между собой, а Artel раздавят в процессе. Своей ниши не останется."},{"type":"flank","act":"II · Волна 3","kicker":"Кроме конкурентов","title":"Кондиционер может выбрать не покупатель","items":[{"from":"Застройщик","what":"Климат покупают вместе с квартирой","why":"Девелопер берёт кондиционеры партией прямо у фабрики. Дилер и магазин в этой сделке не нужны.","weight":"mid"},{"from":"Маркетплейс","what":"Выбирает помощник, а не человек","why":"Помощник сравнивает характеристики и цену. Бренда, которого нет в его ответе, нет и в выборе.","weight":"high","case":"Pew Research, 2025: со сводкой ИИ по ссылкам кликают в 8% визитов против 15%"},{"from":"Дистрибьютор","what":"Дилер заводит свой бренд","why":"Китайская фабрика делает, ИИ пишет карточки и отвечает покупателям. Ваш дилер становится вашим конкурентом.","weight":"mid"},{"from":"Покупатель","what":"«Умный» должен решать сам","why":"Кондиционер, который не экономит счёт без подсказки, скоро будет выглядеть как кнопочный телефон.","weight":"mid"},{"from":"Энергокомпания","what":"Платят за прохладу, а не за кондиционер","why":"Техника принадлежит оператору, клиент платит за охлаждение. Тогда бренд выбирает оператор — по цене киловатта.","weight":"mid","case":"Cooling as a Service, инициатива BASE","surprise":true}],"punchline":"Половина этих угроз не похожа на конкурентов","narration":"Не все удары придут от конкурентов. Застройщик купит климат партией прямо у фабрики. На маркетплейсе выберет помощник, и бренда, которого нет в его ответе, нет и в выборе. Дилер Artel заведёт свой бренд. А самое неожиданное — энергокомпания, которая продаёт прохладу по часам. Тогда кондиционер выбирает она, по цене киловатта."},{"type":"parallels","act":"IV · Это уже происходит","year":2026,"title":"Где это уже случилось быстрее","rows":[{"field":"Разработка ПО","what":"В Anthropic код пишут агенты: слияний в основную ветку стало около 30 000 в день вместо 2 500","speed":"×10 за 5 мес","source":"Anthropic, инженерный блог, 13.10.2026 (пересказ Хабра)"},{"field":"Софт-компании","what":"Cursor: около $1 млрд годовой выручки при ~300 сотрудниках","speed":"×7 на человека","source":"SaaStr, 01.2026, оценки автора; сравнение с Salesforce"},{"field":"Аренда жилья","what":"Dwelly скупает агентства и ведёт их на ИИ: 300+ объектов на сотрудника против ~100","speed":"×3","source":"Pulse 2.0, 07.2026"},{"field":"Сервисные фирмы","what":"Фонды скупают бухгалтерии и консалтинг, чтобы перевести их на ИИ","speed":"$1,5 млрд","source":"General Catalyst, 11.2025 (Techleap)"},{"field":"Экспертные компании","what":"После выхода ИИ-плагинов для юристов и финансистов рынок переоценил их за дни","speed":"−18%","source":"Thomson Reuters, начало 02.2026 (Trending Topics)"}],"narration":"В других отраслях это уже случилось, и быстрее. В Энтропик код пишут агенты: за пять месяцев слияний кода стало в десять раз больше. Курсор зарабатывает миллиард в год с тремя сотнями человек. Фонды скупают бухгалтерии, чтобы перевести их на ИИ. У вас медленнее. Медленнее — не значит никогда."},{"type":"case","act":"IV · Это уже происходит","kicker":"Волна 1 · Покупателя забирают у заводов","name":"Xometry","where":"США и Европа","year":"2025","headline":"Платформа мгновенно считает цену детали по чертежу и раздаёт заказы тысячам заводов. Заказчик принадлежит ей.","stats":[{"value":"$630 млн","label":"выручка маркетплейса за 2025, +30%"},{"value":"81 821","label":"активный заказчик"},{"value":"4 996","label":"заводов-исполнителей"}],"source":"Xometry, итоги 2025 года (CIMdata)","narration":"И в производстве. Первая волна: Ксометри считает цену детали по чертежу за секунды, и заказчик теперь принадлежит не заводам."},{"type":"case","act":"IV · Это уже происходит","kicker":"Волна 2 · Действующая компания перестроилась","name":"Xiaomi","where":"Пекин, Чанпин","year":"2024","headline":"Завод, где ключевые процессы полностью автоматизированы, а люди только наблюдают из диспетчерской.","stats":[{"value":"10 млн+","label":"смартфонов в год — проектная мощность"},{"value":"100%","label":"ключевых процессов автоматизировано"},{"value":"11","label":"производственных линий"}],"source":"New Atlas, 10.07.2024","narration":"Вторая: Сяоми построила завод, где люди только наблюдают."},{"type":"case","act":"IV · Это уже происходит","kicker":"Волна 3 · Заводы с нуля","name":"Hadrian","where":"США","year":"2026","headline":"Строит высокоавтоматизированные заводы прецизионных деталей с нуля: ИИ, роботы и инженерия процессов.","stats":[{"value":"$1,37 млрд","label":"привлечено в августе 2026"},{"value":"$7,87 млрд","label":"оценка компании"},{"value":"6 лет","label":"от первого цеха до сети заводов"}],"source":"PR Newswire; BNN Bloomberg, 08.2026","narration":"Третья: Хэдриан строит заводы с нуля под роботов и привлёк почти полтора миллиарда долларов."},{"type":"myths","act":"IV · Это уже происходит","year":2026,"title":"Вы, скорее всего, сейчас думаете","items":[{"belief":"Мы производство. ИИ — это про софт.","answer":"Сяоми и Хэдриан перестраивают сами заводы. А первый удар — по тому, что вокруг завода: цене, продажам, сервису."},{"belief":"У них ИИ-проекты бесполезные.","answer":"Неудачный проект — полезный проект: он даёт опыт, которого у вас нет. Они впереди, потому что начали."},{"belief":"Новичок займёт свою нишу, а мы — свою.","answer":"Если у него получится, придут ещё. И сосед перестроится. По кусочку и большими кусками — ниши не останется."}],"narration":"Вы, наверное, думаете: мы производство, это про софт. Но перестраивают уже сами заводы. У них ИИ-проекты бесполезные? Каждый даёт опыт, которого у вас нет. Новичок займёт свою нишу, а мы свою? Если у него получится, придут ещё. Ниши не останется."},{"type":"chapter","act":"V · Развилка","num":"05","title":"Развилка","year":2026},{"type":"scenarios","act":"V · Развилка","year":2026,"title":"Три пути","items":[{"name":"Традиция","what":"Всё как есть, плюс немного автоматизации","outcome_label":"к 2031","outcome":"Сценарий этого фильма"},{"name":"Эволюция","what":"Агенты в отдельных процессах. Как электромотор вместо паровой машины: выгода пришла, только когда перестроили сам завод","outcome_label":"к 2031","outcome":"Разрыв меньше, но растёт"},{"name":"Революция","what":"Своя ИИ-нативная компания внутри Artel: туда переходят данные, клиенты и лучшие люди","outcome_label":"к 2031","outcome":"Arqon — это вы","accent":true}],"narration":"У вас три пути. Традиция — сценарий, который вы только что видели. Эволюция — агенты в отдельных процессах; но и с электричеством выгода пришла, только когда перестроили сам завод. Революция — своя компания с нуля внутри Артели. Тогда Аркон — это вы."},{"type":"questions","act":"V · Развилка","items":["Сколько часов сегодня проходит от запроса дилера до цены и срока?","Что вы ответите на письмо, где сорок процентов заказа уходит к соседу?","Если бы вы строили Artel с нуля в 2027 году — что бы вы не стали строить?"],"narration":"Три вопроса, на которые можете ответить только вы. Сколько часов от запроса дилера до цены? Что вы ответите на то письмо? И что бы вы не стали строить, если бы строили Артель с нуля?"},{"type":"end","act":"","title":"Как вы видите Artel теперь?","subtitle":"Это сценарий, а не приговор. Он не сбудется, если вы начнёте раньше других.","cta":"Дальше: ваши цифры за минуту · metAImorphosis","narration":"Это сценарий, а не приговор. Как вы видите Артель теперь? Ответьте себе сами, а потом проверьте свои цифры: это займёт минуту."}],"finale":{"title":"Ваши цифры за минуту","intro":"Фильм построен на публичных данных и допущениях. Сдвиньте ползунки так, как видите сами, и модель пересчитается.","inputs":[{"param":"attacker_mid","label":"Когда новый игрок наберёт силу в вашем сегменте","min":2027.5,"max":2033,"step":0.5,"format":"year"},{"param":"attacker_cap","label":"Какую долю рынка он может занять","min":0.05,"max":0.5,"step":0.05,"format":"pct"},{"param":"taken_from_you","label":"Какая часть его продаж — ваши покупатели","min":0.1,"max":0.9,"step":0.1,"format":"pct"},{"param":"market_growth","label":"Рост вашего рынка в год","min":-0.04,"max":0.12,"step":0.01,"format":"pct"}],"steps_title":"Один шаг на 30 дней. Даже если он не получится, вы начнёте копить опыт","steps":[{"title":"Ответ дилеру в тот же день","text":"Пилот на одной товарной группе: агент собирает цену, срок и наличие по запросу дистрибьютора."},{"title":"Видят ли вас ИИ-ассистенты","text":"Проверка: что ассистенты маркетплейсов советуют покупателю в ваших категориях и почему."},{"title":"Своя «компания с нуля»","text":"Полдня с командой: если бы мы строили Artel в 2027 году, что бы мы не стали строить?"}],"privacy":"Ничего не отправляется: цифры остаются в этом браузере, пока вы сами их не скопируете.","paths_title":"Какой путь вам ближе?","reflection":{"question":"Как вы видите Artel теперь? Одной-двумя фразами"}},"threats":"threats.md","voice":{"rate":"+8%"},"world":{"you":9000,"them_start":40,"them_end":300,"sites":11,"look":"night","kit":"factory","seed":7},"attack_plan":{"title":"Как бы вас атаковали: план компании, которой пока нет","memo":"Arqon вымышлен. Раунд $150 млн, 40 человек, цель — сделать Artel ненужным за пять лет. Бьёт первым по онлайн-продажам кондиционеров и дистрибьюторам в Ташкенте и Алмате. Каждый ход уже делают реальные компании.","moves":[{"area":"Продукт","move":"Модели по отзывам за три месяца","how":"ИИ разбирает отзывы и запросы на маркетплейсах и проектирует модификации","replaces":"14-месячный цикл разработки","takes":"покупателя, которому нужна «своя» модель","when":"2027"},{"area":"Продукт","move":"Без заводов на старте","how":"контрактная сборка в Китае, своя линия под регион с 2029 года","replaces":"11 площадок как условие входа на рынок","takes":"ценовой сегмент","when":"2027→2029"},{"area":"Продукт","move":"Прибор с данными и подписка на сервис","how":"каждый кондиционер в приложении, прогноз поломок","replaces":"гарантийный сервис по звонку","takes":"маржу сервиса","when":"2028"},{"area":"Продажи и сервис","move":"Продажи через ИИ-ассистентов маркетплейсов","how":"карточки, видео и ответы на узбекском и русском делают агенты","replaces":"дилерскую наценку и ручной контент","takes":"онлайн-покупателя","when":"2027"},{"area":"Продажи и сервис","move":"Цена и срок дистрибьютору за минуты","how":"агентский портал: цена, наличие и логистика сразу","replaces":"менеджеров и трое суток ожидания","takes":"дистрибьюторов","when":"2027"},{"area":"Продажи и сервис","move":"Поддержка 24/7 на трёх языках","how":"агенты ведут обращения, люди — сложные случаи","replaces":"колл-центр","takes":"лояльность после покупки","when":"2027"},{"area":"Бэк-офис","move":"Закупки и планирование агентами","how":"прогноз спроса по данным маркетплейсов, автоматические заказы комплектующих","replaces":"отделы закупок и планирования","takes":"оборотный капитал: меньше складов","when":"2027"},{"area":"Бэк-офис","move":"Финансы, документы, таможня","how":"агенты готовят, люди проверяют","replaces":"сотни сотрудников бэк-офиса","when":"2028"},{"area":"Люди","move":"Переманить ключевых инженеров","how":"удалённая работа, доля в компании, команда агентов вокруг каждого","takes":"ведущих конструкторов и технологов","when":"2027–2028"},{"area":"Люди","move":"40 человек вместо 400","how":"малые команды старших специалистов, каждый ведёт агентов","replaces":"оргструктуру со средним звеном","when":"2027"}]},"attack_plan_file":"attack-plan.md","style":"editorial"}</script>
 <script type="text/plain" id="film-js">/* Deterministic film player: every visual is a pure function of time t.
    The renderer calls window.__seek(t) for each frame and screenshots the stage. */
 (function boot() {
@@ -1148,6 +1201,7 @@ function init() {
   };
 
   B.race = (s, root) => {
+    if (V('race', 'line') === 'bars') return VB.race_bars(s, root);
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const years = s.years, a = s.you, b = s.them;
@@ -1201,16 +1255,18 @@ function init() {
   };
 
   B.scissors = (s, root) => {
+    if (V('scissors', 'rows') === 'bars') return VB.scissors_bars(s, root);
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
-    const hy = pos(h('div', 'sc-head you', esc(s.you_label || youName), root), 640, 300);
-    const ht = pos(h('div', 'sc-head them', esc(s.them_label || themName), root), 1080, 300);
+    const cA = Math.round((R - L) * 0.4), cB = Math.round((R - L) * 0.675);   // value columns follow the margins
+    const hy = pos(h('div', 'sc-head you', esc(s.you_label || youName), root), L + cA, 300);
+    const ht = pos(h('div', 'sc-head them', esc(s.them_label || themName), root), L + cB, 300);
     const rows = (s.rows || []).slice(0, 5).map((r, i) => {
       const row = pos(h('div', 'sc-row', '', root), L, 350 + i * 112);
       row.style.width = R - L + 'px';
-      const lab = h('div', 'sc-label', esc(r.label), row);
-      fit(lab, 32, 20, 700, 80);
-      const y = h('div', 'sc-you you', '', row), m = h('div', 'sc-them them', '', row);
+      const lab = h('div', 'sc-label', esc(r.label), row); lab.style.width = cA - 40 + 'px';
+      fit(lab, 32, 20, cA - 40, 80);
+      const y = h('div', 'sc-you you', '', row), m = h('div', 'sc-them them', '', row); y.style.left = cA + 'px'; m.style.left = cB + 'px';
       const q = h('div', 'sc-ratio', esc(r.ratio || ''), row);
       return { row, r, y, m, q };
     });
@@ -1263,11 +1319,13 @@ function init() {
   };
 
   B.signals = (s, root) => {
+    if (V('signals', 'stack') === 'list') return VB.signals_list(s, root);
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 330, 600);
     fit(title, 64, 36, 600, 400);
     const items = (s.items || []).slice(0, 5);
     const cards = items.map((it) => {
       const c = h('div', 'sg-card', `<div class="sg-meta">${esc([it.when, it.from].filter(Boolean).join(' · '))}</div><div class="sg-text">${esc(it.text)}</div>`, root);
+      c.style.left = L + 660 + 'px'; c.style.width = R - L - 660 - 54 + 'px';
       return c;
     });
     const hs = cards.map((c) => c.offsetHeight + 18);
@@ -1773,11 +1831,12 @@ function init() {
     const copyNote = pos(h('div', 'sw-note abs', esc(s.copy_note || (F.language === 'ru' ? 'Успех копируют: за первым приходят следующие' : 'Success is copied: the first is followed by others')), root), legX, top + 500, legW);
     // columns
     const R0 = (() => { let a = 7 + (F.company?.name || '').length; return () => { a = (a * 16807) % 2147483647; return a / 2147483647; }; })();
+    const hz = V('swarm', 'columns') === 'rows', rowH = (bot + 40 - top) / n, barH = Math.min(70, rowH - 40);   // rows: each segment a horizontal bar
     const cols = segs.map((sg, j) => {
-      const x = fieldX + j * (colW + colGap);
-      const box = pos(h('div', 'sw-col abs', '', root), x, top, colW); box.style.height = (bot - top) + 'px';
-      const fill = h('div', 'sw-fill', '', box);
-      const lab = pos(h('div', 'sw-lab abs', esc(typeof sg === 'string' ? sg : sg.name), root), x, bot + 14, colW);
+      const x = hz ? fieldX : fieldX + j * (colW + colGap), y = hz ? top + j * rowH + 30 : top;
+      const box = pos(h('div', 'sw-col abs' + (hz ? ' hz' : ''), '', root), x, y, hz ? fieldW : colW); box.style.height = (hz ? barH : bot - top) + 'px';
+      const fill = h('div', 'sw-fill' + (hz ? ' hz' : ''), '', box);
+      const lab = pos(h('div', 'sw-lab abs' + (hz ? ' hz' : ''), esc(typeof sg === 'string' ? sg : sg.name), root), x, hz ? y - 28 : bot + 14, hz ? fieldW : colW);
       const pct = h('div', 'sw-pct', '', box);
       return { x, box, fill, lab, pct, start: (typeof sg === 'object' && sg.share) || 1 };
     });
@@ -1790,8 +1849,9 @@ function init() {
     ents.forEach((e) => { e.size *= (1 - endShare) * (0.85 + 0.3 * ((e.seg * 37) % 10) / 10) / Math.max(0.01, raw[e.seg]); });
     const placed = ents.sort((a, b) => a.at - b.at).map((e) => {
       const c = cols[e.seg]; const el = h('i', `sw-shape ${SH[e.k]} sw-tok${e.copy ? ' copy' : ''}`, '', c.box);
-      const sz = 14 + Math.min(40, e.size * 260); el.style.width = el.style.height = sz + 'px';
-      el.style.left = (8 + R0() * Math.max(10, colW - sz - 16)) + 'px'; e.el = el; e.sz = sz; e.y = R0(); return e;
+      const sz = Math.min(hz ? barH - 10 : 54, 14 + Math.min(40, e.size * 260)); el.style.width = el.style.height = sz + 'px';
+      if (hz) el.style.top = Math.max(4, (barH - sz) / 2 + (R0() - 0.5) * (barH - sz) * 0.8) + 'px'; else el.style.left = (8 + R0() * Math.max(10, colW - sz - 16)) + 'px';
+      e.el = el; e.sz = sz; e.y = R0(); return e;
     });
     const punch = s.punchline ? pos(h('div', 'sw-punch abs', esc(s.punchline), root), fieldX, bot + 80, fieldW) : null;
     return (t, d, sc) => {
@@ -1809,6 +1869,8 @@ function init() {
       });
       cols.forEach((c, j) => {
         const share = Math.max(0, 1 - taken[j]), hgt = (bot - top) * share;
+        if (hz) { const wd = fieldW * share; c.fill.style.width = wd + 'px'; c.pct.textContent = Math.round(share * 100) + '%'; c.pct.style.left = Math.max(8, wd - 74) + 'px';
+          placed.filter((e) => e.seg === j).forEach((e, q) => { e.el.style.left = Math.min(fieldW - e.sz - 4, wd + 6 + ((q * 53 + e.y * 90) % Math.max(20, (fieldW - wd) * 0.9))) + 'px'; }); return; }
         c.fill.style.height = hgt + 'px';
         c.pct.textContent = Math.round(share * 100) + '%'; c.pct.style.bottom = Math.max(6, hgt - 40) + 'px';   // inside the company's own colour
         placed.filter((e) => e.seg === j).forEach((e, q) => { e.el.style.top = Math.max(6, (bot - top - hgt) - e.sz - 6 - ((q * 41 + e.y * 60) % Math.max(20, (bot - top - hgt) * 0.85))) + 'px'; });
@@ -1819,6 +1881,7 @@ function init() {
   };
 
   B.myths = (s, root) => {
+    if (V('myths', 'rows') === 'stack') return VB.myths_stack(s, root);
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const items = (s.items || []).slice(0, 3);
@@ -1846,6 +1909,7 @@ function init() {
 
   // the attack plan of a company that does not exist yet: a founder's memo and ten moves in four columns
   B.plan = (s, root) => {
+    if (V('plan', 'columns') === 'list') return VB.plan_list(s, root);
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const memo = s.memo ? pos(h('div', 'pl-memo abs', esc(s.memo), root), L, 236, R - L) : null;
@@ -1876,6 +1940,7 @@ function init() {
 
   // where it already happened faster: industries, what changed, how fast
   B.parallels = (s, root) => {
+    if (V('parallels', 'rows') === 'tiles') return VB.parallels_tiles(s, root);
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const rows = (s.rows || []).slice(0, 5), rh = rows.length > 4 ? 118 : 136;
@@ -1898,6 +1963,7 @@ function init() {
 
   // three paths (the metAImorphosis NewCo scenarios): tradition, evolution, revolution, each with where it leads
   B.scenarios = (s, root) => {
+    if (V('scenarios', 'columns') === 'rows') return VB.scenarios_rows(s, root);
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const items = (s.items || []).slice(0, 3), n = items.length || 1, gap = 32, cw = (R - L - (n - 1) * gap) / n;
@@ -1917,6 +1983,245 @@ function init() {
     };
   };
 
+
+
+  // ---- second layouts: the same scene type told another way, so two films never share the same slides (look.variants) ----
+  const VB = {};
+  const fmtNum = (v, r) => { const dec = r.decimals ?? (Math.abs(v) < 10 && v % 1 ? 1 : 0); let n = (+v).toFixed(dec); if (Math.abs(+v) >= 10000) n = n.replace(/\B(?=(\d{3})+(?!\d))/g, ' '); return (r.prefix || '') + n + (r.unit ? ' ' + r.unit : ''); };
+  const mkTitle = (s, root) => { const t = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L); fit(t, 64, 40, R - L); return t; };
+
+  // race as paired bars that grow year by year
+  VB.race_bars = (s, root) => {
+    const title = mkTitle(s, root);
+    const years = s.years, a = s.you, b = s.them, n = years.length;
+    const x0 = L + 20, x1 = s.gap_label ? Math.min(1180, R - 560) : R - 20, yTop = 340, yBot = 800, maxV = Math.max(...a, ...b) * 1.12;
+    const slot = (x1 - x0) / n, bw = Math.min(70, slot * 0.34);
+    const fmt = (v) => (s.format === 'int' ? Math.round(v) : (+v).toFixed(s.decimals ?? 0)) + (s.suffix || '');
+    const unit = pos(h('div', 'rc-legend abs', `${esc((s.metric || '').toUpperCase())}${s.unit ? ' · ' + esc(s.unit) : ''}`, root), x0, yTop - 70);
+    const key = pos(h('div', 'rb-key abs', `<i class="you"></i>${esc(youName)}<i class="them"></i>${esc(themName)}`, root), x0, yTop - 36);
+    const base = pos(h('div', 'rb-base abs', '', root), x0, yBot, x1 - x0);
+    const cols = years.map((y, i) => {
+      const cx = x0 + slot * (i + 0.5);
+      return { ba: pos(h('div', 'rb-bar you abs', '', root), cx - bw - 4, yBot, bw), bb: pos(h('div', 'rb-bar them abs', '', root), cx + 4, yBot, bw),
+        va: pos(h('div', 'rb-val you abs', '', root), cx - bw - 30, 0, bw + 52), vb: pos(h('div', 'rb-val them abs', '', root), cx - 18, 0, bw + 52),
+        yl: pos(h('div', 'rb-year abs', String(y), root), cx - 60, yBot + 16, 120) };
+    });
+    const gap = s.gap_label ? h('div', 'rc-gap', `${esc(s.gap_label)}<small>${esc(s.gap_caption || '')}</small>`, root) : null;
+    if (gap) { gap.style.top = '360px'; fit(gap, 150, 80, 440); }
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); show(unit, P(t, 0.5, 0.6)); show(key, P(t, 0.6, 0.6)); base.style.transform = `scaleX(${P(t, 0.4, 0.8, ease.inOut)})`;
+      const t0 = 1.0, t1 = Math.max(t0 + 3, (sc.speechEnd || d) - 1.2), f = P(t, t0, t1 - t0, ease.inOut) * (n - 1);
+      cols.forEach((c, i) => {
+        const q = ease.out(clamp(f - i + 1)), ha = (a[i] / maxV) * (yBot - yTop) * q, hb = (b[i] / maxV) * (yBot - yTop) * q;
+        c.ba.style.top = yBot - ha + 'px'; c.ba.style.height = ha + 'px'; c.bb.style.top = yBot - hb + 'px'; c.bb.style.height = hb + 'px';
+        c.va.textContent = fmt(a[i]); c.vb.textContent = fmt(b[i]); c.va.style.top = yBot - ha - 30 + 'px'; c.vb.style.top = yBot - hb - 30 + 'px';
+        c.va.style.opacity = c.vb.style.opacity = i === n - 1 || i === 0 ? q : q * 0.55; c.yl.style.opacity = P(t, 0.6 + i * 0.05, 0.4);
+      });
+      sc.year = years[Math.min(n - 1, Math.round(f))];
+      if (gap) show(gap, P(t, t1 + 0.1, 0.8), 30);
+    };
+  };
+
+  // scissors as pairs of bars: today's number and the newcomer's, per row
+  VB.scissors_bars = (s, root) => {
+    const title = mkTitle(s, root);
+    const rows = (s.rows || []).slice(0, 5), n = rows.length || 1, rh = Math.min(128, 580 / n), lw = Math.min(520, (R - L) * 0.34), bx = L + lw + 40, bwMax = R - bx - 190;
+    const key = pos(h('div', 'rb-key abs', `<i class="you"></i>${esc(s.you_label || youName)}<i class="them"></i>${esc(s.them_label || themName)}`, root), bx, 290);
+    const els = rows.map((r, i) => {
+      const y = 350 + i * rh;
+      const lab = pos(h('div', 'sb-label abs', esc(r.label), root), L, y + 6, lw); fit(lab, 30, 18, lw, rh - 20);
+      const ba = pos(h('div', 'sb-bar you abs', '', root), bx, y + 8, 0), bb = pos(h('div', 'sb-bar them abs', '', root), bx, y + 44, 0);
+      const va = pos(h('div', 'sb-val you abs', '', root), bx, y + 2), vb = pos(h('div', 'sb-val them abs', '', root), bx, y + 38);
+      const q = r.ratio ? pos(h('div', 'sc-ratio abs', esc(r.ratio), root), R - 150, y + 20, 150) : null;
+      if (q) q.style.textAlign = 'right';
+      return { r, lab, ba, bb, va, vb, q, max: Math.max(Math.abs(r.you), Math.abs(r.them), 1e-6) };
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); show(key, P(t, 0.5, 0.6));
+      const span = Math.max(2, (sc.speechEnd || d) * 0.8 - 1);
+      els.forEach((e, i) => {
+        const at = 1.0 + (i * span) / els.length, p = P(t, at + 0.3, 1.6, ease.inOut), vis = P(t, at, 0.6);
+        show(e.lab, vis, 12);
+        const v2 = e.r.you + (e.r.them - e.r.you) * p, wa = bwMax * Math.abs(e.r.you) / e.max * P(t, at, 0.8), wb = bwMax * Math.abs(v2) / e.max * vis;
+        e.ba.style.width = wa + 'px'; e.bb.style.width = wb + 'px';
+        e.va.textContent = fmtNum(e.r.you, e.r); e.vb.textContent = fmtNum(v2, e.r);
+        e.va.style.left = bx + wa + 14 + 'px'; e.vb.style.left = bx + wb + 14 + 'px'; e.va.style.opacity = e.vb.style.opacity = vis;
+        if (e.q) e.q.style.opacity = P(t, at + 1.6, 0.5);
+      });
+      if (s.year) sc.year = s.year;
+    };
+  };
+
+  // myths one at a time: the belief in large type, struck out, the answer beneath
+  VB.myths_stack = (s, root) => {
+    const title = mkTitle(s, root);
+    const items = (s.items || []).slice(0, 3), w = Math.min(1300, R - L);
+    const els = items.map((it) => {
+      const b = pos(h('div', 'my-belief my-big abs', '«' + esc(it.belief) + '»', root), L, 330, w); fit(b, 62, 34, w, 230);
+      b.style.display = 'inline-block'; b.style.width = 'auto'; b.style.maxWidth = w + 'px';
+      const st = pos(h('div', 'my-strike abs', '', root), L - 6, 330 + b.offsetHeight / 2 - 3, Math.min(w, b.offsetWidth) + 12);
+      const a = pos(h('div', 'my-answer abs', esc(it.answer), root), L, 330 + b.offsetHeight + 56, w); fit(a, 38, 24, w, 240);
+      return { b, st, a };
+    });
+    const count = pos(h('div', 'my-count abs', '', root), R - 200, 160, 200);
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20);
+      const span = Math.max(2, (sc.speechEnd || d) - 1.0), seg = span / Math.max(1, els.length);
+      let cur = 0;
+      els.forEach((e, i) => {
+        const at = 0.8 + i * seg, out = i < els.length - 1 ? 1 - P(t, at + seg - 0.35, 0.35) : 1;
+        if (t >= at) cur = i + 1;
+        show(e.b, P(t, at, 0.6) * out, 20); e.b.style.color = P(t, at + seg * 0.35, 0.4) > 0.5 ? 'var(--muted)' : 'var(--ink)';
+        e.st.style.transform = `scaleX(${P(t, at + seg * 0.33, 0.45, ease.inOut)})`; e.st.style.opacity = out;
+        show(e.a, P(t, at + seg * 0.42, 0.6) * out, 16);
+      });
+      count.textContent = els.length > 1 ? `${cur} / ${els.length}` : ''; count.style.opacity = P(t, 0.8, 0.5);
+    };
+  };
+
+  // parallels as tiles: the speed first, then where and what
+  VB.parallels_tiles = (s, root) => {
+    const title = mkTitle(s, root);
+    const rows = (s.rows || []).slice(0, 6), n = rows.length || 1, cols = n <= 3 ? n : Math.ceil(n / 2), rn = Math.ceil(n / cols), gap = 28;
+    const tw = (R - L - gap * (cols - 1)) / cols, th = Math.min(320, (560 - gap * (rn - 1)) / rn);
+    const els = rows.map((r, i) => {
+      const c = pos(h('div', 'px-tile abs', '', root), L + (i % cols) * (tw + gap), 300 + Math.floor(i / cols) * (th + gap), tw); c.style.height = th + 'px';
+      const sd = h('div', 'px-speed px-speed-tile', esc(r.speed || ''), c); fit(sd, 64, 28, tw - 10);
+      const f = h('div', 'px-field px-field-tile', esc(r.field), c); fit(f, 30, 20, tw - 10);
+      const wv = h('div', 'px-what px-what-tile', `<span></span>${r.source ? `<em>${esc(r.source)}</em>` : ''}`, c);
+      const sp = wv.querySelector('span'); sp.textContent = r.what; fit(sp, 24, 16, tw - 10, th - 160);
+      return c;
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20);
+      const span = Math.max(2, (sc.speechEnd || d) * 0.88 - 1);
+      els.forEach((e, i) => show(e, P(t, 0.9 + (i * span) / els.length, 0.6), 24));
+    };
+  };
+
+  // three paths as bands across the screen
+  VB.scenarios_rows = (s, root) => {
+    const title = mkTitle(s, root);
+    const items = (s.items || []).slice(0, 3), n = items.length || 1, bh = Math.min(180, 560 / n), nw = Math.min(380, (R - L) * 0.26), ow = Math.min(460, (R - L) * 0.32), ww = R - L - nw - ow - 80;
+    const els = items.map((it, i) => {
+      const y = 300 + i * (bh + 10);
+      const band = pos(h('div', 'sn-band abs' + (it.accent ? ' accent' : ''), '', root), L, y, R - L); band.style.height = bh + 'px';
+      const nm = pos(h('div', 'sn-name abs', esc(it.name), band), 0, 22, nw); fit(nm, 52, 30, nw);
+      const wt = pos(h('div', 'sn-what abs', esc(it.what || ''), band), nw + 40, 22, ww); wt.style.marginTop = '0'; fit(wt, 28, 18, ww, bh - 34);
+      const o = pos(h('div', 'sn-out-r abs', `<small>${esc(it.outcome_label || '')}</small><span></span>`, band), nw + ww + 80, 20, ow);
+      const sp = o.querySelector('span'); sp.textContent = it.outcome || ''; fit(sp, 32, 20, ow, bh - 60);
+      return band;
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20);
+      const span = Math.max(2, (sc.speechEnd || d) * 0.85 - 1);
+      els.forEach((e, i) => show(e, P(t, 0.9 + (i * span) / els.length, 0.7), 0, -40));
+    };
+  };
+
+  // signals as a dated list down the page
+  VB.signals_list = (s, root) => {
+    const title = mkTitle(s, root);
+    const items = (s.items || []).slice(0, 5), n = items.length || 1, rh = Math.min(120, 580 / n), mw = 300;
+    const rail = pos(h('div', 'sl-rail abs', '', root), L + mw - 22, 300, 2); rail.style.height = n * rh - 20 + 'px';
+    const els = items.map((it, i) => {
+      const y = 300 + i * rh;
+      const m = pos(h('div', 'sl-meta abs', `<b>${esc(it.when || '')}</b>${esc(it.from || '')}`, root), L, y + 4, mw - 50);
+      const dot = pos(h('div', 'sl-dot abs', '', root), L + mw - 30, y + 14);
+      const tx = pos(h('div', 'sl-text abs', esc(it.text), root), L + mw + 10, y, R - L - mw - 10); fit(tx, 32, 20, R - L - mw - 10, rh - 16);
+      return { m, dot, tx };
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); rail.style.transform = `scaleY(${P(t, 0.5, (sc.speechEnd || d) * 0.8, ease.inOut)})`;
+      const span = Math.max(2, (sc.speechEnd || d) * 0.85 - 0.6);
+      els.forEach((e, i) => { const p = P(t, 0.6 + (i * span) / els.length, 0.6); show(e.m, p, 10); show(e.tx, p, 0, 40); e.dot.style.opacity = p; e.dot.style.transform = `scale(${0.3 + 0.7 * p})`; });
+    };
+  };
+
+  // the attack plan as one numbered list in two columns, each move tagged with its area
+  VB.plan_list = (s, root) => {
+    const title = mkTitle(s, root);
+    const memo = s.memo ? pos(h('div', 'pl-memo abs', esc(s.memo), root), L, 236, R - L) : null;
+    if (memo) fit(memo, 22, 15, R - L);
+    const all = []; (s.columns || []).slice(0, 4).forEach((c) => (c.items || []).slice(0, 3).forEach((it) => all.push({ it, area: c.name })));
+    const per = Math.ceil(all.length / 2), cw = (R - L - 60) / 2, rh = Math.min(104, 560 / Math.max(1, per));
+    const els = all.map(({ it, area }, k) => {
+      const x = L + (k < per ? 0 : cw + 60), y = 310 + (k % per) * rh;
+      const e = pos(h('div', 'pq-row abs', `<i>${String(k + 1).padStart(2, '0')}</i><small>${esc(area)}${it.when ? ' · ' + esc(it.when) : ''}</small><span></span>`, root), x, y, cw);
+      const sp = e.querySelector('span'); sp.textContent = it.text; fit(sp, 27, 17, cw - 80, rh - 40);
+      return e;
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); if (memo) show(memo, P(t, 0.5, 0.7), 8);
+      const span = Math.max(2, (sc.speechEnd || d) * 0.9 - 1.2);
+      els.forEach((e, i) => show(e, P(t, 1.0 + (i * span) / els.length, 0.5), 0, -24));
+    };
+  };
+
+  // the side: dangers that come not from competitors (data/threat-playbook.md, 1c); the surprise comes last
+  B.flank = (s, root) => {
+    const v0 = V('flank', 'radar'), v = v0 === 'radar' && (s.items || []).length > 5 ? 'doors' : v0;   // six do not fit around the hub
+    const title = mkTitle(s, root);
+    const kicker = s.kicker ? pos(h('div', 'kicker abs', esc(s.kicker), root), L, 112) : null;
+    const items = (s.items || []).slice(0, 6), lvl = { low: 1, mid: 2, medium: 2, high: 3 };
+    const sIdx = Math.max(0, items.findIndex((it) => it.surprise)); const order = items.map((_, i) => i).filter((i) => i !== sIdx).concat(items.length ? [sIdx] : []);
+    const meter = (it) => `<span class="at-meter">${[1, 2, 3].map((k) => `<i class="${k <= (lvl[it.weight] || 2) ? 'on' : ''}"></i>`).join('')}</span>`;
+    const inner = (it, wd, big) => `<div class="fl-from">${esc(it.from || '')}${meter(it)}</div><div class="fl-what"></div>${it.why ? `<div class="fl-why"></div>` : ''}${it.case ? `<div class="fl-case">${esc(it.case)}</div>` : ''}${it.surprise ? `<div class="fl-flag">${F.language === 'ru' ? 'об этом обычно не думают' : 'rarely considered'}</div>` : ''}`;
+    const fill = (c, it, wd, hw, hy) => { const w = c.querySelector('.fl-what'); w.textContent = it.what || ''; fit(w, hw, 20, wd, hy); const y = c.querySelector('.fl-why'); if (y) { y.textContent = it.why; fit(y, 22, 15, wd, 90); } };
+    let els = [], svg = null, hub = null;
+    if (v === 'doors') {
+      const n = items.length || 1, rh = Math.min(132, 600 / n), fw = 300, mw = R - L - fw - 40;
+      els = items.map((it, i) => {
+        const y = 290 + order.indexOf(i) * rh;
+        const c = pos(h('div', 'fl-row abs' + (it.surprise ? ' surprise' : ''), '', root), L, y, R - L); c.style.height = rh - 10 + 'px';
+        c.innerHTML = `<div class="fl-from fl-from-col">${esc(it.from || '')}${meter(it)}</div><div class="fl-body"><div class="fl-what"></div>${it.why ? '<div class="fl-why"></div>' : ''}</div>${it.surprise ? `<div class="fl-flag">${F.language === 'ru' ? 'об этом обычно не думают' : 'rarely considered'}</div>` : ''}`;
+        c.querySelector('.fl-from-col').style.width = fw + 'px'; c.querySelector('.fl-body').style.width = mw + 'px';
+        fill(c, it, mw - (it.surprise ? 260 : 0), 32, 46);
+        return c;
+      });
+    } else if (v === 'cards') {
+      const rest = order.slice(0, -1), cols = rest.length > 2 ? 2 : 1, rn = Math.ceil(rest.length / cols), gap = 24, lw = (R - L) * 0.6, cw = (lw - gap * (cols - 1)) / cols, ch = Math.min(260, (600 - gap * (rn - 1)) / Math.max(1, rn));
+      els = items.map((it, i) => {
+        const k = rest.indexOf(i);
+        if (k < 0) { const x = L + lw + 40, w = R - x; const c = pos(h('div', 'fl-card abs surprise', inner(it), root), x, 290, w); fill(c, it, w - 60, 46, 220); c.style.minHeight = Math.min(560, 2 * ch + gap) + 'px'; return c; }
+        const c = pos(h('div', 'fl-card abs', inner(it), root), L + (k % cols) * (cw + gap), 290 + Math.floor(k / cols) * (ch + gap), cw); c.style.height = ch + 'px'; fill(c, it, cw - 52, 28, 90);
+        return c;
+      });
+    } else {
+      // radar: the company in the middle, dangers arriving from around it
+      const cx = W / 2, cy = 625, rx = Math.min(640, (R - L) / 2 - 170), ry = 235, bw = 400, hr = 90;
+      const NS = 'http://www.w3.org/2000/svg'; svg = document.createElementNS(NS, 'svg'); svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('class', 'rc-svg'); root.appendChild(svg);
+      hub = pos(h('div', 'fl-hub abs', esc(youName), root), cx - hr, cy - hr); fit(hub, 32, 16, 150);
+      const n = items.length || 1;
+      // fixed slots around the hub so cards never collide: top, the four corners
+      const SL = { T: [cx - bw / 2, 'top'], TL: [L - 20, 'top'], TR: [R - bw + 20, 'top'], BL: [L - 20, 'bot'], BR: [R - bw + 20, 'bot'] };
+      const slots = ({ 3: ['T', 'BR', 'BL'], 4: ['TL', 'TR', 'BR', 'BL'], 5: ['T', 'TR', 'BR', 'BL', 'TL'] })[Math.min(5, Math.max(3, items.length))];
+      els = items.map((it, i) => {
+        const k = order.indexOf(i), [x, vy] = SL[slots[k % slots.length]];
+        const c = pos(h('div', 'fl-card fl-node abs' + (it.surprise ? ' surprise' : ''), inner(it), root), x, 300, bw);
+        fill(c, it, bw - 40, 26, 70); if (vy === 'bot') c.style.top = 870 - c.offsetHeight + 'px';
+        const ccx = x + bw / 2, ccy = (vy === 'bot' ? 870 - c.offsetHeight / 2 : 300 + c.offsetHeight / 2), ang = Math.atan2(ccy - cy, ccx - cx);
+        const ln = document.createElementNS(NS, 'line'); const ex = cx + hr * Math.cos(ang), ey = cy + hr * Math.sin(ang);
+        ln.setAttribute('x1', ccx); ln.setAttribute('y1', ccy); ln.setAttribute('x2', ex); ln.setAttribute('y2', ey); ln.setAttribute('class', 'fl-line' + (it.surprise ? ' surprise' : '')); svg.appendChild(ln);
+        const L2 = Math.hypot(ccx - ex, ccy - ey); ln.style.strokeDasharray = L2; ln.style.strokeDashoffset = L2; c._ln = ln; c._len = L2;
+        return c;
+      });
+    }
+    const pun = s.punchline ? pos(h('div', 'fl-pun abs', esc(s.punchline), root), L, 236, R - L) : null;
+    if (pun) fit(pun, 34, 22, R - L);
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); if (kicker) show(kicker, P(t, 0.2, 0.6), 10);
+      if (hub) { hub.style.opacity = P(t, 0.4, 0.6); hub.style.transform = `scale(${0.7 + 0.3 * P(t, 0.4, 0.8)})`; }
+      const span = Math.max(2, (sc.speechEnd || d) * 0.86 - 1.2), n = Math.max(1, els.length);
+      els.forEach((c, i) => {
+        const k = order.indexOf(i), last = k === n - 1 && items[i].surprise, at = 1.0 + (k * span) / n + (last ? span / n * 0.25 : 0), p = P(t, at, last ? 0.9 : 0.6);
+        show(c, p, v === 'doors' ? 0 : 20, v === 'doors' ? -30 : 0);
+        if (c._ln) c._ln.style.strokeDashoffset = c._len * (1 - P(t, at + 0.2, 0.7, ease.inOut));
+        if (last) c.style.transform += ` scale(${(1.06 - 0.06 * P(t, at + 0.5, 0.6)).toFixed(3)})`;
+      });
+      if (pun) show(pun, P(t, 1.0 + span + 0.3, 0.7), 10);
+    };
+  };
 
   // what is really happening: the visible (often clumsy) AI step above the waterline, the experience piling up beneath it
   B.beneath = (s, root) => {
@@ -2068,7 +2373,7 @@ function init() {
    clipSeconds[i]:   length of the video file of a "clip" scene, 0 otherwise. */
 (function (root) {
   const CHARS_PER_SEC = 14.5;
-  const MIN_DUR = { cold_open: 7, statement: 5, chapter: 3.2, dossier: 10, timeline: 12, race: 12, scissors: 10, pillars: 12, signals: 10, map: 12, waves: 14, moment: 10, attackers: 12, anatomy: 12, ladder: 12, myths: 12, plan: 14, parallels: 12, scenarios: 12, beneath: 12, world: 8, path: 12, swarm: 13, case: 9, fork: 10, questions: 10, clip: 4, end: 6 };
+  const MIN_DUR = { cold_open: 7, statement: 5, chapter: 3.2, dossier: 10, timeline: 12, race: 12, scissors: 10, pillars: 12, signals: 10, map: 12, waves: 14, moment: 10, attackers: 12, anatomy: 12, ladder: 12, myths: 12, plan: 14, parallels: 12, scenarios: 12, beneath: 12, world: 8, path: 12, swarm: 13, flank: 13, case: 9, fork: 10, questions: 10, clip: 4, end: 6 };
 
   function splitCaptions(text) {
     const sents = String(text).replace(/\s+/g, ' ').trim().split(/(?<=[.!?…。！？])\s*/).filter(Boolean);
@@ -2121,7 +2426,7 @@ function init() {
    validate(film, { exists(file) }) -> { errors, warnings, estimatedSeconds }
    exists is optional: when given, "clip" files are checked for presence. */
 (function (root) {
-  const TYPES = ['cold_open', 'statement', 'chapter', 'dossier', 'timeline', 'race', 'scissors', 'pillars', 'signals', 'map', 'waves', 'moment', 'attackers', 'anatomy', 'ladder', 'myths', 'plan', 'parallels', 'scenarios', 'beneath', 'world', 'path', 'swarm', 'case', 'fork', 'questions', 'clip', 'end'];
+  const TYPES = ['cold_open', 'statement', 'chapter', 'dossier', 'timeline', 'race', 'scissors', 'pillars', 'signals', 'map', 'waves', 'moment', 'attackers', 'anatomy', 'ladder', 'myths', 'plan', 'parallels', 'scenarios', 'beneath', 'world', 'path', 'swarm', 'flank', 'case', 'fork', 'questions', 'clip', 'end'];
   const TAGS = ['known', 'estimate', 'model'];
   const SIDES = ['you', 'them', 'market'];
 
@@ -2150,6 +2455,7 @@ function init() {
         if (w.you > 12000) warn('world.you above 12 000: the town shows 12 000 windows; say in a caption that one window stands for several people');
       }
     }
+    if (!(film.scenes || []).some((x) => x.type === 'flank')) warn('no flank scene: name the dangers that come not from competitors — clients doing it themselves, prices that fall in the head, an adjacent tool, rising expectations — and one this owner has not thought of (threat-playbook 1c)');
     if (!(film.scenes || []).some((x) => x.type === 'swarm')) warn('no swarm scene: show that the challenger will not be alone — every kind, in every segment, copies (threat-playbook 1b)');
     if (film.look != null) {
       const o = film.look, P = ['grotesk', 'geometric', 'classic', 'editorial', 'news', 'friendly', 'russian', 'modern', 'tech', 'elegant'];
@@ -2358,6 +2664,12 @@ function init() {
         if (s.counts && (!Array.isArray(s.counts) || s.counts.length !== 4)) err(`${at}: counts must list 4 numbers`);
         if (s.end_share != null && !(s.end_share > 0 && s.end_share < 1)) err(`${at}: end_share must be between 0 and 1`);
         if (s.punchline && len(s.punchline) > 90) warn(`${at}: punchline > 90 chars`);
+        break;
+      case 'flank':
+        if (!Array.isArray(s.items) || s.items.length < 3 || s.items.length > 6) err(`${at}: 3–6 items (side dangers) required`);
+        (s.items || []).forEach((it, j) => { if (!it.from || !it.what) err(`${at}: item ${j + 1} needs from and what`); if (len(it.what) > 90) warn(`${at}: item ${j + 1} what > 90 chars`); if (len(it.why) > 140) warn(`${at}: item ${j + 1} why > 140 chars`); if (it.weight && !['low', 'mid', 'medium', 'high'].includes(it.weight)) err(`${at}: item ${j + 1} weight must be low, mid or high`); });
+        if ((s.items || []).filter((it) => it.surprise).length !== 1) warn(`${at}: mark exactly one item surprise: the danger this owner most likely has not considered`);
+        if (s.punchline && len(s.punchline) > 80) warn(`${at}: punchline > 80 chars`);
         break;
       case 'path':
         if (!Array.isArray(s.steps) || s.steps.length < 3 || s.steps.length > 6) err(`${at}: 3–6 steps required`);
@@ -6475,7 +6787,8 @@ postprocessing/build/index.js:
    Deterministic: the seed comes from the company's name (or film.look.seed); the company's colour (film.look.brand,
    else film.world.light) becomes "you" everywhere, and the challenger gets a colour that fights it.
    Anything in film.look overrides the choice: { brand, seed, pairing, mode, align, cards, bg, decor, transition,
-   captions, case, variants: { cold_open, chapter, statement, dossier, end, questions, case } }.
+   captions, case, variants: { cold_open, chapter, statement, dossier, end, questions, case, race, scissors, myths, parallels,
+   scenarios, signals, plan, swarm, flank } }.
    A named style (editorial, poster, sketch) keeps its own colours and fonts; layout, variants and motion still vary.
    Works in the browser (window.FilmLook) and in Node (module.exports). */
 (function (root) {
@@ -6540,6 +6853,15 @@ postprocessing/build/index.js:
     end: ['left', 'center', 'block'],
     questions: ['list', 'cards'],
     case: ['right', 'below'],
+    race: ['line', 'bars'],
+    scissors: ['rows', 'bars'],
+    myths: ['rows', 'stack'],
+    parallels: ['rows', 'tiles'],
+    scenarios: ['columns', 'rows'],
+    signals: ['stack', 'list'],
+    plan: ['columns', 'list'],
+    swarm: ['columns', 'rows'],
+    flank: ['radar', 'doors', 'cards'],
   };
 
   function resolve(film) {

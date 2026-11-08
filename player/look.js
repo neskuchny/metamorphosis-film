@@ -3,7 +3,8 @@
    Deterministic: the seed comes from the company's name (or film.look.seed); the company's colour (film.look.brand,
    else film.world.light) becomes "you" everywhere, and the challenger gets a colour that fights it.
    Anything in film.look overrides the choice: { brand, seed, pairing, mode, align, cards, bg, decor, transition,
-   captions, case, variants: { cold_open, chapter, statement, dossier, end, questions, case } }.
+   captions, case, variants: { cold_open, chapter, statement, dossier, end, questions, case, race, scissors, myths, parallels,
+   scenarios, signals, plan, swarm, flank } }.
    A named style (editorial, poster, sketch) keeps its own colours and fonts; layout, variants and motion still vary.
    Works in the browser (window.FilmLook) and in Node (module.exports). */
 (function (root) {
@@ -68,6 +69,15 @@
     end: ['left', 'center', 'block'],
     questions: ['list', 'cards'],
     case: ['right', 'below'],
+    race: ['line', 'bars'],
+    scissors: ['rows', 'bars'],
+    myths: ['rows', 'stack'],
+    parallels: ['rows', 'tiles'],
+    scenarios: ['columns', 'rows'],
+    signals: ['stack', 'list'],
+    plan: ['columns', 'list'],
+    swarm: ['columns', 'rows'],
+    flank: ['radar', 'doors', 'cards'],
   };
 
   function resolve(film) {

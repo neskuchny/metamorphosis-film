@@ -20,7 +20,7 @@ pip install edge-tts        # free voice; alternative offline voice: pip install
 Key files:
 - `.claude/skills/what-awaits/SKILL.md` — research → threat map → attacker's plan (red team) → three waves → model → script → finale → render
 - `data/cases.json` — verified real-world cases with sources (only source of cases besides what you fetch yourself)
-- `data/threat-playbook.md` — how to think about who breaks this company and how: attacker types, why a venture-funded AI-native newco wins, a crowd from every side rather than one attacker (1b), maturity stages, the collision, the owner's beliefs (Step 2, mandatory)
+- `data/threat-playbook.md` — how to think about who breaks this company and how: attacker types, why a venture-funded AI-native newco wins, a crowd from every side rather than one attacker (1b), dangers from the side that are not competitors (1c), maturity stages, the collision, the owner's beliefs (Step 2, mandatory)
 - `data/risk-rubric.md` — how to decide the risk level
 - `examples/artel/threats.md`, `examples/artel/attack-plan.md` and `examples/artel/film.json` — a worked threat map, the attacker's plan and the film built from them (Russian). Examples show the format, never the content
 - `data/film-architectures.md` — what every film shares and what must be this company's alone: story shapes, central images, the `concept` block (Step 2c)

@@ -9,6 +9,7 @@ So every film has a fixed **logic** and a free **telling**. Read this file in St
 - An honest risk verdict, with the strength of the company named before the threat.
 - Change arrives in waves of growing size: the environment speeds up, a neighbour rebuilds, a company is built from scratch. The waves may be told in any form (see the architectures), not always as three chapters.
 - **It is never one attacker.** In every segment all kinds arrive at once and in numbers (those who optimise a little, rebuild, go AI-first, start from scratch); a success is copied; they fight each other and the company is crushed in between; no niche is safe. Every film has a `swarm` scene and answers the niche belief (`data/threat-playbook.md`, 1b).
+- **Not only competitors.** Danger also comes from the side: clients doing it themselves, prices falling in the head, rising expectations, a general tool or an adjacent market taking a slice, agents choosing instead of people. Every film has a `flank` scene with 3–5 of these that really apply to this company, and exactly one the owner most likely has not thought of (`data/threat-playbook.md`, 1c).
 - The experience gap: the neighbour's clumsy first step is a step the viewer has not taken; experience piles up underneath.
 - A fictional composite challenger that only does what real companies have done, said on screen.
 - A model, labelled as a model.
@@ -28,6 +29,8 @@ So every film has a fixed **logic** and a free **telling**. Read this file in St
 | **Myths and questions** | Beliefs in the owner's own words as found in interviews, the site, job ads; questions that only this owner can answer, with this company's numbers. |
 | **World** | `world.kit` from the business (factory, city, logistics), `world.time` (night, dusk, dawn, snow) from the region and season, `world.light` in the brand's colour, the beats re-cast in this business's terms. |
 | **Look** | `look` (player/look.js): the type pairing (ten, all with Cyrillic), the colour mode (night, paper, field, snow, ink), the company's colour as "you" and a challenger colour across the wheel, cards, background, decoration, captions, transitions and a layout variant for each hero scene (cold open, chapter, statement, dossier, questions, case, end). Without `look` it is derived from the company's name and colour, so it already differs; set it on purpose for this owner (a family manufacturer and a fintech should not look alike). A named `style` (editorial, poster, sketch) keeps its own colours and fonts. |
+| **Side dangers** | Which of the catalogue apply here, and the one of its own: the `flank` scene is the most company-specific scene of the film. The surprise must be this company's, never a stock line. |
+| **Scenes and layouts** | The set of scene types and the layout of each (section 3b). Two films should not share the same set and the same layouts. |
 | **Sound identity** | `sound.identity` from the kit (machine room, city, highway) and one signature sound tied to the central image. |
 | **Signature motif** | One element that returns three times, changed each time (the lit windows of Artel; a store sign that dims; a truck that drives empty). |
 
@@ -52,6 +55,26 @@ Every architecture uses the same scene types; what changes is the order, the spi
 **G. Three witnesses.** A client, an employee and a supplier, one per wave, each with one message through a real channel (three `moment` scenes), each telling what changed on their side. *For:* people businesses (education, clinics, agencies, consulting), and when the threat is mostly in talent.
 
 Write in `concept.architecture` the letter and a sentence on why. Mixing is allowed (a chronicle that opens with the letter from the end), but name it.
+
+## 3b. Scenes: the function is fixed, the slide is not
+
+The logic needs functions, not particular slides. Each function can be told by several scene types, and each type has several layouts (`look.variants`). Choose the type that fits this company's story shape and data, then the layout on purpose; never take the example's set.
+
+| Function | Scene types that can carry it | Layouts |
+|---|---|---|
+| Who you are, your strength | `dossier`, `statement`, `world` (open), `cold_open` | dossier: grid, ledger, hero; statement: left, center, split |
+| The change arrives in waves | `waves`, `chapter`, `world`, `path`, `timeline` | chapter: numeral, center, split |
+| Signs already here | `signals`, `timeline`, `moment` | signals: stack, list |
+| The experience gap | `beneath`, `scissors`, `ladder` | scissors: rows, bars |
+| Who may come | `attackers`, `ladder`, `plan` | plan: columns, list |
+| Why they are cheaper | `anatomy`, `scissors`, `race` | race: line, bars |
+| The crowd | `swarm` | columns, rows |
+| From the side | `flank` | radar, doors, cards |
+| Where it already happened | `parallels`, `case`, `map` | parallels: rows, tiles; case: right, below |
+| What the owner believes | `myths` | rows, stack |
+| The fork and the question | `scenarios`, `fork`, `questions`, `end` | scenarios: columns, rows; questions: list, cards; end: left, center, block |
+
+The distinct check compares the set of scene types and every layout with the other films and warns when they repeat.
 
 ## 4. Central images by how the money is made (starting points, not answers)
 

@@ -2,7 +2,7 @@
    validate(film, { exists(file) }) -> { errors, warnings, estimatedSeconds }
    exists is optional: when given, "clip" files are checked for presence. */
 (function (root) {
-  const TYPES = ['cold_open', 'statement', 'chapter', 'dossier', 'timeline', 'race', 'scissors', 'pillars', 'signals', 'map', 'waves', 'moment', 'attackers', 'anatomy', 'ladder', 'myths', 'plan', 'parallels', 'scenarios', 'beneath', 'world', 'path', 'swarm', 'case', 'fork', 'questions', 'clip', 'end'];
+  const TYPES = ['cold_open', 'statement', 'chapter', 'dossier', 'timeline', 'race', 'scissors', 'pillars', 'signals', 'map', 'waves', 'moment', 'attackers', 'anatomy', 'ladder', 'myths', 'plan', 'parallels', 'scenarios', 'beneath', 'world', 'path', 'swarm', 'flank', 'case', 'fork', 'questions', 'clip', 'end'];
   const TAGS = ['known', 'estimate', 'model'];
   const SIDES = ['you', 'them', 'market'];
 
@@ -31,6 +31,7 @@
         if (w.you > 12000) warn('world.you above 12 000: the town shows 12 000 windows; say in a caption that one window stands for several people');
       }
     }
+    if (!(film.scenes || []).some((x) => x.type === 'flank')) warn('no flank scene: name the dangers that come not from competitors — clients doing it themselves, prices that fall in the head, an adjacent tool, rising expectations — and one this owner has not thought of (threat-playbook 1c)');
     if (!(film.scenes || []).some((x) => x.type === 'swarm')) warn('no swarm scene: show that the challenger will not be alone — every kind, in every segment, copies (threat-playbook 1b)');
     if (film.look != null) {
       const o = film.look, P = ['grotesk', 'geometric', 'classic', 'editorial', 'news', 'friendly', 'russian', 'modern', 'tech', 'elegant'];
@@ -239,6 +240,12 @@
         if (s.counts && (!Array.isArray(s.counts) || s.counts.length !== 4)) err(`${at}: counts must list 4 numbers`);
         if (s.end_share != null && !(s.end_share > 0 && s.end_share < 1)) err(`${at}: end_share must be between 0 and 1`);
         if (s.punchline && len(s.punchline) > 90) warn(`${at}: punchline > 90 chars`);
+        break;
+      case 'flank':
+        if (!Array.isArray(s.items) || s.items.length < 3 || s.items.length > 6) err(`${at}: 3–6 items (side dangers) required`);
+        (s.items || []).forEach((it, j) => { if (!it.from || !it.what) err(`${at}: item ${j + 1} needs from and what`); if (len(it.what) > 90) warn(`${at}: item ${j + 1} what > 90 chars`); if (len(it.why) > 140) warn(`${at}: item ${j + 1} why > 140 chars`); if (it.weight && !['low', 'mid', 'medium', 'high'].includes(it.weight)) err(`${at}: item ${j + 1} weight must be low, mid or high`); });
+        if ((s.items || []).filter((it) => it.surprise).length !== 1) warn(`${at}: mark exactly one item surprise: the danger this owner most likely has not considered`);
+        if (s.punchline && len(s.punchline) > 80) warn(`${at}: punchline > 80 chars`);
         break;
       case 'path':
         if (!Array.isArray(s.steps) || s.steps.length < 3 || s.steps.length > 6) err(`${at}: 3–6 steps required`);
