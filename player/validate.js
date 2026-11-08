@@ -2,7 +2,7 @@
    validate(film, { exists(file) }) -> { errors, warnings, estimatedSeconds }
    exists is optional: when given, "clip" files are checked for presence. */
 (function (root) {
-  const TYPES = ['cold_open', 'statement', 'chapter', 'dossier', 'timeline', 'race', 'scissors', 'pillars', 'signals', 'map', 'waves', 'moment', 'attackers', 'anatomy', 'ladder', 'myths', 'plan', 'parallels', 'scenarios', 'beneath', 'case', 'fork', 'questions', 'clip', 'end'];
+  const TYPES = ['cold_open', 'statement', 'chapter', 'dossier', 'timeline', 'race', 'scissors', 'pillars', 'signals', 'map', 'waves', 'moment', 'attackers', 'anatomy', 'ladder', 'myths', 'plan', 'parallels', 'scenarios', 'beneath', 'world', 'path', 'swarm', 'flank', 'case', 'fork', 'questions', 'clip', 'end'];
   const TAGS = ['known', 'estimate', 'model'];
   const SIDES = ['you', 'them', 'market'];
 
@@ -18,6 +18,34 @@
     if (!film.language) err('language is required (BCP-47 short code, e.g. "ru", "en", "uz", "ja")');
     if (!Array.isArray(film.scenes) || film.scenes.length < 5) err('scenes must be an array with at least 5 scenes');
     if (film.style != null && !['default', 'sketch', 'editorial', 'poster'].includes(film.style)) err('style must be "default", "sketch", "editorial" or "poster"');
+    if (film.world != null) {
+      const w = film.world;
+      if (typeof w !== 'object') err('world must be an object { you, them_start, them_end, sites, look }');
+      else {
+        if (w.look != null && !['night', 'paper'].includes(w.look)) err('world.look must be night or paper');
+        if (w.kit != null && !['factory', 'city', 'logistics'].includes(w.kit)) err('world.kit must be factory, city or logistics');
+        if (w.time != null && !['night', 'dusk', 'dawn', 'snow'].includes(w.time)) err('world.time must be night, dusk, dawn or snow');
+        if (w.light != null && !/^#[0-9a-f]{6}$/i.test(w.light)) err('world.light must be a hex colour like "#e3262f"');
+        if (w.share != null && !(w.share > 0 && w.share < 1)) err('world.share must be between 0 and 1 (the customers the newcomer takes, city kit)');
+        for (const k of ['you', 'them_start', 'them_end', 'sites']) if (w[k] != null && !(typeof w[k] === 'number' && w[k] > 0)) err(`world.${k} must be a positive number`);
+        if (w.you > 12000) warn('world.you above 12 000: the town shows 12 000 windows; say in a caption that one window stands for several people');
+      }
+    }
+    if (!(film.scenes || []).some((x) => x.type === 'flank')) warn('no flank scene: name the dangers that come not from competitors — clients doing it themselves, prices that fall in the head, an adjacent tool, rising expectations — and one this owner has not thought of (threat-playbook 1c)');
+    if (!(film.scenes || []).some((x) => x.type === 'swarm')) warn('no swarm scene: show that the challenger will not be alone — every kind, in every segment, copies (threat-playbook 1b)');
+    if (film.look != null) {
+      const o = film.look, P = ['grotesk', 'geometric', 'classic', 'editorial', 'news', 'friendly', 'russian', 'modern', 'tech', 'elegant'];
+      if (o.pairing && !P.includes(o.pairing)) err('look.pairing must be one of ' + P.join(', '));
+      if (o.mode && !['night', 'paper', 'field', 'snow', 'ink'].includes(o.mode)) err('look.mode must be night, paper, field, snow or ink');
+      if (o.brand && !/^#[0-9a-f]{6}$/i.test(o.brand)) err('look.brand must be a hex colour');
+      if (o.transition && !['dip', 'wipe', 'slide', 'dissolve'].includes(o.transition)) err('look.transition must be dip, wipe, slide or dissolve');
+    }
+    // the film's own idea (Step 2c): without it, films for different companies drift towards the example
+    if (!film.concept || typeof film.concept !== 'object') warn('concept missing: write the film\'s own idea (data/film-architectures.md) — idea, architecture, central_image, signature, specifics[]');
+    else {
+      for (const k of ['idea', 'architecture', 'central_image', 'signature']) if (!film.concept[k]) warn(`concept.${k} missing`);
+      if (!Array.isArray(film.concept.specifics) || film.concept.specifics.length < 4) warn('concept.specifics: list at least 4 words only this company has (names, products, places, numbers)');
+    }
     if (film.sound != null && film.sound !== false && typeof film.sound !== 'object') err('sound must be false or an object { music, room_db, body_db, machine_db, music_db, room_wet }');
     if (film.camera != null && film.camera !== false) err('camera at film level can only be false (turns all camera moves off)');
     if (['sketch', 'editorial', 'poster'].includes(film.style) && film.language && !['ru', 'en', 'uz', 'de', 'fr', 'es', 'it', 'pt', 'uk', 'be', 'nl', 'sv'].includes(film.language)) warn(`style "${film.style}" has fonts for Latin and basic Cyrillic only: for "${film.language}" some letters fall back to a system font, prefer the default style`);
@@ -204,6 +232,35 @@
       case 'scenarios':
         if (!Array.isArray(s.items) || s.items.length < 2 || s.items.length > 3) err(`${at}: items[] (2–3 paths: tradition, evolution, revolution) required`);
         else s.items.forEach((it, j) => { if (!it.name || !it.outcome) err(`${at}: item ${j + 1} needs name and outcome`); if (len(it.what) > 110) warn(`${at}: item ${j + 1} what > 110 chars`); if (len(it.outcome) > 80) warn(`${at}: item ${j + 1} outcome > 80 chars`); });
+        break;
+      case 'swarm':
+        if (!Array.isArray(s.segments) || s.segments.length < 3 || s.segments.length > 6) err(`${at}: 3–6 segments of this company's market required`);
+        (s.segments || []).forEach((g, j) => { const nm = typeof g === 'string' ? g : g && g.name; if (!nm) err(`${at}: segment ${j + 1} needs a name`); else if (len(nm) > 28) warn(`${at}: segment ${j + 1} name > 28 chars`); });
+        if (s.kinds && (!Array.isArray(s.kinds) || s.kinds.length !== 4)) err(`${at}: kinds must list 4 labels (optimise, rebuild, AI-first, AI-native)`);
+        if (s.counts && (!Array.isArray(s.counts) || s.counts.length !== 4)) err(`${at}: counts must list 4 numbers`);
+        if (s.end_share != null && !(s.end_share > 0 && s.end_share < 1)) err(`${at}: end_share must be between 0 and 1`);
+        if (s.punchline && len(s.punchline) > 90) warn(`${at}: punchline > 90 chars`);
+        break;
+      case 'flank':
+        if (!Array.isArray(s.items) || s.items.length < 3 || s.items.length > 6) err(`${at}: 3–6 items (side dangers) required`);
+        (s.items || []).forEach((it, j) => { if (!it.from || !it.what) err(`${at}: item ${j + 1} needs from and what`); if (len(it.what) > 90) warn(`${at}: item ${j + 1} what > 90 chars`); if (len(it.why) > 140) warn(`${at}: item ${j + 1} why > 140 chars`); if (it.weight && !['low', 'mid', 'medium', 'high'].includes(it.weight)) err(`${at}: item ${j + 1} weight must be low, mid or high`); });
+        if ((s.items || []).filter((it) => it.surprise).length !== 1) warn(`${at}: mark exactly one item surprise: the danger this owner most likely has not considered`);
+        if (s.punchline && len(s.punchline) > 80) warn(`${at}: punchline > 80 chars`);
+        break;
+      case 'path':
+        if (!Array.isArray(s.steps) || s.steps.length < 3 || s.steps.length > 6) err(`${at}: 3–6 steps required`);
+        (s.steps || []).forEach((st, j) => {
+          if (!st.label) err(`${at}: step ${j + 1} needs a label`);
+          if (len(st.label) > 22) warn(`${at}: step ${j + 1} label > 22 chars`);
+          if (len(st.text) > 70) warn(`${at}: step ${j + 1} text > 70 chars`);
+          if (st.owner && !SIDES.includes(st.owner)) err(`${at}: step ${j + 1} owner must be you/them/market`);
+        });
+        break;
+      case 'world':
+        if (!['open', 'neighbor', 'newcomer', 'finale'].includes(s.beat)) err(`${at}: beat must be open, neighbor, newcomer or finale`);
+        if (!s.title) err(`${at}: title required (it works as the chapter title over the world)`);
+        if (len(s.title) > 40) warn(`${at}: title > 40 chars`);
+        if (s.caption && len(s.caption) > 90) warn(`${at}: caption > 90 chars`);
         break;
       case 'beneath':
         if (!s.surface || !s.surface.text) err(`${at}: surface.text required (what is visible from outside, often a clumsy first AI step)`);

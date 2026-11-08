@@ -35,6 +35,7 @@ data/risk-rubric.md                  risk levels (from the metAImorphosis toolbo
 examples/artel/threats.md            worked threat map for the example
 examples/artel/attack-plan.md        worked attacker's plan (red team) for the example
 examples/artel/film.json             full example built from it (Uzbekistan, Russian narration)
+examples/korzinka/                   the second example: a retailer, the customer's path, a city at dusk, its own look
 examples/artel/film.sketch.json      the same film in the hand-drawn style ("style": "sketch") with a drawn insert
                                      other looks: "style": "editorial" (cream, serif, crimson) or "poster" (flat colour fields)
 examples/styles/                     hand-drawn sketch and comic scenes, stylebook, how to use them (studio tier)
@@ -47,12 +48,14 @@ scripts/clip.mjs                     style-pack HTML → MP4 clip for a "clip" s
 scripts/bundle.mjs                   packs the browser player (optionally with a film) into one HTML file
 scripts/dev/build-map.mjs            maintainers only: regenerates player/map-data.js from Natural Earth
 player/                              the film template: HTML/CSS/JS, every frame is a function of time
+player/look.js                       the company's own look: fonts, colours, layouts and transitions per company
+player/world.js                      the 3D world of `world` scenes (built from player/world/src.js)
 player/model.js                      the race model, shared by the agent (scripts/model.mjs) and the finale sliders
 player/map-data.js                   world outlines for the `map` scene (Natural Earth 1:110m, public domain)
 dist/film-player.html                the browser player as a single offline file
 ```
 
-The agent only writes `film.json` (text and numbers). The visuals come from a fixed template, so the result looks the same whether the agent is Claude, GPT or Gemini.
+The agent only writes `film.json` (text and numbers); the scene builders are fixed, so the film renders the same whether the agent is Claude, GPT or Gemini. What a scene looks like is not fixed: `player/look.js` gives each company its own type pairing, colour mode built from its brand colour, margins, cards, background, decoration, transitions and a layout variant for every hero scene (cold open, chapter, statement, dossier, questions, case, end). It is derived from the company's name and colour, or set on purpose in `film.look`.
 
 ## Manual use
 
@@ -69,10 +72,20 @@ Voice priority: `ELEVENLABS_API_KEY` → `OPENAI_API_KEY` → `GEMINI_API_KEY` (
 
 Browser player: open `dist/film-player.html`, paste or choose a `film.json`, press Watch. To put a film inside the file (one HTML you can send to the client): `node scripts/bundle.mjs work/acme/film.json --autoload --out acme-player.html`. After changing anything in `player/`, run `node scripts/bundle.mjs` to refresh `dist/film-player.html`.
 
-Before rendering: `node scripts/words.mjs film.json` (clichés, AI-sounding phrases, канцелярит). To choose the voice by ear: `node scripts/voices.mjs film.json --scene 18` (the same line in several free voices, `out/voices/all-voices.mp3`). After rendering: `node scripts/qc.mjs out/artel.mp4` (hook, black, freeze, dead air, loudness, contact sheet). Sound is designed in code on every render and mastered to −14 LUFS; to change only the sound, `--sound-only` re-mixes without re-rendering the picture.
+No two films alike: every film has a fixed logic and its own telling — its own idea, story shape, central image, cases, words, world, look and sound (`data/film-architectures.md`, the `concept` block). `node scripts/distinct.mjs film.json` checks it against the examples and other films, including whether two films share fonts, colour mode and scene layouts. `examples/korzinka/` is the second example, built to differ from Artel.
+
+Never one attacker: in every segment all kinds arrive at once and in numbers — those who optimise a little, those who rebuild their processes, those who convert to AI-first, AI-native companies built from scratch. A success is copied, they fight each other, the company is crushed in between, and no niche is safe (`data/threat-playbook.md`, section 1b). Every film has a `swarm` scene that shows this per segment, answers the owner's belief in a safe niche, and in the 3D finale the newcomer is followed by copies.
+
+Not only competitors: AI also arrives in the hands of clients, suppliers, neighbouring markets and in what people expect. The agent tests a catalogue of fifteen side dangers on the company (clients doing it themselves, clients who try, fail and still stay away, prices falling in the head, rising expectations, a general tool or an adjacent market taking a slice, agents choosing instead of people, the service replacing the product and more), then searches for dangers of this company's own that no catalogue has, scores them, and puts three to five into a `flank` scene, one marked as the danger this owner has most likely not thought of (`data/threat-playbook.md`, section 1c).
+
+The function of each scene is fixed, the slide is not: most scene types have two or three layouts and several types can carry the same function (`data/film-architectures.md`, section 3b).
+
+Before rendering: `node scripts/words.mjs film.json` (clichés, AI-sounding phrases, канцелярит). To choose the voice by ear: `node scripts/voices.mjs film.json --scene 18` (the same line in several free voices, `out/voices/all-voices.mp3`). After rendering: `node scripts/qc.mjs out/artel.mp4` (hook, black, freeze, dead air, loudness, contact sheet). Sound is designed in code on every render and mastered to −14 LUFS; to change only the sound, `--sound-only` re-mixes without re-rendering the picture; `--scenes 2,11` re-renders only those scenes into the last picture.
+
+3D world: `world` scenes show the company as a lit town at night, one window per person, the neighbour that rebuilds next door and a newcomer assembling across the river (`film.world`, look `night` or `paper`). It renders in software WebGL, so no GPU is needed (about 0.5 s per frame). After editing `player/world/src.js`, run `npm run build:world`.
 
 Hand-drawn scenes: see `examples/styles/README.md`.
 
 ## Licences
 
-Code: MIT. Rendering uses only open-source pieces (Chromium via Playwright, FFmpeg, Inter and JetBrains Mono fonts under OFL); there is no per-company render licence to buy. Risk rubric adapted from the metAImorphosis toolbox (A. Tarasov, M. Belukhin), CC BY. World outlines in the `map` scene: Natural Earth (public domain; packaged by world-atlas, ISC). Sound design, camera vocabulary, the words check, QC measures and the cold-review questions follow ideas from [sarpstar/cinecode](https://github.com/sarpstar/cinecode) (MIT, © Sarp Yıldız), rewritten for this project; the narration clean-up filter chain is taken from its `voice_treat.py`. Edge-tts uses Microsoft's online voice service (unofficial client) — for commercial distribution at scale, prefer ElevenLabs/OpenAI keys.
+Code: MIT. Rendering uses only open-source pieces (Chromium via Playwright, FFmpeg, Inter, JetBrains Mono and the ten look pairings — Unbounded, Onest, Playfair Display, Source Serif 4, Oswald, IBM Plex, Rubik, PT Serif/Sans, Montserrat, Exo 2, Yeseva One, Raleway — all under OFL, see `player/fonts/LICENSE-looks.txt`); there is no per-company render licence to buy. Risk rubric adapted from the metAImorphosis toolbox (A. Tarasov, M. Belukhin), CC BY. World outlines in the `map` scene: Natural Earth (public domain; packaged by world-atlas, ISC). The 3D world is built with [three.js](https://threejs.org) (MIT) and [postprocessing](https://github.com/pmndrs/postprocessing) (Zlib). Sound design, camera vocabulary, the words check, QC measures and the cold-review questions follow ideas from [sarpstar/cinecode](https://github.com/sarpstar/cinecode) (MIT, © Sarp Yıldız), rewritten for this project; the narration clean-up filter chain is taken from its `voice_treat.py`. Edge-tts uses Microsoft's online voice service (unofficial client) — for commercial distribution at scale, prefer ElevenLabs/OpenAI keys.

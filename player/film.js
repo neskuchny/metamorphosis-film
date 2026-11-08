@@ -2,18 +2,29 @@
    The renderer calls window.__seek(t) for each frame and screenshots the stage. */
 (function boot() {
   const allText = JSON.stringify(window.FILM.scenes) + (window.FILM.company?.name || '');
+  const LK = window.FilmLook ? window.FilmLook.resolve(window.FILM) : null;
   const loads = ['400', '600', '700', '800'].map((w) => document.fonts.load(`${w} 40px Inter`, allText))
     .concat(['400', '600'].map((w) => document.fonts.load(`${w} 20px "JetBrains Mono"`, allText + '0123456789')))
     .concat(window.FILM.style === 'sketch' ? ['400 40px Caveat', '700 40px Caveat', '400 20px Neucha'].map((f) => document.fonts.load(f, allText + '0123456789')) : [])
     .concat(window.FILM.style === 'editorial' ? ['400 40px "Source Serif 4"', '600 40px "Source Serif 4"'].map((f) => document.fonts.load(f, allText + '0123456789')) : [])
-    .concat(window.FILM.style === 'poster' ? ['500 40px Oswald', '700 40px Oswald'].map((f) => document.fonts.load(f, allText + '0123456789')) : []);
+    .concat(window.FILM.style === 'poster' ? ['500 40px Oswald', '700 40px Oswald'].map((f) => document.fonts.load(f, allText + '0123456789')) : [])
+    .concat(LK ? LK.fonts.map((f) => document.fonts.load(f, allText + '0123456789')) : []);
   Promise.all(loads).catch(() => {}).then(() => document.fonts.ready).then(init);
 })();
 
 function init() {
   const F = window.FILM;
-  const W = 1920, H = 1080, L = 160, R = 1760;
+  // the film's look (player/look.js): fonts, colours, margins, layout variants and transitions chosen for this company
+  const LOOK = window.FilmLook ? window.FilmLook.resolve(F) : null;
+  const W = 1920, H = 1080, L = LOOK ? LOOK.L : 160, R = LOOK ? LOOK.R : 1760;
   const STAGE = document.getElementById('stage');
+  const V = (type, dflt) => (LOOK && LOOK.variants[type]) || dflt;
+  if (LOOK && !LOOK.named) {
+    for (const k in LOOK.css) STAGE.style.setProperty(k, LOOK.css[k]);
+    const fl = LOOK.flags;
+    STAGE.classList.add('lk', 'lk-cards-' + fl.cards, 'lk-bg-' + fl.bg, 'lk-cap-' + fl.captions, 'lk-num-' + fl.numeral, 'lk-mode-' + LOOK.mode);
+    if (fl.upper) STAGE.classList.add('lk-upper');
+  }
   const SKETCH = F.style === 'sketch';
   const THEME = ['sketch', 'editorial', 'poster'].includes(F.style) ? F.style : 'default';
   if (THEME === 'editorial' || THEME === 'poster') STAGE.classList.add('th-' + THEME);
@@ -33,7 +44,8 @@ function init() {
   const DECOR = {
     editorial: (s, root, i) => {
       // the disc sits only where the right side of the frame is free of text
-      const where = { chapter: 'big', cold_open: 'edge', end: 'edge' }[s.type];
+      let where = { chapter: 'big', cold_open: 'edge', end: 'edge' }[s.type];
+      if (where === 'big' && String(s.title || '').length > 20) where = 'edge';   // a long title needs the right side
       if (!where) return null;
       const d = document.createElement('div'); d.className = 'ed-sun ' + where;
       root.insertBefore(d, root.firstChild);
@@ -46,6 +58,14 @@ function init() {
       root.insertBefore(d, root.firstChild);
       return (t) => { const p = 1 - Math.pow(1 - Math.min(1, Math.max(0, t / 0.9)), 3); d.style.opacity = p; d.style.transform = kind === 'band' ? `rotate(-8deg) translateX(${(1 - p) * -300}px)` : `scale(${0.6 + 0.4 * p})`; };
     },
+  };
+  // the look's own decoration on the scenes that carry the film's voice (not on data scenes)
+  const lookDecor = (s, root) => {
+    if (!LOOK || LOOK.named || LOOK.flags.decor === 'none' || !['cold_open', 'chapter', 'statement', 'end', 'questions', 'moment'].includes(s.type)) return null;
+    const kind = LOOK.flags.decor, d = document.createElement('div'); d.className = 'lk-dec ' + kind;
+    if (kind === 'watermark') d.textContent = String((F.company && (F.company.short_name || F.company.name)) || '').slice(0, 1);
+    root.insertBefore(d, root.firstChild);
+    return (t) => { const p = 1 - Math.pow(1 - Math.min(1, Math.max(0, t / 1.2)), 3); d.style.opacity = p; d.style.transform = kind === 'bar' ? `scaleY(${p})` : kind === 'corner' ? `translate(${(1 - p) * 80}px, ${(1 - p) * -80}px)` : `scale(${0.9 + 0.1 * p})`; };
   };
   if (SKETCH) {
     // hand-drawn look: paper, marker ink, and lines that "boil" (three wobble filters swapped 8 times a second, like redrawn frames)
@@ -128,36 +148,55 @@ function init() {
   const B = {};
 
   B.cold_open = (s, root) => {
-    const k = s.kicker ? pos(h('div', 'kicker abs', esc(s.kicker), root), L, 300) : null;
+    const v = V('cold_open', 'stack'), mid = (L + R) / 2;
+    const k = s.kicker ? pos(h('div', 'kicker abs', esc(s.kicker), root), L, v === 'number' ? 220 : 300) : null;
+    if (k && v === 'center') { k.style.left = L + 'px'; k.style.width = (R - L) + 'px'; k.style.textAlign = 'center'; }
+    const n = (s.lines || []).length;
     const lines = (s.lines || []).map((txt, i) => {
-      const el = pos(h('div', 'co-line abs', esc(txt), root), L, 380 + i * 118);
-      fit(el, 96, 44, R - L);
-      if (i === s.lines.length - 1 && s.accent_last !== false) el.style.color = 'var(--them)';
+      let el;
+      if (v === 'center') { el = pos(h('div', 'co-line abs', esc(txt), root), L, 470, R - L); el.style.textAlign = 'center'; el.style.whiteSpace = 'normal'; fit(el, 104, 44, R - L, 240); }
+      else if (v === 'number' && i === 0) { el = pos(h('div', 'co-line co-hero abs', esc(txt), root), L - 6, 280); fit(el, 190, 60, R - L); }
+      else if (v === 'number') { el = pos(h('div', 'co-line co-small abs', esc(txt), root), L, 560 + (i - 1) * 86); fit(el, 64, 34, R - L); }
+      else { el = pos(h('div', 'co-line abs', esc(txt), root), L, 380 + i * 118); fit(el, 96, 44, R - L); }
+      if (i === n - 1 && s.accent_last !== false) el.style.color = 'var(--them)';
       return el;
     });
+    void mid;
+    // the hook: the first line arrives word by word from the first frame, so the film opens on movement, not a still title
+    const words = lines[0] ? (() => { const el = lines[0]; el.innerHTML = el.textContent.split(/(\s+)/).map((w) => (/^\s*$/.test(w) ? w : `<span class="cw">${esc(w)}</span>`)).join(''); return [...el.querySelectorAll('.cw')]; })() : [];
     return (t, d, sc) => {
-      if (k) show(k, P(t, 0.2, 0.8), 10);
+      if (k) { show(k, P(t, 0, 0.7), 0); k.style.clipPath = `inset(0 ${(100 * (1 - P(t, 0, 0.9, ease.inOut))).toFixed(1)}% 0 0)`; }
       const span = Math.max(1.5, (sc.speechEnd || d - 1) - 0.6);
+      const gap = Math.min(0.32, 1.5 / Math.max(1, words.length));   // the line takes about as long as it is said
+      words.forEach((w, j) => { const q = P(t, 0.05 + j * gap, 0.8); w.style.opacity = q; w.style.transform = `translateY(${((1 - q) * 110).toFixed(1)}px)`; w.style.filter = q < 1 ? `blur(${((1 - q) * 10).toFixed(1)}px)` : ''; });
       lines.forEach((el, i) => {
-        const at = 0.5 + (i * span) / lines.length;
-        const p = P(t, at, 0.9);
-        show(el, p, 40);
-        const next = 0.5 + ((i + 1) * span) / lines.length;
-        if (i < lines.length - 1) el.style.opacity = p * (1 - 0.6 * P(t, next, 0.8));
+        const at = i === 0 ? 0 : 0.5 + (i * span) / lines.length, next = 0.5 + ((i + 1) * span) / lines.length;
+        const p = i === 0 ? 1 : P(t, at, 0.9);
+        if (v === 'center') { const pin = i === 0 ? 1 : P(t, at - 0.3, 0.6); show(el, pin * (i < lines.length - 1 ? 1 - P(t, next - 0.3, 0.3) : 1), 30); return; }   // one line at a time, in the middle, crossfading so the screen is never empty
+        show(el, p, v === 'number' && i === 0 ? 0 : 40, v === 'number' && i === 0 ? -40 : 0);
+        if (v !== 'number' && i < lines.length - 1) el.style.opacity = p * (1 - 0.6 * P(t, next, 0.8));
       });
     };
   };
 
   B.statement = (s, root) => {
-    const k = s.kicker ? pos(h('div', 'kicker abs', esc(s.kicker), root), L, 330) : null;
-    const el = pos(h('div', 'stmt abs', esc(s.text), root), L, 390, R - L);
-    fit(el, 92, 48, R - L, 380);
-    const sub = s.sub ? pos(h('div', 'end-sub abs', esc(s.sub), root), L, 0, 1300) : null;
-    if (sub) sub.style.top = 390 + el.scrollHeight + 40 + 'px';
+    const v = V('statement', 'left');
+    const x = v === 'split' ? L + 470 : L, w = v === 'split' ? R - L - 470 : R - L;
+    const k = s.kicker ? pos(h('div', 'kicker abs', esc(s.kicker), root), L, v === 'split' ? 400 : 330, v === 'split' ? 380 : null) : null;
+    const rule = v === 'split' ? pos(h('div', 'st-vrule abs', '', root), L + 420, 380) : null;
+    const quote = v === 'center' ? pos(h('div', 'st-quote abs', '“', root), (L + R) / 2 - 60, 190) : null;
+    const el = pos(h('div', 'stmt abs', esc(s.text), root), x, v === 'center' ? 360 : 390, w);
+    if (v === 'center') el.style.textAlign = 'center';
+    fit(el, v === 'split' ? 84 : 92, 46, w, 380);
+    const sub = s.sub ? pos(h('div', 'end-sub abs', esc(s.sub), root), x, 0, Math.min(1300, w)) : null;
+    if (sub) { sub.style.top = (v === 'center' ? 360 : 390) + el.scrollHeight + 40 + 'px'; if (v === 'center') { sub.style.left = L + 'px'; sub.style.width = (R - L) + 'px'; sub.style.textAlign = 'center'; } }
     if (s.accent) el.style.color = 'var(--them)';
+    if (rule) rule.style.height = Math.max(200, el.scrollHeight + 60) + 'px';
     return (t, d) => {
       if (k) show(k, P(t, 0.1, 0.7), 10);
-      show(el, P(t, 0.3, 1.1), 50);
+      if (quote) show(quote, P(t, 0.0, 0.8), -20);
+      if (rule) rule.style.transform = `scaleY(${P(t, 0.1, 0.8, ease.inOut)})`;
+      show(el, P(t, 0.3, 1.1), v === 'split' ? 0 : 50, v === 'split' ? 60 : 0);
       if (sub) show(sub, P(t, 1.4, 0.9), 20);
     };
   };
@@ -169,6 +208,35 @@ function init() {
   };
 
   B.chapter = (s, root) => {
+    const v = V('chapter', 'numeral');
+    if (v === 'split') {
+      // a panel in the company's colour holds the number; the title stands on the right
+      const panel = pos(h('div', 'ch-panel abs', '', root), 0, 0); panel.style.width = '700px'; panel.style.height = '1080px';
+      const num = pos(h('div', 'ch-num ch-num-panel abs', esc(s.num ?? ''), root), 90, 330);
+      const title = pos(h('div', 'ch-title abs', esc(s.title), root), 800, 400, R - 800);
+      fit(title, 108, 52, R - 800, 320);
+      const sub = s.sub ? pos(h('div', 'end-sub abs', esc(s.sub), root), 800, 0, R - 800) : null;
+      if (sub) sub.style.top = 400 + title.scrollHeight + 36 + 'px';
+      return (t) => {
+        panel.style.transform = `translateX(${-(1 - P(t, 0, 0.8, ease.inOut)) * 700}px)`;
+        show(num, P(t, 0.4, 0.8), 0, -30); show(title, P(t, 0.5, 0.9), 0, 50);
+        if (sub) show(sub, P(t, 1.0, 0.8), 16);
+      };
+    }
+    if (v === 'center') {
+      const num = pos(h('div', 'kicker ch-num-small abs', esc(s.num ?? ''), root), L, 330, R - L); num.style.textAlign = 'center';
+      const title = pos(h('div', 'ch-title abs', esc(s.title), root), L, 420, R - L); title.style.textAlign = 'center';
+      fit(title, 120, 56, R - L, 260);
+      const rule = pos(h('div', 'ch-rule abs', '', root), (L + R) / 2, 400);
+      const sub = s.sub ? pos(h('div', 'end-sub abs', esc(s.sub), root), L, 0, R - L) : null;
+      if (sub) { sub.style.top = 420 + title.scrollHeight + 36 + 'px'; sub.style.textAlign = 'center'; }
+      return (t) => {
+        show(num, P(t, 0.0, 0.7), 10);
+        const rw = 260 * P(t, 0.3, 0.9, ease.inOut); rule.style.width = rw + 'px'; rule.style.left = (L + R) / 2 - rw / 2 + 'px';
+        show(title, P(t, 0.45, 0.9), 40);
+        if (sub) show(sub, P(t, 1.0, 0.8), 16);
+      };
+    }
     const num = pos(h('div', 'ch-num abs', esc(s.num ?? ''), root), L - 10, 250);
     const title = pos(h('div', 'ch-title abs', esc(s.title), root), L, 520, R - L);
     fit(title, 120, 56, R - L, 260);
@@ -183,33 +251,89 @@ function init() {
     };
   };
 
+  // the world: the company as a lit town at night (or a paper diorama), drawn in WebGL by player/world.js.
+  // One canvas and one WebGL context for all world scenes; it moves into the scene that is on screen.
+  let WORLD = null, worldCanvas = null;
+  const worldOf = () => {
+    if (WORLD || !window.FilmWorld) return WORLD;
+    worldCanvas = document.createElement('canvas'); worldCanvas.className = 'world-canvas';
+    const w = F.world || {};
+    try { WORLD = window.FilmWorld.create(worldCanvas, { name: (F.company && F.company.name) || '', ...w, look: w.look || 'night', width: 1920, height: 1080 }); }
+    catch (e) { console.warn('world: WebGL is not available', e); WORLD = null; }
+    return WORLD;
+  };
+  B.world = (s, root) => {
+    const world = worldOf();
+    if (!world) h('div', 'world-fallback abs', '', root);
+    h('div', 'world-shade abs', '', root);
+    const num = s.num ? pos(h('div', 'ch-num world-num abs', esc(s.num), root), L - 6, 590) : null;
+    const title = pos(h('div', 'ch-title world-title abs', esc(s.title || ''), root), L, 700, R - L);
+    fit(title, 92, 48, R - L, 140);
+    const cap = s.caption ? pos(h('div', 'world-cap abs', esc(s.caption), root), L, 0, 1200) : null;
+    if (cap) cap.style.top = 700 + title.scrollHeight + 22 + 'px';   // clear of the subtitles below
+    return (t, d) => {
+      if (world && !window.__probe) { if (worldCanvas.parentNode !== root) root.insertBefore(worldCanvas, root.firstChild); world.render(s.beat || 'open', t, d); }   // __probe: the renderer reads text only
+      if (num) show(num, P(t, 0.3, 0.9), 0, -30);
+      show(title, P(t, 0.6, 0.9), 30);
+      if (cap) show(cap, P(t, 1.3, 0.8), 12);
+    };
+  };
+
   B.dossier = (s, root) => {
+    const v = V('dossier', 'grid');
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const facts = (s.facts || []).slice(0, 6);
-    const cols = 3, cw = 520, gap = (R - L - cols * cw) / (cols - 1);
-    const cards = facts.map((f, i) => {
-      const c = pos(h('div', 'ds-card', '', root), L + (i % cols) * (cw + gap), 320 + Math.floor(i / cols) * 290);
-      h('div', 'ds-label', esc(f.label), c);
-      const v = h('div', 'ds-value', esc(f.value), c);
-      fit(v, 76, 30, cw - 10);
-      if (f.note) h('div', 'ds-note', esc(f.note), c);
-      const tag = f.tag || 'known';
-      h('div', `chip ds-tag tag-${tag}`, esc(UI[tag] || tag), c);
-      const scan = h('div', 'ds-scan', '', c);
-      return { c, v, f, scan };
-    });
+    let cards;
+    if (v === 'ledger') {
+      // a ledger: label on the left, the number on the right, one row per fact
+      const rowH = Math.min(110, 620 / Math.max(1, facts.length));
+      cards = facts.map((f, i) => {
+        const c = pos(h('div', 'ds-row abs', '', root), L, 300 + i * rowH, R - L); c.style.height = rowH + 'px';
+        h('div', 'ds-label', esc(f.label), c);
+        if (f.note) h('div', 'ds-note ds-note-row', esc(f.note), c);
+        const v2 = h('div', 'ds-value ds-value-row', esc(f.value), c);
+        const tag = f.tag || 'known'; h('div', `chip ds-tag-row tag-${tag}`, esc(UI[tag] || tag), c);
+        return { c, v: v2, f, scan: null };
+      });
+    } else if (v === 'hero') {
+      // the first fact as the hero on the left, the rest as a list on the right
+      cards = facts.map((f, i) => {
+        if (i === 0) {
+          const c = pos(h('div', 'ds-hero abs', '', root), L, 330, 780);
+          h('div', 'ds-label', esc(f.label), c);
+          const v2 = h('div', 'ds-value ds-value-hero', esc(f.value), c); fit(v2, 200, 60, 760);
+          if (f.note) h('div', 'ds-note', esc(f.note), c);
+          return { c, v: v2, f, scan: null };
+        }
+        const c = pos(h('div', 'ds-item abs', '', root), L + 900, 300 + (i - 1) * 124, R - L - 900);
+        h('div', 'ds-label', esc(f.label), c);
+        const v2 = h('div', 'ds-value ds-value-item', esc(f.value), c); fit(v2, 54, 28, R - L - 900);
+        if (f.note) h('div', 'ds-note ds-note-item', esc(f.note), c);
+        return { c, v: v2, f, scan: null };
+      });
+    } else {
+      const cols = 3, cw = Math.min(520, (R - L - 2 * 48) / cols), gap = (R - L - cols * cw) / (cols - 1);   // narrow margins must not make the cards overlap
+      cards = facts.map((f, i) => {
+        const c = pos(h('div', 'ds-card', '', root), L + (i % cols) * (cw + gap), 320 + Math.floor(i / cols) * 290, cw);
+        h('div', 'ds-label', esc(f.label), c);
+        const v2 = h('div', 'ds-value', esc(f.value), c);
+        fit(v2, 76, 30, cw - 10);
+        if (f.note) h('div', 'ds-note', esc(f.note), c);
+        const tag = f.tag || 'known';
+        h('div', `chip ds-tag tag-${tag}`, esc(UI[tag] || tag), c);
+        return { c, v: v2, f, scan: h('div', 'ds-scan', '', c) };
+      });
+    }
     return (t, d, sc) => {
       show(title, P(t, 0.1, 0.8), 20);
       const span = Math.max(2, (sc.speechEnd || d) * 0.85 - 0.8);
-      cards.forEach(({ c, v, f, scan }, i) => {
+      cards.forEach(({ c, v: val, f, scan }, i) => {
         const at = 0.8 + (i * span) / cards.length;
         const p = P(t, at, 0.7);
-        show(c, p, 30);
-        v.textContent = countText(f.value, P(t, at, 1.4, ease.expo));
-        const ps = clamp((t - at) / 0.9);
-        scan.style.opacity = ps > 0 && ps < 1 ? 1 : 0;
-        scan.style.top = ps * 230 + 'px';
+        show(c, p, v === 'ledger' ? 0 : 30, v === 'ledger' ? -30 : 0);
+        val.textContent = countText(f.value, P(t, at, 1.4, ease.expo));
+        if (scan) { const ps = clamp((t - at) / 0.9); scan.style.opacity = ps > 0 && ps < 1 ? 1 : 0; scan.style.top = ps * 230 + 'px'; }
       });
     };
   };
@@ -275,6 +399,7 @@ function init() {
   };
 
   B.race = (s, root) => {
+    if (V('race', 'line') === 'bars') return VB.race_bars(s, root);
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const years = s.years, a = s.you, b = s.them;
@@ -328,16 +453,18 @@ function init() {
   };
 
   B.scissors = (s, root) => {
+    if (V('scissors', 'rows') === 'bars') return VB.scissors_bars(s, root);
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
-    const hy = pos(h('div', 'sc-head you', esc(s.you_label || youName), root), 640, 300);
-    const ht = pos(h('div', 'sc-head them', esc(s.them_label || themName), root), 1080, 300);
+    const cA = Math.round((R - L) * 0.4), cB = Math.round((R - L) * 0.675);   // value columns follow the margins
+    const hy = pos(h('div', 'sc-head you', esc(s.you_label || youName), root), L + cA, 300);
+    const ht = pos(h('div', 'sc-head them', esc(s.them_label || themName), root), L + cB, 300);
     const rows = (s.rows || []).slice(0, 5).map((r, i) => {
       const row = pos(h('div', 'sc-row', '', root), L, 350 + i * 112);
       row.style.width = R - L + 'px';
-      const lab = h('div', 'sc-label', esc(r.label), row);
-      fit(lab, 32, 20, 700, 80);
-      const y = h('div', 'sc-you you', '', row), m = h('div', 'sc-them them', '', row);
+      const lab = h('div', 'sc-label', esc(r.label), row); lab.style.width = cA - 40 + 'px';
+      fit(lab, 32, 20, cA - 40, 80);
+      const y = h('div', 'sc-you you', '', row), m = h('div', 'sc-them them', '', row); y.style.left = cA + 'px'; m.style.left = cB + 'px';
       const q = h('div', 'sc-ratio', esc(r.ratio || ''), row);
       return { row, r, y, m, q };
     });
@@ -367,7 +494,7 @@ function init() {
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const items = (s.items || []).slice(0, 5);
-    const n = items.length, cw = 292, gap = (R - L - n * cw) / Math.max(1, n - 1);
+    const n = items.length, cw = Math.min(292, (R - L - 24 * Math.max(0, n - 1)) / Math.max(1, n)), gap = (R - L - n * cw) / Math.max(1, n - 1);
     const cols = items.map((it, i) => {
       const c = pos(h('div', 'pl-col', '', root), L + i * (cw + gap), 330, cw);
       const bar = h('div', 'pl-bar', '<i></i>', c);
@@ -390,11 +517,13 @@ function init() {
   };
 
   B.signals = (s, root) => {
+    if (V('signals', 'stack') === 'list') return VB.signals_list(s, root);
     const title = pos(h('div', 'title abs', esc(s.title), root), L, 330, 600);
     fit(title, 64, 36, 600, 400);
     const items = (s.items || []).slice(0, 5);
     const cards = items.map((it) => {
       const c = h('div', 'sg-card', `<div class="sg-meta">${esc([it.when, it.from].filter(Boolean).join(' · '))}</div><div class="sg-text">${esc(it.text)}</div>`, root);
+      c.style.left = L + 660 + 'px'; c.style.width = R - L - 660 - 54 + 'px';
       return c;
     });
     const hs = cards.map((c) => c.offsetHeight + 18);
@@ -422,12 +551,15 @@ function init() {
   B.case = (s, root) => {
     const kk = pos(h('div', 'kicker abs', esc(s.kicker || ''), root), L, 230);
     const nm = pos(h('div', 'cs-name abs', esc(s.name), root), L, 290);
-    fit(nm, 118, 56, 960);
+    fit(nm, 118, 48, Math.min(960, 1180 - L - 40));
     const wh = pos(h('div', 'cs-where abs', esc([s.where, s.year].filter(Boolean).join(' · ')), root), L, 430);
     const hd = pos(h('div', 'cs-head abs', esc(s.headline), root), L, 490, 920);
     fit(hd, 40, 26, 920, 300);
+    const below = V('case', 'right') === 'below';
+    if (below) { hd.style.width = (R - L) + 'px'; fit(hd, 40, 26, R - L, 140); }
     const stats = (s.stats || []).slice(0, 3).map((st, i) => {
-      const el = pos(h('div', 'cs-stat', `<div class="v"></div><div class="l">${esc(st.label)}</div>`, root), 1180, 250 + i * 190);
+      const el = below ? pos(h('div', 'cs-stat cs-stat-below', `<div class="v"></div><div class="l">${esc(st.label)}</div>`, root), L + i * ((R - L) / 3), 690)
+        : pos(h('div', 'cs-stat', `<div class="v"></div><div class="l">${esc(st.label)}</div>`, root), 1180, 250 + i * 190);
       const v = el.querySelector('.v');
       v.textContent = st.value; fit(v, 96, 44, 600);
       return { el, v, st };
@@ -472,6 +604,21 @@ function init() {
   };
 
   B.questions = (s, root) => {
+    if (V('questions', 'list') === 'cards') {
+      // all questions stay on screen as numbered cards; the one being read lights up
+      const items = (s.items || []).slice(0, 4), n = Math.max(1, items.length), gap = 36, w = (R - L - gap * (n - 1)) / n;
+      const cards = items.map((q, i) => {
+        const c = pos(h('div', 'q-card abs', '', root), L + i * (w + gap), 300, w);
+        h('div', 'q-idx', String(i + 1).padStart(2, '0'), c);
+        const tx = h('div', 'q-text q-text-card', esc(q), c); tx.style.marginTop = '22px'; fit(tx, 46, 26, w - 40, 420);
+        return c;
+      });
+      return (t, d, sc) => {
+        const slots = (sc.slots && sc.slots.length === cards.length) ? sc.slots : cards.map((_, i) => (i * d) / cards.length);
+        cards.forEach((c, i) => { const p = P(t, slots[i] + 0.1, 0.6); const on = t >= slots[i] && (i === cards.length - 1 || t < slots[i + 1]);
+          show(c, p, 30); c.classList.toggle('on', on); });
+      };
+    }
     const qs = (s.items || []).slice(0, 6).map((q, i, arr) => {
       const box = pos(h('div', 'abs', '', root), L, 0, R - L);
       h('div', 'q-idx', `${String(i + 1).padStart(2, '0')} / ${String(arr.length).padStart(2, '0')}`, box);
@@ -491,12 +638,19 @@ function init() {
   };
 
   B.end = (s, root) => {
+    const v = V('end', 'left');
+    const block = v === 'block' ? pos(h('div', 'end-block abs', '', root), 0, 250) : null;
+    if (block) { block.style.width = '1920px'; block.style.height = '420px'; }
     const tt = pos(h('div', 'end-title abs', esc(s.title), root), L, 330, R - L);
+    if (v === 'center') tt.style.textAlign = 'center';
     fit(tt, 104, 52, R - L, 300);
-    const sb = s.subtitle ? pos(h('div', 'end-sub abs', esc(s.subtitle), root), L, 0, 1400) : null;
-    if (sb) sb.style.top = 330 + tt.scrollHeight + 36 + 'px';
-    const cta = s.cta ? pos(h('div', 'end-cta abs', esc(s.cta), root), L, 760) : null;
+    if (v === 'block') tt.style.top = 250 + (420 - tt.scrollHeight) / 2 + 'px';
+    const sb = s.subtitle ? pos(h('div', 'end-sub abs', esc(s.subtitle), root), L, 0, v === 'center' ? R - L : 1400) : null;
+    if (sb) { sb.style.top = (v === 'block' ? 700 : 330 + tt.scrollHeight + 36) + 'px'; if (v === 'center') sb.style.textAlign = 'center'; }
+    const cta = s.cta ? pos(h('div', 'end-cta abs', esc(s.cta), root), L, v === 'block' ? 800 : 760, v === 'center' ? R - L : null) : null;
+    if (cta && v === 'center') cta.style.textAlign = 'center';
     return (t) => {
+      if (block) block.style.transform = `scaleX(${P(t, 0.0, 0.8, ease.inOut)})`;
       show(tt, P(t, 0.3, 1.0), 40);
       if (sb) show(sb, P(t, 1.0, 0.8), 16);
       if (cta) show(cta, P(t, 1.8, 0.8), 10);
@@ -755,7 +909,7 @@ function init() {
       a.style.setProperty('--sh', r.margin ? 1 : shades[i] || '.2'); b.style.setProperty('--sh', r.margin ? 1 : shades[i] || '.2');
       if (r.margin) { a.classList.add('margin'); b.classList.add('margin'); }
       a.innerHTML = `<span>${esc(String(r.you))}</span>`; b.innerHTML = `<span>${esc(String(r.them))}</span>`;
-      const lab = pos(h('div', 'an-lab', esc(r.label), root), L, 0, xa - L - 30);
+      const lx = Math.min(L, 160), lab = pos(h('div', 'an-lab', esc(r.label), root), lx, 0, xa - lx - 30); fit(lab, 28, 18, xa - lx - 30);   // one line, whatever the margins
       segA.push(a); segB.push(b); labs.push(lab);
     });
     const unit = s.unit ? pos(h('div', 'an-unit', esc(s.unit), root), xa, yBot + 18, xb + colW - xa) : null;
@@ -824,7 +978,108 @@ function init() {
   };
 
   // what the owner is probably thinking, and what answers it: the belief is named first, then met with a fact
+  // the customer's path (architecture C): one purchase as a row of steps; each step says who decides it.
+  // The same scene comes back later with other owners: the steps that changed hands are the film's argument.
+  B.path = (s, root) => {
+    const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
+    fit(title, 64, 40, R - L);
+    const steps = (s.steps || []).slice(0, 6), n = Math.max(1, steps.length);
+    const gap = 26, w = (R - L - gap * (n - 1)) / n, y = 430;
+    const line = pos(h('div', 'pa-line abs', '', root), L + w / 2, y + 2, 0);
+    const dot = pos(h('div', 'pa-dot abs', '', root), L + w / 2 - 14, y - 12);
+    const cards = steps.map((st, i) => {
+      const x = L + i * (w + gap);
+      const node = pos(h('div', 'pa-node abs side-' + (st.owner || 'you'), '', root), x + w / 2 - 9, y - 6);
+      const c = pos(h('div', 'pa-card abs side-' + (st.owner || 'you'), '', root), x, y + 50, w);
+      c.innerHTML = `<div class="pa-when">${esc(st.when || '')}</div><div class="pa-label">${esc(st.label || '')}</div><div class="pa-text">${esc(st.text || '')}</div>` +
+        (st.who ? `<div class="pa-who">${esc(st.who)}</div>` : '');
+      return { node, c };
+    });
+    const note = s.note ? pos(h('div', 'pa-note abs', esc(s.note), root), L, 900, R - L) : null;
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20);
+      const span = Math.max(2, (sc.speechEnd || d) - 1.4), each = span / n;
+      const prog = clamp((t - 0.9) / span);
+      line.style.width = (R - L - w) * prog + 'px';
+      dot.style.left = (L + w / 2 - 14 + (R - L - w) * prog) + 'px'; dot.style.opacity = P(t, 0.8, 0.4);
+      cards.forEach((k, i) => { const at = 0.9 + i * each; show(k.node, P(t, at, 0.3), 0); show(k.c, P(t, at + 0.1, 0.6), 18); });
+      if (note) show(note, P(t, 0.9 + span * 0.85, 0.6), 10);
+    };
+  };
+
+  // the crowd ("zoo"): every segment of the market is attacked by every kind of player at once, many of each.
+  // Small players bite slices everywhere, AI-native newcomers take big pieces, a success is copied; the company's
+  // share in each segment (its colour, from the bottom) shrinks until no safe niche is left. Deterministic schedule.
+  B.swarm = (s, root) => {
+    const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
+    fit(title, 64, 40, R - L);
+    const KD = F.language === 'ru'
+      ? ['Оптимизируют свой бизнес', 'Перестраивают процессы', 'Переходят на AI-first', 'AI-native с нуля']
+      : ['Optimise their business', 'Rebuild their processes', 'Go AI-first', 'AI-native from scratch'];
+    const kinds = (s.kinds || KD).slice(0, 4);
+    const counts = (s.counts || [18, 11, 6, 3]).slice(0, 4);
+    const bite = [0.012, 0.026, 0.05, 0.11], onset = [0.0, 0.15, 0.32, 0.45], SH = ['circle', 'square', 'tri', 'diamond'];
+    const segs = (s.segments || []).slice(0, 6), n = Math.max(1, segs.length);
+    const endShare = clamp(s.end_share ?? 0.25, 0.05, 0.9);
+    const y0 = s.years?.[0] ?? F.start_year ?? 2026, y1 = s.years?.[1] ?? y0 + 5;
+    // legend
+    const legX = L, legW = 470, fieldX = L + legW + 60, fieldW = R - fieldX, top = 260, bot = 720, colGap = 26, colW = (fieldW - colGap * (n - 1)) / n;
+    const leg = kinds.map((k, i) => { const el = pos(h('div', 'sw-leg abs', `<i class="sw-shape ${SH[i]}"></i><span>${esc(k)}</span><b>×0</b>`, root), legX, top + 20 + i * 92, legW); return { el, b: el.querySelector('b') }; });
+    const yearEl = pos(h('div', 'sw-year abs', String(y0), root), legX, top + 420);
+    const copyNote = pos(h('div', 'sw-note abs', esc(s.copy_note || (F.language === 'ru' ? 'Успех копируют: за первым приходят следующие' : 'Success is copied: the first is followed by others')), root), legX, top + 500, legW);
+    // columns
+    const R0 = (() => { let a = 7 + (F.company?.name || '').length; return () => { a = (a * 16807) % 2147483647; return a / 2147483647; }; })();
+    const hz = V('swarm', 'columns') === 'rows', rowH = (bot + 40 - top) / n, barH = Math.min(70, rowH - 40);   // rows: each segment a horizontal bar
+    const cols = segs.map((sg, j) => {
+      const x = hz ? fieldX : fieldX + j * (colW + colGap), y = hz ? top + j * rowH + 30 : top;
+      const box = pos(h('div', 'sw-col abs' + (hz ? ' hz' : ''), '', root), x, y, hz ? fieldW : colW); box.style.height = (hz ? barH : bot - top) + 'px';
+      const fill = h('div', 'sw-fill' + (hz ? ' hz' : ''), '', box);
+      const lab = pos(h('div', 'sw-lab abs' + (hz ? ' hz' : ''), esc(typeof sg === 'string' ? sg : sg.name), root), x, hz ? y - 28 : bot + 14, hz ? fieldW : colW);
+      const pct = h('div', 'sw-pct', '', box);
+      return { x, box, fill, lab, pct, start: (typeof sg === 'object' && sg.share) || 1 };
+    });
+    // entrants: who, where, when, how big; AI-native successes are copied in other segments
+    const ents = [];
+    counts.forEach((c, k) => { for (let i = 0; i < c; i++) ents.push({ k, seg: Math.floor(R0() * n), at: onset[k] + (1 - onset[k]) * 0.85 * (i / Math.max(1, c)) + R0() * 0.05, size: bite[k] * (0.7 + 0.6 * R0()) }); });
+    ents.filter((e) => e.k === 3).forEach((e) => { for (let c = 0; c < 2; c++) ents.push({ k: 3, copy: true, seg: (e.seg + 1 + c + Math.floor(R0() * (n - 1))) % n, at: Math.min(0.98, e.at + 0.12 + c * 0.08), size: bite[3] * 0.7 }); });
+    // scale bites so each segment ends near the company's end share
+    const raw = Array(n).fill(0); ents.forEach((e) => (raw[e.seg] += e.size));
+    ents.forEach((e) => { e.size *= (1 - endShare) * (0.85 + 0.3 * ((e.seg * 37) % 10) / 10) / Math.max(0.01, raw[e.seg]); });
+    const placed = ents.sort((a, b) => a.at - b.at).map((e) => {
+      const c = cols[e.seg]; const el = h('i', `sw-shape ${SH[e.k]} sw-tok${e.copy ? ' copy' : ''}`, '', c.box);
+      const sz = Math.min(hz ? barH - 10 : 54, 14 + Math.min(40, e.size * 260)); el.style.width = el.style.height = sz + 'px';
+      if (hz) el.style.top = Math.max(4, (barH - sz) / 2 + (R0() - 0.5) * (barH - sz) * 0.8) + 'px'; else el.style.left = (8 + R0() * Math.max(10, colW - sz - 16)) + 'px';
+      e.el = el; e.sz = sz; e.y = R0(); return e;
+    });
+    const punch = s.punchline ? pos(h('div', 'sw-punch abs', esc(s.punchline), root), fieldX, bot + 80, fieldW) : null;
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20);
+      leg.forEach((l, i) => show(l.el, P(t, 0.5 + i * 0.25, 0.6), 0, -20));
+      cols.forEach((c, j) => { show(c.box, P(t, 0.6 + j * 0.1, 0.6), 20); show(c.lab, P(t, 0.8 + j * 0.1, 0.6), 10); });
+      const span = Math.max(3, (sc.speechEnd || d) - 2.2), u = clamp((t - 1.4) / span);
+      yearEl.textContent = String(Math.round(y0 + (y1 - y0) * u)); show(yearEl, P(t, 1.2, 0.6), 10);
+      show(copyNote, P(t, 1.4 + span * 0.55, 0.6), 10);
+      const taken = Array(n).fill(0), cnt = [0, 0, 0, 0];
+      placed.forEach((e) => {
+        const p = clamp((u - e.at) / 0.06);
+        if (p > 0) { taken[e.seg] += e.size * p; cnt[e.k] += p >= 1 ? 1 : 0; }
+        e.el.style.opacity = p; e.el.style.transform = `scale(${0.4 + 0.6 * p})`;
+      });
+      cols.forEach((c, j) => {
+        const share = Math.max(0, 1 - taken[j]), hgt = (bot - top) * share;
+        if (hz) { const wd = fieldW * share; c.fill.style.width = wd + 'px'; c.pct.textContent = Math.round(share * 100) + '%'; c.pct.style.left = Math.max(8, wd - 74) + 'px';
+          placed.filter((e) => e.seg === j).forEach((e, q) => { e.el.style.left = Math.min(fieldW - e.sz - 4, wd + 6 + ((q * 53 + e.y * 90) % Math.max(20, (fieldW - wd) * 0.9))) + 'px'; }); return; }
+        c.fill.style.height = hgt + 'px';
+        c.pct.textContent = Math.round(share * 100) + '%'; c.pct.style.bottom = Math.max(6, hgt - 40) + 'px';   // inside the company's own colour
+        placed.filter((e) => e.seg === j).forEach((e, q) => { e.el.style.top = Math.max(6, (bot - top - hgt) - e.sz - 6 - ((q * 41 + e.y * 60) % Math.max(20, (bot - top - hgt) * 0.85))) + 'px'; });
+      });
+      leg.forEach((l, i) => (l.b.textContent = '×' + cnt[i]));
+      if (punch) show(punch, P(t, 1.4 + span * 0.9, 0.7), 10);
+    };
+  };
+
   B.myths = (s, root) => {
+    if (V('myths', 'rows') === 'stack') return VB.myths_stack(s, root);
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const items = (s.items || []).slice(0, 3);
@@ -852,6 +1107,7 @@ function init() {
 
   // the attack plan of a company that does not exist yet: a founder's memo and ten moves in four columns
   B.plan = (s, root) => {
+    if (V('plan', 'columns') === 'list') return VB.plan_list(s, root);
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const memo = s.memo ? pos(h('div', 'pl-memo abs', esc(s.memo), root), L, 236, R - L) : null;
@@ -882,6 +1138,7 @@ function init() {
 
   // where it already happened faster: industries, what changed, how fast
   B.parallels = (s, root) => {
+    if (V('parallels', 'rows') === 'tiles') return VB.parallels_tiles(s, root);
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const rows = (s.rows || []).slice(0, 5), rh = rows.length > 4 ? 118 : 136;
@@ -904,6 +1161,7 @@ function init() {
 
   // three paths (the metAImorphosis NewCo scenarios): tradition, evolution, revolution, each with where it leads
   B.scenarios = (s, root) => {
+    if (V('scenarios', 'columns') === 'rows') return VB.scenarios_rows(s, root);
     const title = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L);
     fit(title, 64, 40, R - L);
     const items = (s.items || []).slice(0, 3), n = items.length || 1, gap = 32, cw = (R - L - (n - 1) * gap) / n;
@@ -923,6 +1181,245 @@ function init() {
     };
   };
 
+
+
+  // ---- second layouts: the same scene type told another way, so two films never share the same slides (look.variants) ----
+  const VB = {};
+  const fmtNum = (v, r) => { const dec = r.decimals ?? (Math.abs(v) < 10 && v % 1 ? 1 : 0); let n = (+v).toFixed(dec); if (Math.abs(+v) >= 10000) n = n.replace(/\B(?=(\d{3})+(?!\d))/g, ' '); return (r.prefix || '') + n + (r.unit ? ' ' + r.unit : ''); };
+  const mkTitle = (s, root) => { const t = pos(h('div', 'title abs', esc(s.title || ''), root), L, 150, R - L); fit(t, 64, 40, R - L); return t; };
+
+  // race as paired bars that grow year by year
+  VB.race_bars = (s, root) => {
+    const title = mkTitle(s, root);
+    const years = s.years, a = s.you, b = s.them, n = years.length;
+    const x0 = L + 20, x1 = s.gap_label ? Math.min(1180, R - 560) : R - 20, yTop = 340, yBot = 800, maxV = Math.max(...a, ...b) * 1.12;
+    const slot = (x1 - x0) / n, bw = Math.min(70, slot * 0.34);
+    const fmt = (v) => (s.format === 'int' ? Math.round(v) : (+v).toFixed(s.decimals ?? 0)) + (s.suffix || '');
+    const unit = pos(h('div', 'rc-legend abs', `${esc((s.metric || '').toUpperCase())}${s.unit ? ' · ' + esc(s.unit) : ''}`, root), x0, yTop - 70);
+    const key = pos(h('div', 'rb-key abs', `<i class="you"></i>${esc(youName)}<i class="them"></i>${esc(themName)}`, root), x0, yTop - 36);
+    const base = pos(h('div', 'rb-base abs', '', root), x0, yBot, x1 - x0);
+    const cols = years.map((y, i) => {
+      const cx = x0 + slot * (i + 0.5);
+      return { ba: pos(h('div', 'rb-bar you abs', '', root), cx - bw - 4, yBot, bw), bb: pos(h('div', 'rb-bar them abs', '', root), cx + 4, yBot, bw),
+        va: pos(h('div', 'rb-val you abs', '', root), cx - bw - 30, 0, bw + 52), vb: pos(h('div', 'rb-val them abs', '', root), cx - 18, 0, bw + 52),
+        yl: pos(h('div', 'rb-year abs', String(y), root), cx - 60, yBot + 16, 120) };
+    });
+    const gap = s.gap_label ? h('div', 'rc-gap', `${esc(s.gap_label)}<small>${esc(s.gap_caption || '')}</small>`, root) : null;
+    if (gap) { gap.style.top = '360px'; fit(gap, 150, 80, 440); }
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); show(unit, P(t, 0.5, 0.6)); show(key, P(t, 0.6, 0.6)); base.style.transform = `scaleX(${P(t, 0.4, 0.8, ease.inOut)})`;
+      const t0 = 1.0, t1 = Math.max(t0 + 3, (sc.speechEnd || d) - 1.2), f = P(t, t0, t1 - t0, ease.inOut) * (n - 1);
+      cols.forEach((c, i) => {
+        const q = ease.out(clamp(f - i + 1)), ha = (a[i] / maxV) * (yBot - yTop) * q, hb = (b[i] / maxV) * (yBot - yTop) * q;
+        c.ba.style.top = yBot - ha + 'px'; c.ba.style.height = ha + 'px'; c.bb.style.top = yBot - hb + 'px'; c.bb.style.height = hb + 'px';
+        c.va.textContent = fmt(a[i]); c.vb.textContent = fmt(b[i]); c.va.style.top = yBot - ha - 30 + 'px'; c.vb.style.top = yBot - hb - 30 + 'px';
+        c.va.style.opacity = c.vb.style.opacity = i === n - 1 || i === 0 ? q : q * 0.55; c.yl.style.opacity = P(t, 0.6 + i * 0.05, 0.4);
+      });
+      sc.year = years[Math.min(n - 1, Math.round(f))];
+      if (gap) show(gap, P(t, t1 + 0.1, 0.8), 30);
+    };
+  };
+
+  // scissors as pairs of bars: today's number and the newcomer's, per row
+  VB.scissors_bars = (s, root) => {
+    const title = mkTitle(s, root);
+    const rows = (s.rows || []).slice(0, 5), n = rows.length || 1, rh = Math.min(128, 580 / n), lw = Math.min(520, (R - L) * 0.34), bx = L + lw + 40, bwMax = R - bx - 190;
+    const key = pos(h('div', 'rb-key abs', `<i class="you"></i>${esc(s.you_label || youName)}<i class="them"></i>${esc(s.them_label || themName)}`, root), bx, 290);
+    const els = rows.map((r, i) => {
+      const y = 350 + i * rh;
+      const lab = pos(h('div', 'sb-label abs', esc(r.label), root), L, y + 6, lw); fit(lab, 30, 18, lw, rh - 20);
+      const ba = pos(h('div', 'sb-bar you abs', '', root), bx, y + 8, 0), bb = pos(h('div', 'sb-bar them abs', '', root), bx, y + 44, 0);
+      const va = pos(h('div', 'sb-val you abs', '', root), bx, y + 2), vb = pos(h('div', 'sb-val them abs', '', root), bx, y + 38);
+      const q = r.ratio ? pos(h('div', 'sc-ratio abs', esc(r.ratio), root), R - 150, y + 20, 150) : null;
+      if (q) q.style.textAlign = 'right';
+      return { r, lab, ba, bb, va, vb, q, max: Math.max(Math.abs(r.you), Math.abs(r.them), 1e-6) };
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); show(key, P(t, 0.5, 0.6));
+      const span = Math.max(2, (sc.speechEnd || d) * 0.8 - 1);
+      els.forEach((e, i) => {
+        const at = 1.0 + (i * span) / els.length, p = P(t, at + 0.3, 1.6, ease.inOut), vis = P(t, at, 0.6);
+        show(e.lab, vis, 12);
+        const v2 = e.r.you + (e.r.them - e.r.you) * p, wa = bwMax * Math.abs(e.r.you) / e.max * P(t, at, 0.8), wb = bwMax * Math.abs(v2) / e.max * vis;
+        e.ba.style.width = wa + 'px'; e.bb.style.width = wb + 'px';
+        e.va.textContent = fmtNum(e.r.you, e.r); e.vb.textContent = fmtNum(v2, e.r);
+        e.va.style.left = bx + wa + 14 + 'px'; e.vb.style.left = bx + wb + 14 + 'px'; e.va.style.opacity = e.vb.style.opacity = vis;
+        if (e.q) e.q.style.opacity = P(t, at + 1.6, 0.5);
+      });
+      if (s.year) sc.year = s.year;
+    };
+  };
+
+  // myths one at a time: the belief in large type, struck out, the answer beneath
+  VB.myths_stack = (s, root) => {
+    const title = mkTitle(s, root);
+    const items = (s.items || []).slice(0, 3), w = Math.min(1300, R - L);
+    const els = items.map((it) => {
+      const b = pos(h('div', 'my-belief my-big abs', '«' + esc(it.belief) + '»', root), L, 330, w); fit(b, 62, 34, w, 230);
+      b.style.display = 'inline-block'; b.style.width = 'auto'; b.style.maxWidth = w + 'px';
+      const st = pos(h('div', 'my-strike abs', '', root), L - 6, 330 + b.offsetHeight / 2 - 3, Math.min(w, b.offsetWidth) + 12);
+      const a = pos(h('div', 'my-answer abs', esc(it.answer), root), L, 330 + b.offsetHeight + 56, w); fit(a, 38, 24, w, 240);
+      return { b, st, a };
+    });
+    const count = pos(h('div', 'my-count abs', '', root), R - 200, 160, 200);
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20);
+      const span = Math.max(2, (sc.speechEnd || d) - 1.0), seg = span / Math.max(1, els.length);
+      let cur = 0;
+      els.forEach((e, i) => {
+        const at = 0.8 + i * seg, out = i < els.length - 1 ? 1 - P(t, at + seg - 0.35, 0.35) : 1;
+        if (t >= at) cur = i + 1;
+        show(e.b, P(t, at, 0.6) * out, 20); e.b.style.color = P(t, at + seg * 0.35, 0.4) > 0.5 ? 'var(--muted)' : 'var(--ink)';
+        e.st.style.transform = `scaleX(${P(t, at + seg * 0.33, 0.45, ease.inOut)})`; e.st.style.opacity = out;
+        show(e.a, P(t, at + seg * 0.42, 0.6) * out, 16);
+      });
+      count.textContent = els.length > 1 ? `${cur} / ${els.length}` : ''; count.style.opacity = P(t, 0.8, 0.5);
+    };
+  };
+
+  // parallels as tiles: the speed first, then where and what
+  VB.parallels_tiles = (s, root) => {
+    const title = mkTitle(s, root);
+    const rows = (s.rows || []).slice(0, 6), n = rows.length || 1, cols = n <= 3 ? n : Math.ceil(n / 2), rn = Math.ceil(n / cols), gap = 28;
+    const tw = (R - L - gap * (cols - 1)) / cols, th = Math.min(320, (560 - gap * (rn - 1)) / rn);
+    const els = rows.map((r, i) => {
+      const c = pos(h('div', 'px-tile abs', '', root), L + (i % cols) * (tw + gap), 300 + Math.floor(i / cols) * (th + gap), tw); c.style.height = th + 'px';
+      const sd = h('div', 'px-speed px-speed-tile', esc(r.speed || ''), c); fit(sd, 64, 28, tw - 10);
+      const f = h('div', 'px-field px-field-tile', esc(r.field), c); fit(f, 30, 20, tw - 10);
+      const wv = h('div', 'px-what px-what-tile', `<span></span>${r.source ? `<em>${esc(r.source)}</em>` : ''}`, c);
+      const sp = wv.querySelector('span'); sp.textContent = r.what; fit(sp, 24, 16, tw - 10, th - 160);
+      return c;
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20);
+      const span = Math.max(2, (sc.speechEnd || d) * 0.88 - 1);
+      els.forEach((e, i) => show(e, P(t, 0.9 + (i * span) / els.length, 0.6), 24));
+    };
+  };
+
+  // three paths as bands across the screen
+  VB.scenarios_rows = (s, root) => {
+    const title = mkTitle(s, root);
+    const items = (s.items || []).slice(0, 3), n = items.length || 1, bh = Math.min(180, 560 / n), nw = Math.min(380, (R - L) * 0.26), ow = Math.min(460, (R - L) * 0.32), ww = R - L - nw - ow - 80;
+    const els = items.map((it, i) => {
+      const y = 300 + i * (bh + 10);
+      const band = pos(h('div', 'sn-band abs' + (it.accent ? ' accent' : ''), '', root), L, y, R - L); band.style.height = bh + 'px';
+      const nm = pos(h('div', 'sn-name abs', esc(it.name), band), 0, 22, nw); fit(nm, 52, 30, nw);
+      const wt = pos(h('div', 'sn-what abs', esc(it.what || ''), band), nw + 40, 22, ww); wt.style.marginTop = '0'; fit(wt, 28, 18, ww, bh - 34);
+      const o = pos(h('div', 'sn-out-r abs', `<small>${esc(it.outcome_label || '')}</small><span></span>`, band), nw + ww + 80, 20, ow);
+      const sp = o.querySelector('span'); sp.textContent = it.outcome || ''; fit(sp, 32, 20, ow, bh - 60);
+      return band;
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20);
+      const span = Math.max(2, (sc.speechEnd || d) * 0.85 - 1);
+      els.forEach((e, i) => show(e, P(t, 0.9 + (i * span) / els.length, 0.7), 0, -40));
+    };
+  };
+
+  // signals as a dated list down the page
+  VB.signals_list = (s, root) => {
+    const title = mkTitle(s, root);
+    const items = (s.items || []).slice(0, 5), n = items.length || 1, rh = Math.min(120, 580 / n), mw = 300;
+    const rail = pos(h('div', 'sl-rail abs', '', root), L + mw - 22, 300, 2); rail.style.height = n * rh - 20 + 'px';
+    const els = items.map((it, i) => {
+      const y = 300 + i * rh;
+      const m = pos(h('div', 'sl-meta abs', `<b>${esc(it.when || '')}</b>${esc(it.from || '')}`, root), L, y + 4, mw - 50);
+      const dot = pos(h('div', 'sl-dot abs', '', root), L + mw - 30, y + 14);
+      const tx = pos(h('div', 'sl-text abs', esc(it.text), root), L + mw + 10, y, R - L - mw - 10); fit(tx, 32, 20, R - L - mw - 10, rh - 16);
+      return { m, dot, tx };
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); rail.style.transform = `scaleY(${P(t, 0.5, (sc.speechEnd || d) * 0.8, ease.inOut)})`;
+      const span = Math.max(2, (sc.speechEnd || d) * 0.85 - 0.6);
+      els.forEach((e, i) => { const p = P(t, 0.6 + (i * span) / els.length, 0.6); show(e.m, p, 10); show(e.tx, p, 0, 40); e.dot.style.opacity = p; e.dot.style.transform = `scale(${0.3 + 0.7 * p})`; });
+    };
+  };
+
+  // the attack plan as one numbered list in two columns, each move tagged with its area
+  VB.plan_list = (s, root) => {
+    const title = mkTitle(s, root);
+    const memo = s.memo ? pos(h('div', 'pl-memo abs', esc(s.memo), root), L, 236, R - L) : null;
+    if (memo) fit(memo, 22, 15, R - L);
+    const all = []; (s.columns || []).slice(0, 4).forEach((c) => (c.items || []).slice(0, 3).forEach((it) => all.push({ it, area: c.name })));
+    const per = Math.ceil(all.length / 2), cw = (R - L - 60) / 2, rh = Math.min(104, 560 / Math.max(1, per));
+    const els = all.map(({ it, area }, k) => {
+      const x = L + (k < per ? 0 : cw + 60), y = 310 + (k % per) * rh;
+      const e = pos(h('div', 'pq-row abs', `<i>${String(k + 1).padStart(2, '0')}</i><small>${esc(area)}${it.when ? ' · ' + esc(it.when) : ''}</small><span></span>`, root), x, y, cw);
+      const sp = e.querySelector('span'); sp.textContent = it.text; fit(sp, 27, 17, cw - 80, rh - 40);
+      return e;
+    });
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); if (memo) show(memo, P(t, 0.5, 0.7), 8);
+      const span = Math.max(2, (sc.speechEnd || d) * 0.9 - 1.2);
+      els.forEach((e, i) => show(e, P(t, 1.0 + (i * span) / els.length, 0.5), 0, -24));
+    };
+  };
+
+  // the side: dangers that come not from competitors (data/threat-playbook.md, 1c); the surprise comes last
+  B.flank = (s, root) => {
+    const v0 = V('flank', 'radar'), v = v0 === 'radar' && (s.items || []).length > 5 ? 'doors' : v0;   // six do not fit around the hub
+    const title = mkTitle(s, root);
+    const kicker = s.kicker ? pos(h('div', 'kicker abs', esc(s.kicker), root), L, 112) : null;
+    const items = (s.items || []).slice(0, 6), lvl = { low: 1, mid: 2, medium: 2, high: 3 };
+    const sIdx = Math.max(0, items.findIndex((it) => it.surprise)); const order = items.map((_, i) => i).filter((i) => i !== sIdx).concat(items.length ? [sIdx] : []);
+    const meter = (it) => `<span class="at-meter">${[1, 2, 3].map((k) => `<i class="${k <= (lvl[it.weight] || 2) ? 'on' : ''}"></i>`).join('')}</span>`;
+    const inner = (it, wd, big) => `<div class="fl-from">${esc(it.from || '')}${meter(it)}</div><div class="fl-what"></div>${it.why ? `<div class="fl-why"></div>` : ''}${it.case ? `<div class="fl-case">${esc(it.case)}</div>` : ''}${it.surprise ? `<div class="fl-flag">${F.language === 'ru' ? 'об этом обычно не думают' : 'rarely considered'}</div>` : ''}`;
+    const fill = (c, it, wd, hw, hy) => { const w = c.querySelector('.fl-what'); w.textContent = it.what || ''; fit(w, hw, 20, wd, hy); const y = c.querySelector('.fl-why'); if (y) { y.textContent = it.why; fit(y, 22, 15, wd, 90); } };
+    let els = [], svg = null, hub = null;
+    if (v === 'doors') {
+      const n = items.length || 1, rh = Math.min(132, 600 / n), fw = 300, mw = R - L - fw - 40;
+      els = items.map((it, i) => {
+        const y = 290 + order.indexOf(i) * rh;
+        const c = pos(h('div', 'fl-row abs' + (it.surprise ? ' surprise' : ''), '', root), L, y, R - L); c.style.height = rh - 10 + 'px';
+        c.innerHTML = `<div class="fl-from fl-from-col">${esc(it.from || '')}${meter(it)}</div><div class="fl-body"><div class="fl-what"></div>${it.why ? '<div class="fl-why"></div>' : ''}</div>${it.surprise ? `<div class="fl-flag">${F.language === 'ru' ? 'об этом обычно не думают' : 'rarely considered'}</div>` : ''}`;
+        c.querySelector('.fl-from-col').style.width = fw + 'px'; c.querySelector('.fl-body').style.width = mw + 'px';
+        fill(c, it, mw - (it.surprise ? 260 : 0), 32, 46);
+        return c;
+      });
+    } else if (v === 'cards') {
+      const rest = order.slice(0, -1), cols = rest.length > 2 ? 2 : 1, rn = Math.ceil(rest.length / cols), gap = 24, lw = (R - L) * 0.6, cw = (lw - gap * (cols - 1)) / cols, ch = Math.min(260, (600 - gap * (rn - 1)) / Math.max(1, rn));
+      els = items.map((it, i) => {
+        const k = rest.indexOf(i);
+        if (k < 0) { const x = L + lw + 40, w = R - x; const c = pos(h('div', 'fl-card abs surprise', inner(it), root), x, 290, w); fill(c, it, w - 60, 46, 220); c.style.minHeight = Math.min(560, 2 * ch + gap) + 'px'; return c; }
+        const c = pos(h('div', 'fl-card abs', inner(it), root), L + (k % cols) * (cw + gap), 290 + Math.floor(k / cols) * (ch + gap), cw); c.style.height = ch + 'px'; fill(c, it, cw - 52, 28, 90);
+        return c;
+      });
+    } else {
+      // radar: the company in the middle, dangers arriving from around it
+      const cx = W / 2, cy = 625, rx = Math.min(640, (R - L) / 2 - 170), ry = 235, bw = 400, hr = 90;
+      const NS = 'http://www.w3.org/2000/svg'; svg = document.createElementNS(NS, 'svg'); svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('class', 'rc-svg'); root.appendChild(svg);
+      hub = pos(h('div', 'fl-hub abs', esc(youName), root), cx - hr, cy - hr); fit(hub, 32, 16, 150);
+      const n = items.length || 1;
+      // fixed slots around the hub so cards never collide: top, the four corners
+      const SL = { T: [cx - bw / 2, 'top'], TL: [L - 20, 'top'], TR: [R - bw + 20, 'top'], BL: [L - 20, 'bot'], BR: [R - bw + 20, 'bot'] };
+      const slots = ({ 3: ['T', 'BR', 'BL'], 4: ['TL', 'TR', 'BR', 'BL'], 5: ['T', 'TR', 'BR', 'BL', 'TL'] })[Math.min(5, Math.max(3, items.length))];
+      els = items.map((it, i) => {
+        const k = order.indexOf(i), [x, vy] = SL[slots[k % slots.length]];
+        const c = pos(h('div', 'fl-card fl-node abs' + (it.surprise ? ' surprise' : ''), inner(it), root), x, 300, bw);
+        fill(c, it, bw - 40, 26, 70); if (vy === 'bot') c.style.top = 870 - c.offsetHeight + 'px';
+        const ccx = x + bw / 2, ccy = (vy === 'bot' ? 870 - c.offsetHeight / 2 : 300 + c.offsetHeight / 2), ang = Math.atan2(ccy - cy, ccx - cx);
+        const ln = document.createElementNS(NS, 'line'); const ex = cx + hr * Math.cos(ang), ey = cy + hr * Math.sin(ang);
+        ln.setAttribute('x1', ccx); ln.setAttribute('y1', ccy); ln.setAttribute('x2', ex); ln.setAttribute('y2', ey); ln.setAttribute('class', 'fl-line' + (it.surprise ? ' surprise' : '')); svg.appendChild(ln);
+        const L2 = Math.hypot(ccx - ex, ccy - ey); ln.style.strokeDasharray = L2; ln.style.strokeDashoffset = L2; c._ln = ln; c._len = L2;
+        return c;
+      });
+    }
+    const pun = s.punchline ? pos(h('div', 'fl-pun abs', esc(s.punchline), root), L, 236, R - L) : null;
+    if (pun) fit(pun, 34, 22, R - L);
+    return (t, d, sc) => {
+      show(title, P(t, 0.1, 0.8), 20); if (kicker) show(kicker, P(t, 0.2, 0.6), 10);
+      if (hub) { hub.style.opacity = P(t, 0.4, 0.6); hub.style.transform = `scale(${0.7 + 0.3 * P(t, 0.4, 0.8)})`; }
+      const span = Math.max(2, (sc.speechEnd || d) * 0.86 - 1.2), n = Math.max(1, els.length);
+      els.forEach((c, i) => {
+        const k = order.indexOf(i), last = k === n - 1 && items[i].surprise, at = 1.0 + (k * span) / n + (last ? span / n * 0.25 : 0), p = P(t, at, last ? 0.9 : 0.6);
+        show(c, p, v === 'doors' ? 0 : 20, v === 'doors' ? -30 : 0);
+        if (c._ln) c._ln.style.strokeDashoffset = c._len * (1 - P(t, at + 0.2, 0.7, ease.inOut));
+        if (last) c.style.transform += ` scale(${(1.06 - 0.06 * P(t, at + 0.5, 0.6)).toFixed(3)})`;
+      });
+      if (pun) show(pun, P(t, 1.0 + span + 0.3, 0.7), 10);
+    };
+  };
 
   // what is really happening: the visible (often clumsy) AI step above the waterline, the experience piling up beneath it
   B.beneath = (s, root) => {
@@ -965,7 +1462,7 @@ function init() {
     root.style.display = 'block';
     const builder = B[s.type] || B.statement;
     const upd0 = builder(s, root);
-    const deco = DECOR[THEME] ? DECOR[THEME](s, root, i) : null;
+    const deco = DECOR[THEME] ? DECOR[THEME](s, root, i) : lookDecor(s, root);
     const update = deco ? (t, d, sc) => { deco(t, d, sc); upd0(t, d, sc); } : upd0;
     root.style.display = 'none';
     const t = F.timeline[i];
@@ -998,7 +1495,7 @@ function init() {
   // push = dolly in, pull = pull back, breathe = a <= 1.5% push that leaves reading undisturbed, none = locked.
   // ease: inertia (35% linear + 65% smoothstep) inside the film; ease-out on the first scene so it moves from frame 0.
   const CAM = { cold_open: ['push', 1.045, 'out'], chapter: ['push', 1.05], statement: ['push', 1.03], moment: ['push', 1.04],
-    case: ['push', 1.025], questions: ['push', 1.02], end: ['pull', 1.04], clip: ['none'] };
+    case: ['push', 1.025], questions: ['push', 1.02], end: ['pull', 1.04], clip: ['none'], world: ['none'] };
   const inertia = (x) => 0.35 * x + 0.65 * x * x * (3 - 2 * x), easeOut = (x) => 1 - (1 - x) * (1 - x);
   function camera(s, t, d) {
     const mode = s.camera || (CAM[s.type] || ['breathe', 1.015])[0];
@@ -1032,7 +1529,23 @@ function init() {
     // fade through black between scenes
     const fin = 1 - P(t, 0, i === 0 ? 0.12 : 0.45, (x) => x);   // the first frame already shows the picture (hook)
     const fout = P(t, sc.dur - 0.35, 0.35, (x) => x);
-    fade.style.opacity = Math.max(i === 0 ? fin : fin * 0.9, fout * (i === SC.length - 1 ? 1 : 0.9));
+    const TR = LOOK ? LOOK.transition : 'dip', last = i === SC.length - 1;
+    if (TR === 'wipe' && !last && i > 0) {
+      // a panel in the company's colour sweeps across the cut
+      const a = P(t, sc.dur - 0.4, 0.4, ease.inOut), b = P(t, 0, 0.4, ease.inOut);
+      fade.style.background = 'var(--you)'; fade.style.opacity = 1;
+      fade.style.clipPath = a > 0 ? `inset(0 ${100 - a * 100}% 0 0)` : `inset(0 0 0 ${b * 100}%)`;
+      if (a === 0 && b >= 1) fade.style.opacity = 0;
+    } else if (TR === 'slide' && i > 0 && !last) {
+      // the scene slides in from the right and out to the left, over the background
+      fade.style.background = ''; fade.style.clipPath = ''; fade.style.opacity = 0;
+      const a = P(t, sc.dur - 0.4, 0.4, ease.inOut), b = 1 - P(t, 0, 0.5, ease.out);
+      sc.root.style.transform = `translateX(${(b * 160 - a * 160).toFixed(1)}px) ` + sc.root.style.transform;
+      sc.root.style.opacity = 1 - Math.max(a, b);
+    } else {
+      fade.style.background = TR === 'dissolve' ? 'var(--bg)' : ''; fade.style.clipPath = '';
+      fade.style.opacity = Math.max(i === 0 ? fin : fin * 0.9, fout * (last ? 1 : 0.9));
+    }
     if (SKETCH) STAGE.dataset.boil = Math.floor(T * 8) % 3;
     // living background
     grid.style.transform = `translate(${-(T * 6) % 80}px, ${-(T * 3) % 80}px)`;
