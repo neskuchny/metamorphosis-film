@@ -920,7 +920,7 @@ function init() {
       lines.forEach((el, i) => {
         const at = i === 0 ? 0 : 0.5 + (i * span) / lines.length, next = 0.5 + ((i + 1) * span) / lines.length;
         const p = i === 0 ? 1 : P(t, at, 0.9);
-        if (v === 'center') { show(el, p * (i < lines.length - 1 ? 1 - P(t, next - 0.3, 0.3) : 1), 30); return; }   // one line at a time, in the middle
+        if (v === 'center') { const pin = i === 0 ? 1 : P(t, at - 0.3, 0.6); show(el, pin * (i < lines.length - 1 ? 1 - P(t, next - 0.3, 0.3) : 1), 30); return; }   // one line at a time, in the middle, crossfading so the screen is never empty
         show(el, p, v === 'number' && i === 0 ? 0 : 40, v === 'number' && i === 0 ? -40 : 0);
         if (v !== 'number' && i < lines.length - 1) el.style.opacity = p * (1 - 0.6 * P(t, next, 0.8));
       });
